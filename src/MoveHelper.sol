@@ -172,7 +172,7 @@ contract MoveHelper {
     /// @param gameState is the uint256 game state of the board
     /// @return string[64] is the resulting array
     function getBoard(uint256 gameState)
-        external
+        public
         view
         returns (string[64] memory)
     {

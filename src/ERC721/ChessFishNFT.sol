@@ -20,7 +20,8 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-import {ChessGame} from './../ChessGame.sol';
+import { ChessGame } from "./../ChessGame.sol";
+import { MoveVerification } from "./../MoveVerification.sol";
 
 contract ChessFishNFT_V2 is ERC721 {
     uint256 private _tokenIdCounter;
@@ -28,6 +29,7 @@ contract ChessFishNFT_V2 is ERC721 {
     mapping(uint256 => address) public wagerAddresses;
 
     ChessGame public immutable game;
+    MoveVerification public moveVerification;
 
     address public deployer;
 
@@ -44,7 +46,6 @@ contract ChessFishNFT_V2 is ERC721 {
     constructor(address _chessFish) ERC721("ChessFishNFT", "CFSH") {
         deployer = msg.sender;
         game = ChessGame(_chessFish);
-
     }
 
     function awardWinner(
@@ -88,6 +89,10 @@ contract ChessFishNFT_V2 is ERC721 {
                 )
             );
         }
+
+        string[64] memory boardArr = game.getBoard(
+            0xcbaedabc99999999000000000000000000000000000000001111111143265234
+        );
 
         bytes memory image = abi.encodePacked(
             "data:image/svg+xml;base64,",

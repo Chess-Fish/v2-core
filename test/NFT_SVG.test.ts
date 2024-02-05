@@ -30,10 +30,12 @@ describe("ChessFish NFT Unit Tests", function () {
         const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
 
-		const ChessGame = await ethers.getContractFactory("ChessGame");
-		const chess = await ChessGame.deploy(moveVerification.address, deployer.address, deployer.address, deployer.address);
+        const moveVerificationAddress = await moveVerification.getAddress();
 
-		await chess.initCoordinates(coordinates_array, bitCoordinates_array);
+  		const ChessGame = await ethers.getContractFactory("ChessGame");
+		const chessGame = await ChessGame.deploy(moveVerificationAddress, moveVerificationAddress,moveVerificationAddress,moveVerificationAddress);
+ 
+        await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
 
 
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT_V2");
@@ -47,8 +49,8 @@ describe("ChessFish NFT Unit Tests", function () {
 
         it("Should deploy", async function () {
             const { chessNFT } = await loadFixture(deploy);
-        
-            console.log(chessNFT.address);
+
+            console.log(await chessNFT.getAddress())
         
             const svgURI = await chessNFT.tokenURI(0);
         
