@@ -2,20 +2,20 @@
 pragma solidity ^0.8.13;
 
 import { Test, console } from "forge-std/Test.sol";
-import { ChessGame } from "../src/ChessGame.sol";
+import { ChessGameTest } from "../src/ChessGameTest.sol";
 
 import { ECDSA } from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
-contract CounterTest is Test {
+contract GameTest is Test {
     using ECDSA for bytes32;
 
-    ChessGame public game;
+    ChessGameTest public game;
 
     string mnemonic =
         "test test test test test test test test test test test junk";
 
     function setUp() public {
-        game = new ChessGame();
+        game = new ChessGameTest();
     }
 
     function testSignature() public {

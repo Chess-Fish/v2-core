@@ -16,3 +16,6 @@ docs/
 # ts
 node_modules
 typechain-types
+
+hardhat_cache
+artifacts
