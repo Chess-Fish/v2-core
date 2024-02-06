@@ -182,16 +182,20 @@ contract ChessFishNFT_V2 is ERC721 {
             '<text x="20" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
             dateString,
             "</text>",
-            // Adjusting animation to use a Unicode emoji instead of a circle
+            // Adjusting circle animation to go around the border of the board
             '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
             '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
-            '<text font-family="Arial" font-size="32" fill="red">',
+            '<circle r="5" fill="green">',
             '<animateMotion dur="10s" repeatCount="indefinite">',
             '<mpath href="#borderPath"/>',
             "</animateMotion>",
-            "&#x1f3c6;", // Trophy emoji as an example
-            "</text>",
+            "</circle>",
             '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>',
+            // Directly positioning the spinning emoji
+            "<g>",
+            '<text x="600" y="650" font-family="Arial" font-size="18" fill="#FFFFFF">&#x1f3b2;</text>',
+            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 600 650" to="360 600 650" dur="10s" repeatCount="indefinite"/>',
+            "</g>",
             "</svg>"
         );
 
