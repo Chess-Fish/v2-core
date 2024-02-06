@@ -74,7 +74,7 @@ contract ChessFishNFT_V2 is ERC721 {
         returns (string memory)
     {
         return generateBoardSVG(
-            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
+            "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
             address(5),
             address(4)
         );
@@ -85,7 +85,7 @@ contract ChessFishNFT_V2 is ERC721 {
         return string(abi.encodePacked(_byte));
     }
 
-    function getPieceSymbol(bytes1 piece)
+    /*     function getPieceSymbol(bytes1 piece)
         private
         pure
         returns (string memory)
@@ -106,8 +106,222 @@ contract ChessFishNFT_V2 is ERC721 {
         if (piece == "n") return "&#9822;"; // Black Knight
         if (piece == "p") return "&#9823;"; // Black Pawn
 
-        if (piece == bytes1(0x20)) return " "; // Return space for empty squares
+    if (piece == bytes1(0x20)) return " "; // Return space for empty squares
         return " "; // Fallback to a space for unrecognized characters
+    } */
+
+    function getPieceSymbol(
+        bytes1 piece,
+        uint256 x,
+        uint256 y
+    )
+        private
+        pure
+        returns (bytes memory)
+    {
+        // Black Pawn
+        if (piece == "p") {
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #ffffff; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>',
+                "</g>",
+                "</svg>"
+            );
+        }
+        // White Pawn
+        if (piece == "P") {
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        // White Rook
+        if (piece == "R") {
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                '<g style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">'
+                '<path d="M 9,39 L 36,39 L 36,36 L 9,36 L 9,39 z " style="stroke-linecap: butt" />',
+                '<path d="M 12.5,32 L 14,29.5 L 31,29.5 L 32.5,32 L 12.5,32 z " style="stroke-linecap: butt" />',
+                '<path d="M 12,36 L 12,32 L 33,32 L 33,36 L 12,36 z " style="stroke-linecap: butt" />',
+                '<path d="M 14,29.5 L 14,16.5 L 31,16.5 L 31,29.5 L 14,29.5 z " style="stroke-linecap: butt; stroke-linejoin: miter" />',
+                '<path d="M 14,16.5 L 11,14 L 34,14 L 31,16.5 L 14,16.5 z " style="stroke-linecap: butt" />',
+                '<path d="M 11,14 L 11,9 L 15,9 L 15,11 L 20,11 L 20,9 L 25,9 L 25,11 L 30,11 L 30,9 L 34,9 L 34,14 L 11,14 z " style="stroke-linecap: butt" />',
+                '<path d="M 12,35.5 L 33,35.5 L 33,35.5" style="fill: none; stroke: #ffffff; stroke-width: 1; stroke-linejoin: miter" />',
+                '<path d="M 13,31.5 L 32,31.5" style="fill: none; stroke: #ffffff; stroke-width: 1; stroke-linejoin: miter" />',
+                '<path d="M 14,29.5 L 31,29.5" style="fill: none; stroke: #ffffff; stroke-width: 1; stroke-linejoin: miter" />',
+                '<path d="M 14,16.5 L 31,16.5" style="fill: none; stroke: #ffffff; stroke-width: 1; stroke-linejoin: miter" />',
+                '<path d="M 11,14 L 34,14" style="fill: none; stroke: #ffffff; stroke-width: 1; stroke-linejoin: miter" />',
+                "</g>",
+                "</svg>"
+            );
+        }
+        // Black Rook
+        if (piece == "r") {
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                '<g style="opacity: 1; fill: #ffffff; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">'
+                '<path d="M 9,39 L 36,39 L 36,36 L 9,36 L 9,39 z " style="stroke-linecap: butt" />'
+                '<path d="M 12,36 L 12,32 L 33,32 L 33,36 L 12,36 z " style="stroke-linecap: butt" />'
+                '<path d="M 11,14 L 11,9 L 15,9 L 15,11 L 20,11 L 20,9 L 25,9 L 25,11 L 30,11 L 30,9 L 34,9 L 34,14" style="stroke-linecap: butt" />'
+                '<path d="M 34,14 L 31,17 L 14,17 L 11,14" />'
+                '<path d="M 31,17 L 31,29.5 L 14,29.5 L 14,17" style="strokeL-linecap: butt; stroke-linejoin: miter" />'
+                '<path d="M 31,29.5 L 32.5,32 L 12.5,32 L 14,29.5" />'
+                '<path d="M 11,14 L 34,14" style="fill: none; stroke: #000000; stroke-linejoin: miter" />'
+                "</g>" "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+
+        if (piece == "p") {
+            // More aggressively scale down the piece and adjust positioning
+            return abi.encodePacked(
+                '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
+                uint2str(x),
+                '" y="',
+                uint2str(y),
+                '" width="40" height="40">',
+                "<g transform='translate(0, 0) scale(1)'>",
+                '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
+                "</g>",
+                "</svg>"
+            );
+        }
+
+        // Handle other pieces similarly
+        if (piece == bytes1(0x20)) return abi.encodePacked("");
+        return abi.encodePacked("");
     }
 
     function generateBoardSVG(
@@ -123,41 +337,30 @@ contract ChessFishNFT_V2 is ERC721 {
         bytes memory svg = abi.encodePacked(
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="320" height="320" viewBox="0 0 320 320">',
-            '<style type="text/css"><![CDATA[.square { width: 40px; height: 40px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; } .piece { font-family: Arial; font-size: 36px; text-anchor: middle; dominant-baseline: middle; }]]></style>'
+            '<style type="text/css"><![CDATA[.square { width: 40px; height: 40px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; }]]></style>'
         );
 
-        uint256 index = 0; // Initialize index to start at the beginning of the
-            // boardBytes
+        uint256 index = 0;
         for (uint256 row = 0; row < 8; row++) {
             for (uint256 col = 0; col < 8; col++) {
-                // Adjust the x and y positions to start from the bottom right
-                // corner
-                uint256 x = (7 - col) * 40; // Adjusted to start from the right
-                uint256 y = (7 - row) * 40; // Adjusted to start from the bottom
+                uint256 x = col * 40;
+                uint256 y = row * 40;
 
-                // Determine if the square should be dark or light
-                bool isDark = (row + col) % 2 == 1; // Adjusted the calculation
-                    // for the board pattern
+                bool isDark = (row + col) % 2 == 1;
                 string memory squareColor = isDark ? "dark" : "light";
 
-                // Skip commas in the boardString
                 while (index < boardBytes.length && boardBytes[index] == ",") {
                     index++;
                 }
 
-                // Ensure we do not exceed the boardBytes length
                 if (index >= boardBytes.length) {
                     break;
                 }
 
-                // Replace '.' with a space for SVG display
                 bytes1 piece =
                     boardBytes[index] == "." ? bytes1(0x20) : boardBytes[index];
-
-                // Correctly increment index after processing a character
                 index++;
 
-                // Generate SVG elements for the square and the piece
                 svg = abi.encodePacked(
                     svg,
                     '<rect x="',
@@ -166,17 +369,15 @@ contract ChessFishNFT_V2 is ERC721 {
                     uint2str(y),
                     '" class="square ',
                     squareColor,
-                    '"/>',
-                    '<text x="',
-                    uint2str(x + 20),
-                    '" y="',
-                    uint2str(y + 20),
-                    '" class="piece">',
-                    piece != bytes1(0x20)
-                        ? string(abi.encodePacked(getPieceSymbol(piece)))
-                        : " ", // Correctly display space for '.' characters
-                    "</text>"
+                    '"/>'
                 );
+
+                // Add piece SVG if not an empty square, ensuring it's added
+                // after squares
+                if (piece != bytes1(0x20)) {
+                    bytes memory pieceSVG = getPieceSymbol(piece, x, y);
+                    svg = abi.encodePacked(svg, pieceSVG);
+                }
             }
         }
         svg = abi.encodePacked(svg, "</svg>");

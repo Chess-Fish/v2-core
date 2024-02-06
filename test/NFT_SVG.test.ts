@@ -61,7 +61,7 @@ describe("ChessFish NFT Unit Tests", function () {
 			const svgContent = Buffer.from(svgBase64, "base64").toString("utf-8");
 
 			// Define the file path for the output HTML file
-			const filePath = path.join(__dirname, "NFT_SVG_output.html");
+			const filePath = path.join(__dirname, "SVG_output.html");
 
 			// Write the SVG content to the file
 			fs.writeFileSync(filePath, svgContent);
