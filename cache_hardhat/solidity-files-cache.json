@@ -738,8 +738,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707235337941,
-      "contentHash": "7af1fd80daa2f7eeec63820bcf580fb8",
+      "lastModificationDate": 1707239852954,
+      "contentHash": "b95a68d379600b27bd583fb8df7eda00",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -774,7 +774,8 @@
         "@openzeppelin/contracts/utils/Base64.sol",
         "./../ChessGame.sol",
         "./../MoveVerification.sol",
-        "forge-std/console.sol"
+        "forge-std/console.sol",
+        "./SVGContainer.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -2143,6 +2144,48 @@
       ],
       "artifacts": [
         "Token"
+      ]
+    },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/SVGContainer.sol": {
+      "lastModificationDate": 1707239920531,
+      "contentHash": "d443ff2e303369b4080e91453f0312d7",
+      "sourceName": "src/ERC721/SVGContainer.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/Strings.sol",
+        "@openzeppelin/contracts/utils/Base64.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "SVG_Container"
       ]
     }
   }
