@@ -2,12 +2,13 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ChessGame.sol": {
-      "lastModificationDate": 1707240899420,
+      "lastModificationDate": 1707243299521,
       "contentHash": "0b35da980a4032ae819d7251151d2d36",
       "sourceName": "src/ChessGame.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -48,12 +49,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/interfaces/interfaces.sol": {
-      "lastModificationDate": 1707240899412,
+      "lastModificationDate": 1707243299512,
       "contentHash": "b309da33146ffacdb2706b64fb713c97",
       "sourceName": "src/interfaces/interfaces.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -88,12 +90,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveHelper.sol": {
-      "lastModificationDate": 1707240899413,
+      "lastModificationDate": 1707243299513,
       "contentHash": "778cc867928cd3fddefde38ae43442b7",
       "sourceName": "src/MoveHelper.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -129,12 +132,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/GaslessGame.sol": {
-      "lastModificationDate": 1707240899415,
+      "lastModificationDate": 1707243299514,
       "contentHash": "1606f7f396ee56ef90b8bd86f3ca1032",
       "sourceName": "src/GaslessGame.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -181,6 +185,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -220,6 +225,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -259,6 +265,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -296,12 +303,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveVerification.sol": {
-      "lastModificationDate": 1707240899453,
+      "lastModificationDate": 1707243299552,
       "contentHash": "b7dd0fbc18178b9ddbae7b456a1cf145",
       "sourceName": "src/MoveVerification.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -343,6 +351,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -382,6 +391,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -425,6 +435,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -464,6 +475,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -505,6 +517,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -546,6 +559,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -585,6 +599,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -627,6 +642,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -666,6 +682,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -705,6 +722,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -738,12 +756,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707241790813,
-      "contentHash": "05307cb9a73323727a715fbf2e8f0997",
+      "lastModificationDate": 1707244157414,
+      "contentHash": "0970380989cbd9ee247f57cf6fb9ec10",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -791,6 +810,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -830,6 +850,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -869,6 +890,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -916,6 +938,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -955,6 +978,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -996,6 +1020,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1037,6 +1062,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1076,6 +1102,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1117,6 +1144,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1158,6 +1186,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1197,6 +1226,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1241,6 +1271,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1276,12 +1307,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ChessGameTest.sol": {
-      "lastModificationDate": 1707231014778,
+      "lastModificationDate": 1707243299513,
       "contentHash": "af04a5b215d1252985947f93d529a240",
       "sourceName": "src/ChessGameTest.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1325,6 +1357,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1381,6 +1414,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1420,6 +1454,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1459,6 +1494,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1503,6 +1539,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1545,6 +1582,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1586,6 +1624,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1630,6 +1669,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1669,6 +1709,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1708,6 +1749,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1749,6 +1791,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1790,6 +1833,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1832,6 +1876,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1876,6 +1921,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1915,6 +1961,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1955,6 +2002,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -1994,6 +2042,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -2033,6 +2082,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -2073,6 +2123,7 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -2106,12 +2157,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/test/token.sol": {
-      "lastModificationDate": 1707231014777,
+      "lastModificationDate": 1707243299512,
       "contentHash": "4d255e0b40f9548ec467d043d34b7818",
       "sourceName": "src/test/token.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },
@@ -2147,12 +2199,13 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/SVGContainer.sol": {
-      "lastModificationDate": 1707240899416,
+      "lastModificationDate": 1707243299515,
       "contentHash": "609ede7058bb8ca795533bb7699638a4",
       "sourceName": "src/ERC721/SVGContainer.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
+          "viaIR": true,
           "metadata": {
             "bytecodeHash": "none"
           },

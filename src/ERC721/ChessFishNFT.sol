@@ -123,8 +123,7 @@ contract ChessFishNFT_V2 is ERC721 {
         // Double the size of the board and add extra space for the rectangle
         bytes memory svg = abi.encodePacked(
             '<?xml version="1.0" encoding="UTF-8"?>',
-            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="640" height="720" viewBox="0 0 640 720">', // Adjusted
-                // dimensions
+            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="640" height="720" viewBox="0 0 640 720">',
             '<style type="text/css"><![CDATA[.square { width: 80px; height: 80px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; }]]></style>'
         );
 
@@ -168,22 +167,34 @@ contract ChessFishNFT_V2 is ERC721 {
             }
         }
 
-        string memory dateString = timestampToDate(block.timestamp);
+        string memory dateString = timestampToDateTimeString(block.timestamp);
 
         // Append the date string to the SVG
-        svg = abi.encodePacked(
-            svg,
-            '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
-            '<text x="30" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
-            toHexString(uint256(uint160(player0)), 20),
-            "</text>",
-            '<text x="10" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
-            toHexString(uint256(uint160(player1)), 20),
-            "</text>",
-            '<text x="10" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
-            dateString,
-            "</text>"
-        );
+svg = abi.encodePacked(
+    svg,
+    '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
+    '<text x="20" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
+    toHexString(uint256(uint160(player0)), 20),
+    "</text>",
+    '<text x="20" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
+    toHexString(uint256(uint160(player1)), 20),
+    "</text>",
+    '<text x="20" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
+    dateString,
+    "</text>",
+    // Adjusting circle animation to go around the border of the board
+    '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
+    '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
+    '<circle r="5" fill="red">',
+    '<animateMotion dur="10s" repeatCount="indefinite">',
+    '<mpath href="#borderPath"/>',
+    '</animateMotion>',
+    '</circle>',
+    '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>',
+    '</svg>'
+);
+
+
 
         svg = abi.encodePacked(svg, "</svg>");
 
@@ -201,66 +212,151 @@ contract ChessFishNFT_V2 is ERC721 {
         bytes memory buffer = new bytes(2 * length);
 
         for (uint256 i = 2 * length; i > 0; --i) {
-            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf))); 
+            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf)));
             if (buffer[i - 1] >= bytes1(uint8(58))) {
                 buffer[i - 1] = bytes1(uint8(87 + (uint8(buffer[i - 1]) - 58)));
             }
             value >>= 4;
-		} 
+        }
 
         return string(buffer);
     }
 
-    uint256[12] monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    uint256 constant SECONDS_PER_DAY = 24 * 60 * 60;
+    uint256 constant SECONDS_PER_HOUR = 60 * 60;
+    uint256 constant SECONDS_PER_MINUTE = 60;
+    int256 constant OFFSET19700101 = 2_440_588;
 
-function timestampToDate(uint256 timestamp) public view returns (string memory) {
-    uint256 secondsInADay = 24 * 60 * 60;
-    uint256 year = 1970;
-    uint256 month;
-    uint256 day;
-    uint256 hour;
-    uint256 minute;
-    uint256 second;
+    uint256 constant DOW_MON = 1;
+    uint256 constant DOW_TUE = 2;
+    uint256 constant DOW_WED = 3;
+    uint256 constant DOW_THU = 4;
+    uint256 constant DOW_FRI = 5;
+    uint256 constant DOW_SAT = 6;
+    uint256 constant DOW_SUN = 7;
 
-    // Calculate elapsed days since 1970
-    uint256 daysSince1970 = timestamp / secondsInADay;
-    // Calculate leftover seconds for time calculation
-    uint256 leftoverSeconds = timestamp % secondsInADay;
-    
-    // Calculate hour, minute, and second
-    hour = leftoverSeconds / (60 * 60);
-    leftoverSeconds -= hour * (60 * 60);
-    minute = leftoverSeconds / 60;
-    second = leftoverSeconds % 60;
+    function timestampToDateTimeString(uint256 timestamp)
+        internal
+        pure
+        returns (string memory)
+    {
+        (
+            uint256 year,
+            uint256 month,
+            uint256 day,
+            uint256 hour,
+            uint256 minute,
+            uint256 second
+        ) = timestampToDateTime(timestamp);
 
-    // Leap year calculation
-    uint256 daysInYear;
-    while (daysSince1970 >= (daysInYear = (isLeapYear(year) ? 366 : 365))) {
-        daysSince1970 -= daysInYear;
-        year += 1;
+        return string(
+            abi.encodePacked(
+                _zeroPad(month, 2),
+                "/",
+                _zeroPad(day, 2),
+                "/",
+                _toString(year),
+                " ",
+                _zeroPad(hour, 2),
+                ":",
+                _zeroPad(minute, 2),
+                ":",
+                _zeroPad(second, 2)
+            )
+        );
     }
-    
-    // Calculate the month and day
-    for (uint256 i = 0; i < monthDays.length; i++) {
-        uint256 daysInMonth = monthDays[i];
-        // Adjust for leap year February
-        if (i == 1 && isLeapYear(year)) {
-            daysInMonth += 1;
+
+    function _zeroPad(
+        uint256 value,
+        uint256 length
+    )
+        internal
+        pure
+        returns (string memory)
+    {
+        // Converts a uint256 to a string and pads with leading zeros if necessary to
+        // match the desired length
+        string memory strValue = _toString(value);
+        uint256 strLength = bytes(strValue).length;
+
+        if (strLength >= length) {
+            return strValue;
         }
 
-        if (daysSince1970 < daysInMonth) {
-            month = i + 1;
-            day = daysSince1970 + 1; // Day of month is 1-indexed
-            break;
-        } else {
-            daysSince1970 -= daysInMonth;
+        uint256 zerosToAdd = length - strLength;
+        bytes memory padded = new bytes(length);
+        for (uint256 i = 0; i < zerosToAdd; i++) {
+            padded[i] = bytes1("0");
         }
-    }
-    
-    // Format date and time into a string
-    return string(abi.encodePacked(svg_container.uint2str(month), "/", svg_container.uint2str(day), "/", svg_container.uint2str(year), " ", svg_container.uint2str(hour), ":", svg_container.uint2str(minute), ":", svg_container.uint2str(second)));
-}
+        for (uint256 i = zerosToAdd; i < length; i++) {
+            padded[i] = bytes(strValue)[i - zerosToAdd];
+        }
 
+        return string(padded);
+    }
+
+    function _toString(uint256 value) internal pure returns (string memory) {
+        // Converts a uint256 to a string
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
+    }
+
+    function timestampToDateTime(uint256 timestamp)
+        internal
+        pure
+        returns (
+            uint256 year,
+            uint256 month,
+            uint256 day,
+            uint256 hour,
+            uint256 minute,
+            uint256 second
+        )
+    {
+        (year, month, day) = _daysToDate(timestamp / SECONDS_PER_DAY);
+        uint256 secs = timestamp % SECONDS_PER_DAY;
+        hour = secs / SECONDS_PER_HOUR;
+        secs = secs % SECONDS_PER_HOUR;
+        minute = secs / SECONDS_PER_MINUTE;
+        second = secs % SECONDS_PER_MINUTE;
+    }
+
+    function _daysToDate(uint256 _days)
+        internal
+        pure
+        returns (uint256 year, uint256 month, uint256 day)
+    {
+        int256 __days = int256(_days);
+
+        int256 L = __days + 68_569 + OFFSET19700101;
+        int256 N = (4 * L) / 146_097;
+        L = L - (146_097 * N + 3) / 4;
+        int256 _year = (4000 * (L + 1)) / 1_461_001;
+        L = L - (1461 * _year) / 4 + 31;
+        int256 _month = (80 * L) / 2447;
+        int256 _day = L - (2447 * _month) / 80;
+        L = _month / 11;
+        _month = _month + 2 - 12 * L;
+        _year = 100 * (N - 49) + _year + L;
+
+        year = uint256(_year);
+        month = uint256(_month);
+        day = uint256(_day);
+    }
 
     function isLeapYear(uint256 year) internal pure returns (bool) {
         if (year % 4 != 0) {
