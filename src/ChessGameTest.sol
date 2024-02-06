@@ -8,7 +8,7 @@ import { console } from "forge-std/Test.sol";
 
 contract ChessGameTest is EIP712 {
     struct GaslessMove {
-        address wagerAddress;
+        address gameAddress;
         uint256 gameNumber;
         uint256 moveNumber;
         uint16 move;
@@ -28,7 +28,7 @@ contract ChessGameTest is EIP712 {
 
     constructor() EIP712("ChessFish", "1") {
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address wagerAddress,uint gameNumber,uint moveNumber,uint16 move,uint expiration)"
+            "GaslessMove(address gameAddress,uint gameNumber,uint moveNumber,uint16 move,uint expiration)"
         );
     }
 

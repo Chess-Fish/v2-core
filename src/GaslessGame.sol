@@ -46,7 +46,7 @@ import "./ChessGame.sol";
  */
 contract GaslessGame is EIP712 {
     struct GaslessMove {
-        address wagerAddress;
+        address gameAddress;
         uint256 gameNumber;
         uint256 moveNumber;
         uint16 move;
@@ -64,7 +64,7 @@ contract GaslessGame is EIP712 {
     struct Delegation {
         address delegatorAddress;
         address delegatedAddress;
-        address wagerAddress;
+        address gameAddress;
     }
 
     struct SignedDelegation {
@@ -75,7 +75,7 @@ contract GaslessGame is EIP712 {
     /// @dev MoveVerification contract
     MoveVerification public immutable moveVerification;
 
-    // @dev ChessWager contract
+    // @dev ChessGame contract
     ChessGame public chessGame;
 
     /// @dev address deployer
@@ -97,17 +97,17 @@ contract GaslessGame is EIP712 {
         deployer = msg.sender;
 
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address wagerAddress,uint gameNumber,uint moveNumber,uint16 move,uint expiration)"
+            "GaslessMove(address gameAddress,uint gameNumber,uint moveNumber,uint16 move,uint expiration)"
         );
 
         DELEGATION_METHOD_HASH = keccak256(
-            "Delegation(address delegatorAddress,address delegatedAddress,address wagerAddress)"
+            "Delegation(address delegatorAddress,address delegatedAddress,address gameAddress)"
         );
     }
 
-    /// @notice set ChessWager contract
-    function setChessWager(address _chessWager) external onlyDeployer {
-        chessGame = ChessGame(_chessWager);
+    /// @notice set ChessGame contract
+    function setChessGame(address _chessGame) external onlyDeployer {
+        chessGame = ChessGame(_chessGame);
     }
 
     /// @notice Generates gasless move message
@@ -129,14 +129,14 @@ contract GaslessGame is EIP712 {
         return move;
     }
 
-    /// @notice Decodes gasless move message and returns wager address
-    function decodeWagerAddress(bytes memory message)
+    /// @notice Decodes gasless move message and returns game address
+    function decodegameAddress(bytes memory message)
         internal
         pure
         returns (address)
     {
         GaslessMove memory move = abi.decode(message, (GaslessMove));
-        return move.wagerAddress;
+        return move.gameAddress;
     }
 
     /// @dev typed signature verification
@@ -151,7 +151,7 @@ contract GaslessGame is EIP712 {
             keccak256(
                 abi.encode(
                     MOVE_METHOD_HASH,
-                    moveData.move.wagerAddress,
+                    moveData.move.gameAddress,
                     moveData.move.gameNumber,
                     moveData.move.moveNumber,
                     moveData.move.move,
@@ -186,12 +186,12 @@ contract GaslessGame is EIP712 {
                 ? moveData.player0
                 : moveData.player1;
 
-            address wagerAddress = moveData.move.wagerAddress;
+            address gameAddress = moveData.move.gameAddress;
             moveData.move = decodeMoveMessage(messages[i]);
 
             require(
-                wagerAddress == moveData.move.wagerAddress,
-                "non matching wagers"
+                gameAddress == moveData.move.gameAddress,
+                "non matching games"
             );
             require(moveData.move.expiration >= block.timestamp, "move expired");
 
@@ -222,28 +222,28 @@ contract GaslessGame is EIP712 {
     )
         public
         view
-        returns (address wagerAddress, uint8 outcome, uint16[] memory moves)
+        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
     {
         require(messages.length == signatures.length, "msg.len == sig.len");
 
-        // optimistically use the wagerAddress from the first index
-        wagerAddress = decodeWagerAddress(messages[0]);
+        // optimistically use the gameAddress from the first index
+        gameAddress = decodegameAddress(messages[0]);
 
-        address playerToMove = chessGame.getPlayerMove(wagerAddress);
+        address playerToMove = chessGame.getPlayerMove(gameAddress);
 
         (address player0, address player1) =
-            chessGame.getWagerPlayers(wagerAddress);
+            chessGame.getGamePlayers(gameAddress);
 
         GaslessMoveData memory moveData;
         moveData.player0 = player0;
         moveData.player1 = player1;
-        moveData.move.wagerAddress = wagerAddress;
+        moveData.move.gameAddress = gameAddress;
 
         moves = verifyMoves(playerToMove, moveData, messages, signatures);
 
         /// @dev appending moves to onChainMoves if they exist
         uint16[] memory onChainMoves =
-            chessGame.getLatestGameMoves(wagerAddress);
+            chessGame.getLatestGameMoves(gameAddress);
 
         if (onChainMoves.length > 0) {
             uint16[] memory combinedMoves =
@@ -259,7 +259,7 @@ contract GaslessGame is EIP712 {
 
         (outcome,,,) = moveVerification.checkGameFromStart(moves);
 
-        return (wagerAddress, outcome, moves);
+        return (gameAddress, outcome, moves);
     }
 
     /*
@@ -270,14 +270,14 @@ contract GaslessGame is EIP712 {
     function createDelegation(
         address delegatorAddress,
         address delegatedAddress,
-        address wagerAddress
+        address gameAddress
     )
         external
         pure
         returns (Delegation memory)
     {
         Delegation memory delegation =
-            Delegation(delegatorAddress, delegatedAddress, wagerAddress);
+            Delegation(delegatorAddress, delegatedAddress, gameAddress);
         return delegation;
     }
 
@@ -304,17 +304,17 @@ contract GaslessGame is EIP712 {
         return abi.decode(signedDelegationBytes, (SignedDelegation));
     }
 
-    /// @notice Check if delegators match players in wagerAddress
+    /// @notice Check if delegators match players in gameAddress
     function checkIfAddressesArePlayers(
         address delegator0,
         address delegator1,
-        address wagerAddress
+        address gameAddress
     )
         internal
         view
     {
         (address player0, address player1) =
-            chessGame.getWagerPlayers(wagerAddress);
+            chessGame.getGamePlayers(gameAddress);
         require(
             delegator0 == player0 && delegator1 == player1,
             "players don't match"
@@ -330,8 +330,8 @@ contract GaslessGame is EIP712 {
         view
     {
         require(
-            signedDelegation0.delegation.wagerAddress
-                == signedDelegation1.delegation.wagerAddress,
+            signedDelegation0.delegation.gameAddress
+                == signedDelegation1.delegation.gameAddress,
             "non matching addresses"
         );
 
@@ -350,7 +350,7 @@ contract GaslessGame is EIP712 {
                     DELEGATION_METHOD_HASH,
                     signedDelegation.delegation.delegatorAddress,
                     signedDelegation.delegation.delegatedAddress,
-                    signedDelegation.delegation.wagerAddress
+                    signedDelegation.delegation.gameAddress
                 )
             )
         );
@@ -369,7 +369,7 @@ contract GaslessGame is EIP712 {
     )
         external
         view
-        returns (address wagerAddress, uint8 outcome, uint16[] memory moves)
+        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
     {
         require(messages.length == signatures.length, "573");
 
@@ -380,20 +380,20 @@ contract GaslessGame is EIP712 {
 
         checkDelegations(signedDelegation0, signedDelegation1);
 
-        wagerAddress = signedDelegation0.delegation.wagerAddress;
+        gameAddress = signedDelegation0.delegation.gameAddress;
 
         GaslessMoveData memory moveData;
         moveData.player0 = signedDelegation0.delegation.delegatedAddress;
         moveData.player1 = signedDelegation1.delegation.delegatedAddress;
-        moveData.move.wagerAddress = wagerAddress;
+        moveData.move.gameAddress = gameAddress;
 
         checkIfAddressesArePlayers(
             signedDelegation0.delegation.delegatorAddress,
             signedDelegation1.delegation.delegatorAddress,
-            wagerAddress
+            gameAddress
         );
 
-        address playerToMove = chessGame.getPlayerMove(wagerAddress)
+        address playerToMove = chessGame.getPlayerMove(gameAddress)
             == signedDelegation0.delegation.delegatorAddress
             ? moveData.player0
             : moveData.player1;
@@ -401,7 +401,7 @@ contract GaslessGame is EIP712 {
         moves = verifyMoves(playerToMove, moveData, messages, signatures);
 
         uint16[] memory onChainMoves =
-            chessGame.getLatestGameMoves(wagerAddress);
+            chessGame.getLatestGameMoves(gameAddress);
         if (onChainMoves.length > 0) {
             uint16[] memory combinedMoves =
                 new uint16[](onChainMoves.length + moves.length);
@@ -416,6 +416,6 @@ contract GaslessGame is EIP712 {
 
         (outcome,,,) = moveVerification.checkGameFromStart(moves);
 
-        return (wagerAddress, outcome, moves);
+        return (gameAddress, outcome, moves);
     }
 }

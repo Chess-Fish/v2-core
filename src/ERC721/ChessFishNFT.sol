@@ -75,8 +75,8 @@ contract ChessFishNFT_V2 is ERC721 {
     {
         return generateBoardSVG(
             "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
-			address(5),
-			address(4)
+            address(5),
+            address(4)
         );
         // return _buildTokenURI(id);
     }
@@ -110,7 +110,11 @@ contract ChessFishNFT_V2 is ERC721 {
         return " "; // Fallback to a space for unrecognized characters
     }
 
-    function generateBoardSVG(string memory boardString, address player0, address player1)
+    function generateBoardSVG(
+        string memory boardString,
+        address player0,
+        address player1
+    )
         public
         pure
         returns (string memory)
