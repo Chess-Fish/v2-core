@@ -4,27 +4,27 @@ pragma solidity ^0.8.22;
 interface IChessFishNFT {
     function awardWinner(
         address player,
-        address wagerHash
+        address gameHash
     )
         external
         returns (uint256);
 }
 
-interface IChessWager {
-    function createGameWagerTournamentSingle(
+interface IChessGame {
+    function createChessGameTournamentSingle(
         address player0,
         address player1,
-        address wagerToken,
-        uint256 wagerAmount,
+        address gameToken,
+        uint256 gameAmount,
         uint256 numberOfGames,
         uint256 timeLimit
     )
         external
-        returns (address wagerAddress);
+        returns (address gameAddress);
 
-    function startWagersInTournament(address wagerAddress) external;
+    function startGamesInTournament(address gameAddress) external;
 
-    function getWagerStatus(address wagerAddress)
+    function getGameStatus(address gameAddress)
         external
         view
         returns (address, address, uint256, uint256);

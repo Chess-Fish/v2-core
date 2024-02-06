@@ -2,7 +2,7 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-describe("ChessFish Wager Unit Tests", function () {
+describe("ChessFish Game Unit Tests", function () {
 	// We define a fixture to reuse the same setup in every test.
 	async function deploy() {
 		const [deployer, otherAccount] = await ethers.getSigners();

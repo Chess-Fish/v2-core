@@ -28,7 +28,7 @@ import "forge-std/console.sol";
 contract ChessFishNFT_V2 is ERC721 {
     uint256 private _tokenIdCounter;
 
-    mapping(uint256 => address) public wagerAddresses;
+    mapping(uint256 => address) public gameAddresses;
 
     ChessGame public immutable game;
     MoveVerification public moveVerification;
@@ -52,7 +52,7 @@ contract ChessFishNFT_V2 is ERC721 {
 
     function awardWinner(
         address player,
-        address wagerAddress
+        address gameAddress
     )
         external
         onlyChessGame
@@ -60,7 +60,7 @@ contract ChessFishNFT_V2 is ERC721 {
     {
         uint256 tokenId = _tokenIdCounter;
         _mint(player, tokenId);
-        wagerAddresses[tokenId] = wagerAddress;
+        gameAddresses[tokenId] = gameAddress;
 
         _tokenIdCounter += 1;
 

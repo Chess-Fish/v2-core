@@ -190,8 +190,7 @@ contract GaslessGame is EIP712 {
             moveData.move = decodeMoveMessage(messages[i]);
 
             require(
-                gameAddress == moveData.move.gameAddress,
-                "non matching games"
+                gameAddress == moveData.move.gameAddress, "non matching games"
             );
             require(moveData.move.expiration >= block.timestamp, "move expired");
 
@@ -242,8 +241,7 @@ contract GaslessGame is EIP712 {
         moves = verifyMoves(playerToMove, moveData, messages, signatures);
 
         /// @dev appending moves to onChainMoves if they exist
-        uint16[] memory onChainMoves =
-            chessGame.getLatestGameMoves(gameAddress);
+        uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
 
         if (onChainMoves.length > 0) {
             uint16[] memory combinedMoves =
@@ -400,8 +398,7 @@ contract GaslessGame is EIP712 {
 
         moves = verifyMoves(playerToMove, moveData, messages, signatures);
 
-        uint16[] memory onChainMoves =
-            chessGame.getLatestGameMoves(gameAddress);
+        uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
         if (onChainMoves.length > 0) {
             uint16[] memory combinedMoves =
                 new uint16[](onChainMoves.length + moves.length);

@@ -12,7 +12,7 @@ interface ContractAddresses {
 	chessNFT: string;
 	moveVerification: string;
 	gaslessGame: string;
-	chessWager: string;
+	chessGame: string;
 	tournament: string;
 }
 
@@ -40,21 +40,21 @@ async function deploy(): Promise<void> {
 	const gaslessGame = await GaslessGame.deploy(moveVerification.address);
 	console.log("Gasless game contract deployed");
 
-	const ChessWager = await ethers.getContractFactory("ChessWager");
-	const chess = await ChessWager.deploy(
+	const GhessGame = await ethers.getContractFactory("GhessGame");
+	const chessGame = await GhessGame.deploy(
 		moveVerification.address,
 		gaslessGame.address,
 		splitter.address,
 		chessNFT.address
 	);
-	console.log("ChessWager contract deployed");
+	console.log("ChessGame contract deployed");
 
 	const ChessTournament = await ethers.getContractFactory("ChessFishTournament");
-	const tournament = await ChessTournament.deploy(chess.address, splitter.address);
+	const tournament = await ChessTournament.deploy(chessGame.address, splitter.address);
 	await tournament.deployed();
 	console.log("Chess Tournament contract deployed");
 
-	const tx = await chess.addTournamentHandler(tournament.address);
+	const tx = await chessGame.addTournamentHandler(tournament.address);
 	await tx.wait();
 
 	const contractAddresses: ContractAddresses = {
@@ -66,7 +66,7 @@ async function deploy(): Promise<void> {
 		chessNFT: chessNFT.address,
 		moveVerification: moveVerification.address,
 		gaslessGame: gaslessGame.address,
-		chessWager: chess.address,
+		chessGame: chessGame.address,
 		tournament: tournament.address,
 	};
 
@@ -97,27 +97,27 @@ async function deploy(): Promise<void> {
 	console.log("ChessNFT address", contractAddresses.chessNFT);
 	console.log("Move Verification address", contractAddresses.moveVerification);
 	console.log("GaslessGame address", contractAddresses.gaslessGame);
-	console.log("Chess Contract address", contractAddresses.chessWager);
+	console.log("Chess Contract address", contractAddresses.chessGame);
 	console.log("Tournament contract", contractAddresses.tournament);
 
 	try {
-		const tx1 = await chess.initCoordinates(coordinates_array, bitCoordinates_array);
+		const tx1 = await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
 		await tx1.wait();
-		console.log("board coodinates initialized in chess wager contract");
+		console.log("board coodinates initialized in ChessGame contract");
 	} catch (error) {
 		console.log(error);
 	}
 	try {
-		const tx2 = await chessNFT.setChessFishAddress(chess.address);
+		const tx2 = await chessNFT.setChessFishAddress(chessGame.address);
 		await tx2.wait();
-		console.log("Chess Wager address set in ChessNFT contract");
+		console.log("ChessGame address set in ChessNFT contract");
 	} catch (error) {
 		console.log(error);
 	}
 	try {
-		const tx3 = await gaslessGame.setChessWager(chess.address);
+		const tx3 = await gaslessGame.setChessGame(chessGame.address);
 		await tx3.wait();
-		console.log("Chess Wager address set in gasless game contract");
+		console.log("ChessGame address set in gasless game contract");
 	} catch (error) {
 		console.log(error);
 	}

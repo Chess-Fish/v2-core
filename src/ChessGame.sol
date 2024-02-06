@@ -131,16 +131,16 @@ contract ChessGame is MoveHelper {
         uint256 timeLimit,
         uint256 numberOfGames
     );
-    event acceptWagerEvent(address gameAddress, address userAddress);
+    event acceptGameEvent(address gameAddress, address userAddress);
     event playMoveEvent(address gameAddress, uint16 move);
-    event payoutWagerEvent(
+    event payoutGameEvent(
         address gameAddress,
         address winner,
         address gameToken,
         uint256 tokenAmount,
         uint256 protocolFee
     );
-    event cancelWagerEvent(address gameAddress, address userAddress);
+    event cancelGameEvent(address gameAddress, address userAddress);
 
     /* 
     //// VIEW FUNCTIONS ////
@@ -210,8 +210,7 @@ contract ChessGame is MoveHelper {
         view
         returns (address, address)
     {
-        return
-            (gameData[gameAddress].player0, gameData[gameAddress].player1);
+        return (gameData[gameAddress].player0, gameData[gameAddress].player1);
     }
 
     /// @notice Get game Status
@@ -271,13 +270,9 @@ contract ChessGame is MoveHelper {
     }
 
     /// @notice Gets the address of the player whose turn it is
-    /// @param gameAddress address of the wager
+    /// @param gameAddress address of the game
     /// @return playerAddress
-    function getPlayerMove(address gameAddress)
-        public
-        view
-        returns (address)
-    {
+    function getPlayerMove(address gameAddress) public view returns (address) {
         uint256 gameID = gameIDs[gameAddress].length;
         uint256 moves = gameMoves[gameAddress][gameID].moves.length;
 
@@ -299,7 +294,7 @@ contract ChessGame is MoveHelper {
     }
 
     /// @notice Returns boolean if player is white or not
-    /// @param gameAddress address of the wager
+    /// @param gameAddress address of the game
     /// @param player address player
     /// @return isPlayerWhite
     function isPlayerWhite(
@@ -317,8 +312,8 @@ contract ChessGame is MoveHelper {
         }
     }
 
-    /// @notice Gets the game status for the last played game in a wager
-    /// @param gameAddress address of the wager
+    /// @notice Gets the game status for the last played game in a
+    /// @param gameAddress address of the game
     /// @return outcome,
     /// @return gameState
     /// @return player0State
@@ -356,7 +351,7 @@ contract ChessGame is MoveHelper {
         return chainId;
     }
 
-    /// @notice Generates unique hash for a game wager
+    /// @notice Generates unique hash for a game game
     /// @dev using keccak256 to generate a hash which is converted to an address
     /// @return gameAddress
     function getgameAddress(GameData memory game)
@@ -394,7 +389,7 @@ contract ChessGame is MoveHelper {
     //// GASLESS GAME FUNCTIONS ////
     */
 
-    /// @notice Verifies game moves and updates the state of the wager
+    /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
     function verifyGameUpdateState(
         bytes[] memory message,
@@ -410,17 +405,17 @@ contract ChessGame is MoveHelper {
         gameMoves[gameAddress][gameID].moves = moves;
 
         if (outcome != 0) {
-            updateWagerState(gameAddress);
+            updateGameState(gameAddress);
             return true;
         }
         if (outcome == 0) {
-            return updateWagerStateInsufficientMaterial(gameAddress);
+            return updateGameStateInsufficientMaterial(gameAddress);
         } else {
             return false;
         }
     }
 
-    /// @notice Verifies game moves and updates the state of the wager
+    /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
     function verifyGameUpdateStateDelegated(
         bytes[2] memory delegations,
@@ -437,11 +432,11 @@ contract ChessGame is MoveHelper {
         gameMoves[gameAddress][gameID].moves = moves;
 
         if (outcome != 0) {
-            updateWagerState(gameAddress);
+            updateGameState(gameAddress);
             return true;
         }
         if (outcome == 0) {
-            return updateWagerStateInsufficientMaterial(gameAddress);
+            return updateGameStateInsufficientMaterial(gameAddress);
         } else {
             return false;
         }
@@ -469,22 +464,22 @@ contract ChessGame is MoveHelper {
         TournamentHandler = _tournamentHandler;
     }
 
-    /// @notice Starts tournament wagers
-    function startWagersInTournament(address gameAddress)
+    /// @notice Starts tournament games
+    function startgamesInTournament(address gameAddress)
         external
         onlyTournament
     {
         gameData[gameAddress].timeLastMove = block.timestamp;
     }
 
-    /// @notice Creates a wager between two players
+    /// @notice Creates a game between two players
     /// @dev only the tournament contract can call
-    /// @return gameAddress created wager address
-    function createGameWagerTournamentSingle(
+    /// @return gameAddress created game address
+    function createGameGameTournamentSingle(
         address player0,
         address player1,
         address gameToken,
-        uint256 wagerAmount,
+        uint256 gameAmount,
         uint256 numberOfGames,
         uint256 timeLimit
     )
@@ -492,11 +487,11 @@ contract ChessGame is MoveHelper {
         onlyTournament
         returns (address gameAddress)
     {
-        GameData memory gameWager = GameData(
+        GameData memory game = GameData(
             player0,
             player1,
             gameToken,
-            wagerAmount,
+            gameAmount,
             numberOfGames,
             true, // hasPlayerAccepted
             timeLimit,
@@ -508,9 +503,9 @@ contract ChessGame is MoveHelper {
             false, // isComplete
             false // hasBeenPaid
         );
-        gameAddress = getgameAddress(gameWager);
+        gameAddress = getgameAddress(game);
 
-        gameData[gameAddress] = gameWager;
+        gameData[gameAddress] = game;
 
         GameStatus memory status = GameStatus(false, 0, 0);
         gameStatus[gameAddress] = status;
@@ -522,7 +517,7 @@ contract ChessGame is MoveHelper {
         allGames.push(gameAddress);
 
         emit createGameDataEvent(
-            gameAddress, gameToken, wagerAmount, timeLimit, numberOfGames
+            gameAddress, gameToken, gameAmount, timeLimit, numberOfGames
         );
 
         return gameAddress;
@@ -532,11 +527,11 @@ contract ChessGame is MoveHelper {
     //// WRITE FUNCTIONS ////
     */
 
-    /// @notice Creates a 1v1 chess wager
-    function createGameWager(
+    /// @notice Creates a 1v1 chess game
+    function createChessGame(
         address player1,
         address gameToken,
-        uint256 wager,
+        uint256 gameAmount,
         uint256 timeLimit,
         uint256 numberOfGames
     )
@@ -544,11 +539,11 @@ contract ChessGame is MoveHelper {
         payable
         returns (address gameAddress)
     {
-        GameData memory gameWager = GameData(
+        GameData memory game = GameData(
             msg.sender, // player0
             player1,
             gameToken,
-            wager,
+            gameAmount,
             numberOfGames,
             false, // hasPlayerAccepted
             timeLimit,
@@ -560,16 +555,17 @@ contract ChessGame is MoveHelper {
             false // hasBeenPaid
         );
 
-        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), wager);
-
-        gameAddress = getgameAddress(gameWager);
-
-        require(
-            gameData[gameAddress].player0 == address(0),
-            "failed to create wager"
+        IERC20(gameToken).safeTransferFrom(
+            msg.sender, address(this), gameAmount
         );
 
-        gameData[gameAddress] = gameWager;
+        gameAddress = getgameAddress(game);
+
+        require(
+            gameData[gameAddress].player0 == address(0), "failed to create game"
+        );
+
+        gameData[gameAddress] = game;
 
         GameStatus memory status = GameStatus(false, 0, 0);
         gameStatus[gameAddress] = status;
@@ -581,14 +577,14 @@ contract ChessGame is MoveHelper {
         allGames.push(gameAddress);
 
         emit createGameDataEvent(
-            gameAddress, gameToken, wager, timeLimit, numberOfGames
+            gameAddress, gameToken, gameAmount, timeLimit, numberOfGames
         );
 
         return gameAddress;
     }
 
     /// @notice Player1 calls if they accept challenge
-    function acceptWager(address gameAddress) external {
+    function acceptGame(address gameAddress) external {
         address player1 = gameData[gameAddress].player1;
 
         if (player1 == address(0)) {
@@ -602,14 +598,14 @@ contract ChessGame is MoveHelper {
         }
 
         address gameToken = gameData[gameAddress].gameToken;
-        uint256 wager = gameData[gameAddress].tokenAmount;
+        uint256 game = gameData[gameAddress].tokenAmount;
 
         gameData[gameAddress].hasPlayerAccepted = true;
         gameData[gameAddress].timeLastMove = block.timestamp;
 
-        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), wager);
+        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), game);
 
-        emit acceptWagerEvent(gameAddress, msg.sender);
+        emit acceptGameEvent(gameAddress, msg.sender);
     }
 
     /// @notice Plays move on the board
@@ -625,7 +621,7 @@ contract ChessGame is MoveHelper {
         require(
             getNumberOfGamesPlayed(gameAddress)
                 <= gameData[gameAddress].numberOfGames,
-            "Wager ended"
+            "Game ended"
         );
         require(
             gameData[gameAddress].timeLastMove != 0,
@@ -635,7 +631,7 @@ contract ChessGame is MoveHelper {
         /// @dev checking if time ran out
         updateTime(gameAddress, msg.sender);
 
-        bool isEndgameTime = updateWagerStateTime(gameAddress);
+        bool isEndgameTime = updateGameStateTime(gameAddress);
         if (isEndgameTime) {
             return true;
         }
@@ -660,24 +656,22 @@ contract ChessGame is MoveHelper {
         gameMoves[gameAddress][gameID].moves = moves;
 
         /// @dev fails on invalid move
-        bool isEndgame = updateWagerState(gameAddress);
+        bool isEndgame = updateGameState(gameAddress);
 
         emit playMoveEvent(gameAddress, move);
 
         return isEndgame;
     }
 
-    /// @notice Handles payout of wager
-    /// @dev smallest wager amount is 18 wei before fees => 0
-    function payoutWager(address gameAddress) external returns (bool) {
+    /// @notice Handles payout of game
+    /// @dev smallest game amount is 18 wei before fees => 0
+    function payoutGame(address gameAddress) external returns (bool) {
         require(
             gameData[gameAddress].player0 == msg.sender
                 || gameData[gameAddress].player1 == msg.sender,
             "not listed"
         );
-        require(
-            gameData[gameAddress].isComplete == true, "wager not finished"
-        );
+        require(gameData[gameAddress].isComplete == true, "game not finished");
         require(
             gameData[gameAddress].isTournament == false,
             "tournament payment handled by tournament contract"
@@ -709,7 +703,7 @@ contract ChessGame is MoveHelper {
         }
 
         address token = gameData[gameAddress].gameToken;
-        uint256 wagerAmount = gameData[gameAddress].tokenAmount * 2;
+        uint256 gameAmount = gameData[gameAddress].tokenAmount * 2;
         uint256 prize = gamePrizes[gameAddress];
 
         gameData[gameAddress].tokenAmount = 0;
@@ -719,14 +713,14 @@ contract ChessGame is MoveHelper {
         IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
 
         /// @dev 5% shareholder fee
-        uint256 shareHolderFee = ((wagerAmount + prize) * protocolFee) / 10_000;
-        uint256 wagerPayout = (wagerAmount + prize) - shareHolderFee;
+        uint256 shareHolderFee = ((gameAmount + prize) * protocolFee) / 10_000;
+        uint256 gamePayout = (gameAmount + prize) - shareHolderFee;
 
         IERC20(token).safeTransfer(DividendSplitter, shareHolderFee);
-        IERC20(token).safeTransfer(winner, wagerPayout);
+        IERC20(token).safeTransfer(winner, gamePayout);
 
-        emit payoutWagerEvent(
-            gameAddress, winner, token, wagerPayout, protocolFee
+        emit payoutGameEvent(
+            gameAddress, winner, token, gamePayout, protocolFee
         );
 
         return true;
@@ -734,9 +728,7 @@ contract ChessGame is MoveHelper {
 
     /// @notice mint tournament winner NFT
     function mintWinnerNFT(address gameAddress) external {
-        require(
-            gameData[gameAddress].isComplete == true, "wager not finished"
-        );
+        require(gameData[gameAddress].isComplete == true, "game not finished");
         require(gameData[gameAddress].hasBeenPaid == false, "already paid");
 
         gameData[gameAddress].hasBeenPaid == true;
@@ -754,38 +746,36 @@ contract ChessGame is MoveHelper {
         IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
     }
 
-    /// @notice Cancel wager
-    /// @dev cancel wager only if other player has not yet accepted
+    /// @notice Cancel game
+    /// @dev cancel game only if other player has not yet accepted
     /// @dev && only if msg.sender is one of the players
-    function cancelWager(address gameAddress) external {
-        require(
-            gameData[gameAddress].hasPlayerAccepted == false, "in progress"
-        );
+    function cancelGame(address gameAddress) external {
+        require(gameData[gameAddress].hasPlayerAccepted == false, "in progress");
         require(gameData[gameAddress].player0 == msg.sender, "not listed");
         require(
             gameData[gameAddress].isTournament == false,
-            "cannot cancel tournament wager"
+            "cannot cancel tournament game"
         );
 
         address token = gameData[gameAddress].gameToken;
-        uint256 wagerAmount = gameData[gameAddress].tokenAmount;
+        uint256 gameAmount = gameData[gameAddress].tokenAmount;
 
         gameData[gameAddress].tokenAmount = 0;
 
-        IERC20(token).safeTransfer(msg.sender, wagerAmount);
+        IERC20(token).safeTransfer(msg.sender, gameAmount);
 
-        emit cancelWagerEvent(gameAddress, msg.sender);
+        emit cancelGameEvent(gameAddress, msg.sender);
     }
 
-    /// @notice Updates the state of the wager if player time is < 0
+    /// @notice Updates the state of the game if player time is < 0
     /// @dev check when called with timeout w tournament
     /// @dev set to public so that anyone can update time if player disappears
     /// @return wasUpdated returns true if status was updated
-    function updateWagerStateTime(address gameAddress) public returns (bool) {
+    function updateGameStateTime(address gameAddress) public returns (bool) {
         require(
             getNumberOfGamesPlayed(gameAddress)
                 <= gameData[gameAddress].numberOfGames,
-            "wager ended"
+            "game ended"
         );
         require(
             gameData[gameAddress].timeLastMove != 0,
@@ -811,17 +801,17 @@ contract ChessGame is MoveHelper {
         return false;
     }
 
-    /// @notice Update wager state if insufficient material
+    /// @notice Update game state if insufficient material
     /// @dev set to public so that anyone can update
     /// @return wasUpdated returns true if status was updated
-    function updateWagerStateInsufficientMaterial(address gameAddress)
+    function updateGameStateInsufficientMaterial(address gameAddress)
         public
         returns (bool)
     {
         require(
             getNumberOfGamesPlayed(gameAddress)
                 <= gameData[gameAddress].numberOfGames,
-            "wager ended"
+            "game ended"
         );
 
         uint256 gameID = gameIDs[gameAddress].length;
@@ -845,23 +835,23 @@ contract ChessGame is MoveHelper {
         }
     }
 
-    /// @notice Deposits prize to wager address
-    /// @dev used to deposit prizes to wager
-    function depositToWager(address gameAddress, uint256 amount) external {
-        require(!gameData[gameAddress].isComplete, "wager completed");
+    /// @notice Deposits prize to game address
+    /// @dev used to deposit prizes to game
+    function depositToGame(address gameAddress, uint256 amount) external {
+        require(!gameData[gameAddress].isComplete, "game completed");
         IERC20(gameData[gameAddress].gameToken).safeTransferFrom(
             msg.sender, address(this), amount
         );
         gamePrizes[gameAddress] += amount;
     }
 
-    /// @notice Checks the moves of the wager and updates state if neccessary
+    /// @notice Checks the moves of the game and updates state if neccessary
     /// @return isEndGame
-    function updateWagerState(address gameAddress) private returns (bool) {
+    function updateGameState(address gameAddress) private returns (bool) {
         require(
             getNumberOfGamesPlayed(gameAddress)
                 <= gameData[gameAddress].numberOfGames,
-            "wager ended"
+            "game ended"
         );
 
         uint256 gameID = gameIDs[gameAddress].length;
@@ -923,7 +913,7 @@ contract ChessGame is MoveHelper {
         return false;
     }
 
-    /// @notice Updates wager time
+    /// @notice Updates game time
     function updateTime(address gameAddress, address player) private {
         bool isPlayer0 = gameData[gameAddress].player0 == player;
         uint256 startTime = gameData[gameAddress].timeLastMove;
