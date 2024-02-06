@@ -170,31 +170,30 @@ contract ChessFishNFT_V2 is ERC721 {
         string memory dateString = timestampToDateTimeString(block.timestamp);
 
         // Append the date string to the SVG
-svg = abi.encodePacked(
-    svg,
-    '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
-    '<text x="20" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
-    toHexString(uint256(uint160(player0)), 20),
-    "</text>",
-    '<text x="20" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
-    toHexString(uint256(uint160(player1)), 20),
-    "</text>",
-    '<text x="20" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
-    dateString,
-    "</text>",
-    // Adjusting circle animation to go around the border of the board
-    '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
-    '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
-    '<circle r="5" fill="red">',
-    '<animateMotion dur="10s" repeatCount="indefinite">',
-    '<mpath href="#borderPath"/>',
-    '</animateMotion>',
-    '</circle>',
-    '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>',
-    '</svg>'
-);
-
-
+        svg = abi.encodePacked(
+            svg,
+            '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
+            '<text x="20" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
+            toHexString(uint256(uint160(player0)), 20),
+            "</text>",
+            '<text x="20" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
+            toHexString(uint256(uint160(player1)), 20),
+            "</text>",
+            '<text x="20" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
+            dateString,
+            "</text>",
+            // Adjusting animation to use a Unicode emoji instead of a circle
+            '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
+            '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
+            '<text font-family="Arial" font-size="32" fill="red">',
+            '<animateMotion dur="10s" repeatCount="indefinite">',
+            '<mpath href="#borderPath"/>',
+            "</animateMotion>",
+            "&#x1f3c6;", // Trophy emoji as an example
+            "</text>",
+            '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>',
+            "</svg>"
+        );
 
         svg = abi.encodePacked(svg, "</svg>");
 

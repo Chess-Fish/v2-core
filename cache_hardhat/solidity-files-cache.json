@@ -756,8 +756,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707244157414,
-      "contentHash": "0970380989cbd9ee247f57cf6fb9ec10",
+      "lastModificationDate": 1707244358443,
+      "contentHash": "257753b027182e21486bb36e7478a6bd",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
