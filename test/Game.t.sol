@@ -11,8 +11,7 @@ contract GameTest is Test {
 
     ChessGameTest public game;
 
-    string mnemonic =
-        "test test test test test test test test test test test junk";
+    string mnemonic = "test test test test test test test test test test test junk";
 
     function setUp() public {
         game = new ChessGameTest();

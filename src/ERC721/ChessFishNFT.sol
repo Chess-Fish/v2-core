@@ -48,12 +48,7 @@ contract ChessFishNFT_V2 is ERC721 {
         _;
     }
 
-    constructor(
-        address _chessFish,
-        address _svg
-    )
-        ERC721("ChessFishNFT", "CFSH")
-    {
+    constructor(address _chessFish, address _svg) ERC721("ChessFishNFT", "CFSH") {
         deployer = msg.sender;
         game = ChessGame(_chessFish);
 
@@ -77,12 +72,7 @@ contract ChessFishNFT_V2 is ERC721 {
         return tokenId;
     }
 
-    function tokenURI(uint256 id)
-        public
-        view
-        override
-        returns (string memory)
-    {
+    function tokenURI(uint256 id) public view override returns (string memory) {
         return generateBoardSVG(
             // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
             "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
@@ -157,8 +147,7 @@ contract ChessFishNFT_V2 is ERC721 {
                     break;
                 }
 
-                bytes1 piece =
-                    boardBytes[index] == "." ? bytes1(0x20) : boardBytes[index];
+                bytes1 piece = boardBytes[index] == "." ? bytes1(0x20) : boardBytes[index];
                 index++;
 
                 svg = abi.encodePacked(
@@ -173,32 +162,32 @@ contract ChessFishNFT_V2 is ERC721 {
                 );
 
                 if (piece != bytes1(0x20)) {
-                    bytes memory pieceSVG =
-                        svg_container.getPieceSymbol(piece, x, y); // Ensure
-                        // getPieceSymbol function handles new dimensions
+                    bytes memory pieceSVG = svg_container.getPieceSymbol(piece, x, y);
                     svg = abi.encodePacked(svg, pieceSVG);
                 }
             }
         }
 
-        // Add a rectangle for player addresses at the bottom
+        string memory dateString = timestampToDate(block.timestamp);
+
+        // Append the date string to the SVG
         svg = abi.encodePacked(
             svg,
-            '<rect x="0" y="640" width="640" height="80" fill="#ffffff"/>', // Placeholder
-                // rectangle for data
-            '<text x="10" y="670" font-family="Arial" font-size="14" fill="#000000">Player 0: ',
+            '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
+            '<text x="30" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
             toHexString(uint256(uint160(player0)), 20),
             "</text>",
-            '<text x="10" y="690" font-family="Arial" font-size="14" fill="#000000">Player 1: ',
+            '<text x="10" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
             toHexString(uint256(uint160(player1)), 20),
+            "</text>",
+            '<text x="10" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
+            dateString,
             "</text>"
         );
 
         svg = abi.encodePacked(svg, "</svg>");
 
-        return string(
-            abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg))
-        );
+        return string(abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg)));
     }
 
     function toHexString(
@@ -209,22 +198,74 @@ contract ChessFishNFT_V2 is ERC721 {
         pure
         returns (string memory)
     {
-        // Pre-compute length: 2 characters per byte
         bytes memory buffer = new bytes(2 * length);
 
         for (uint256 i = 2 * length; i > 0; --i) {
-            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf))); // Convert last
-                // nibble to character
-            // Check if the character is above '9' and adjust to get 'a'-'f'
+            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf))); 
             if (buffer[i - 1] >= bytes1(uint8(58))) {
                 buffer[i - 1] = bytes1(uint8(87 + (uint8(buffer[i - 1]) - 58)));
             }
-            value >>= 4; // Shift right to process the next nibble
-        }
+            value >>= 4;
+		} 
 
         return string(buffer);
     }
 
-    // Helper functions like uint2str, getPieceSymbol, and toHexString need to
-    // be defined or adjusted accordingly.
+    uint256[12] monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+    function timestampToDate(uint256 timestamp) public view returns (string memory) {
+        uint256 secondsInADay = 24 * 60 * 60;
+        uint256 year = 1970;
+        uint256 month;
+        uint256 day;
+
+        // Days per month (ignoring leap years for February)
+        // Calculate elapsed days since 1970
+        uint256 daysSince1970 = timestamp / secondsInADay;
+
+        // Leap year calculation
+        uint256 daysInYear;
+        while (daysSince1970 >= (daysInYear = (isLeapYear(year) ? 366 : 365))) {
+            daysSince1970 -= daysInYear;
+            year += 1;
+        }
+
+        // Calculate the month and day
+        for (uint256 i = 0; i < monthDays.length; i++) {
+            uint256 daysInMonth = monthDays[i];
+            // Adjust for leap year February
+            if (i == 1 && isLeapYear(year)) {
+                daysInMonth += 1;
+            }
+
+            if (daysSince1970 < daysInMonth) {
+                month = i + 1;
+                day = daysSince1970 + 1; 
+                break;
+            } else {
+                daysSince1970 -= daysInMonth;
+            }
+        }
+
+        return string(
+            abi.encodePacked(
+                svg_container.uint2str(month),
+                "/",
+                svg_container.uint2str(day),
+                "/",
+                svg_container.uint2str(year)
+            )
+        );
+    }
+
+    function isLeapYear(uint256 year) internal pure returns (bool) {
+        if (year % 4 != 0) {
+            return false;
+        } else if (year % 100 != 0) {
+            return true;
+        } else if (year % 400 == 0) {
+            return true;
+        }
+        return false;
+    }
 }

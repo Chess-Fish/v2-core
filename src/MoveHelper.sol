@@ -104,14 +104,7 @@ contract MoveHelper {
     /// @param fromPos is the position to move a piece from.
     /// @param toPos is the position to move a piece to.
     /// @return move
-    function convertToMove(
-        uint8 fromPos,
-        uint8 toPos
-    )
-        public
-        pure
-        returns (uint16)
-    {
+    function convertToMove(uint8 fromPos, uint8 toPos) public pure returns (uint16) {
         uint16 move = (uint16)(fromPos);
         move = move << 6;
         move = move + (uint16)(toPos);
@@ -121,11 +114,7 @@ contract MoveHelper {
     /// @dev Converts an algebraic chess notation string move to uint16 format
     /// @param move is the move to convert i.e. e2e4 to hex move
     /// @return hexMove is the resulting uint16 value
-    function moveToHex(string memory move)
-        external
-        view
-        returns (uint16 hexMove)
-    {
+    function moveToHex(string memory move) external view returns (uint16 hexMove) {
         bytes memory byteString = bytes(move);
 
         bytes memory bFromPos = "00";
@@ -151,11 +140,7 @@ contract MoveHelper {
     /// @dev Converts a uint16 hex value to move in algebraic chess notation
     /// @param hexMove is the move to convert to string
     /// @return move is the resulting string value
-    function hexToMove(uint16 hexMove)
-        public
-        view
-        returns (string memory move)
-    {
+    function hexToMove(uint16 hexMove) public view returns (string memory move) {
         uint8 fromPos = uint8(hexMove >> 6);
         uint8 toPos = uint8(hexMove & 0x3f);
 
@@ -171,11 +156,7 @@ contract MoveHelper {
     /// @dev only to be called by user or ui
     /// @param gameState is the uint256 game state of the board
     /// @return string[64] is the resulting array
-    function getBoard(uint256 gameState)
-        public
-        view
-        returns (string[64] memory)
-    {
+    function getBoard(uint256 gameState) public view returns (string[64] memory) {
         string[64] memory board;
         uint256 j = 0;
 
@@ -183,9 +164,8 @@ contract MoveHelper {
             int256 pos = ((int256(i) + 1) * 8) - 1;
             int256 last = pos - 7;
             for (pos; pos >= last; pos--) {
-                uint8 piece = moveVerification.pieceAtPosition(
-                    gameState, uint8(uint256(pos))
-                );
+                uint8 piece =
+                    moveVerification.pieceAtPosition(gameState, uint8(uint256(pos)));
 
                 board[j] = getLetter(piece);
 

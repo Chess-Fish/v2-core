@@ -2,12 +2,7 @@
 pragma solidity ^0.8.22;
 
 interface IChessFishNFT {
-    function awardWinner(
-        address player,
-        address gameHash
-    )
-        external
-        returns (uint256);
+    function awardWinner(address player, address gameHash) external returns (uint256);
 }
 
 interface IChessGame {

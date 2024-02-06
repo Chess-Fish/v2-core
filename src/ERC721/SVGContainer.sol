@@ -279,11 +279,7 @@ contract SVG_Container {
     }
 
     // Helper function to convert uint to string
-    function uint2str(uint256 _i)
-        public
-        pure
-        returns (string memory _uintAsString)
-    {
+    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
         if (_i == 0) {
             return "0";
         }

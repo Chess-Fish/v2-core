@@ -130,11 +130,7 @@ contract GaslessGame is EIP712 {
     }
 
     /// @notice Decodes gasless move message and returns game address
-    function decodegameAddress(bytes memory message)
-        internal
-        pure
-        returns (address)
-    {
+    function decodegameAddress(bytes memory message) internal pure returns (address) {
         GaslessMove memory move = abi.decode(message, (GaslessMove));
         return move.gameAddress;
     }
@@ -160,8 +156,7 @@ contract GaslessGame is EIP712 {
             )
         );
         require(
-            ECDSA.recover(digest, signature) == moveData.signer,
-            "140 invalid signature"
+            ECDSA.recover(digest, signature) == moveData.signer, "140 invalid signature"
         );
     }
 
@@ -189,17 +184,14 @@ contract GaslessGame is EIP712 {
             address gameAddress = moveData.move.gameAddress;
             moveData.move = decodeMoveMessage(messages[i]);
 
-            require(
-                gameAddress == moveData.move.gameAddress, "non matching games"
-            );
+            require(gameAddress == moveData.move.gameAddress, "non matching games");
             require(moveData.move.expiration >= block.timestamp, "move expired");
 
             verifyMoveSigner(moveData, signatures[i]);
 
             if (i != 0) {
                 require(
-                    moveNumbers[i - 1] < moveData.move.moveNumber,
-                    "must be sequential"
+                    moveNumbers[i - 1] < moveData.move.moveNumber, "must be sequential"
                 );
             }
             moveNumbers[i] = moveData.move.moveNumber;
@@ -230,8 +222,7 @@ contract GaslessGame is EIP712 {
 
         address playerToMove = chessGame.getPlayerMove(gameAddress);
 
-        (address player0, address player1) =
-            chessGame.getGamePlayers(gameAddress);
+        (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
 
         GaslessMoveData memory moveData;
         moveData.player0 = player0;
@@ -288,8 +279,7 @@ contract GaslessGame is EIP712 {
         pure
         returns (bytes memory)
     {
-        SignedDelegation memory signedDelegation =
-            SignedDelegation(delegation, signature);
+        SignedDelegation memory signedDelegation = SignedDelegation(delegation, signature);
         return abi.encode(signedDelegation);
     }
 
@@ -311,12 +301,8 @@ contract GaslessGame is EIP712 {
         internal
         view
     {
-        (address player0, address player1) =
-            chessGame.getGamePlayers(gameAddress);
-        require(
-            delegator0 == player0 && delegator1 == player1,
-            "players don't match"
-        );
+        (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
+        require(delegator0 == player0 && delegator1 == player1, "players don't match");
     }
 
     /// @notice Check delegations
@@ -338,10 +324,7 @@ contract GaslessGame is EIP712 {
     }
 
     /// @dev typed signature verification
-    function verifyDelegation(SignedDelegation memory signedDelegation)
-        internal
-        view
-    {
+    function verifyDelegation(SignedDelegation memory signedDelegation) internal view {
         bytes32 digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -371,10 +354,8 @@ contract GaslessGame is EIP712 {
     {
         require(messages.length == signatures.length, "573");
 
-        SignedDelegation memory signedDelegation0 =
-            decodeSignedDelegation(delegations[0]);
-        SignedDelegation memory signedDelegation1 =
-            decodeSignedDelegation(delegations[1]);
+        SignedDelegation memory signedDelegation0 = decodeSignedDelegation(delegations[0]);
+        SignedDelegation memory signedDelegation1 = decodeSignedDelegation(delegations[1]);
 
         checkDelegations(signedDelegation0, signedDelegation1);
 

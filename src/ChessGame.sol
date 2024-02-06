@@ -154,19 +154,11 @@ contract ChessGame is MoveHelper {
         return allGames;
     }
 
-    function getAllUserGames(address player)
-        external
-        view
-        returns (address[] memory)
-    {
+    function getAllUserGames(address player) external view returns (address[] memory) {
         return userGames[player];
     }
 
-    function getGameLength(address gameAddress)
-        external
-        view
-        returns (uint256)
-    {
+    function getGameLength(address gameAddress) external view returns (uint256) {
         return gameIDs[gameAddress].length;
     }
 
@@ -197,11 +189,7 @@ contract ChessGame is MoveHelper {
         return gameIDs[gameAddress].length + 1;
     }
 
-    function getGameData(address gameAddress)
-        external
-        view
-        returns (GameData memory)
-    {
+    function getGameData(address gameAddress) external view returns (GameData memory) {
         return gameData[gameAddress];
     }
 
@@ -249,8 +237,7 @@ contract ChessGame is MoveHelper {
         uint256 player0Time = gameData[gameAddress].timePlayer0;
         uint256 player1Time = gameData[gameAddress].timePlayer1;
 
-        uint256 elapsedTime =
-            block.timestamp - gameData[gameAddress].timeLastMove;
+        uint256 elapsedTime = block.timestamp - gameData[gameAddress].timeLastMove;
         int256 timeLimit = int256(gameData[gameAddress].timeLimit);
 
         address player = getPlayerMove(gameAddress);
@@ -330,12 +317,8 @@ contract ChessGame is MoveHelper {
             moves = gameMoves[gameAddress][gameID - 1].moves;
         }
 
-        (
-            uint8 outcome,
-            uint256 gameState,
-            uint32 player0State,
-            uint32 player1State
-        ) = moveVerification.checkGameFromStart(moves);
+        (uint8 outcome, uint256 gameState, uint32 player0State, uint32 player1State) =
+            moveVerification.checkGameFromStart(moves);
 
         return (outcome, gameState, player0State, player1State);
     }
@@ -354,11 +337,7 @@ contract ChessGame is MoveHelper {
     /// @notice Generates unique hash for a game game
     /// @dev using keccak256 to generate a hash which is converted to an address
     /// @return gameAddress
-    function getgameAddress(GameData memory game)
-        internal
-        view
-        returns (address)
-    {
+    function getgameAddress(GameData memory game) internal view returns (address) {
         require(game.player0 != game.player1, "players must be different");
         require(game.numberOfGames % 2 == 1, "number of games must be odd");
 
@@ -426,7 +405,7 @@ contract ChessGame is MoveHelper {
         returns (bool)
     {
         (address gameAddress, uint256 outcome, uint16[] memory moves) =
-        gaslessGame.verifyGameViewDelegated(delegations, messages, signatures);
+            gaslessGame.verifyGameViewDelegated(delegations, messages, signatures);
 
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
@@ -450,25 +429,17 @@ contract ChessGame is MoveHelper {
     address public TournamentHandler;
 
     modifier onlyTournament() {
-        require(
-            msg.sender == address(TournamentHandler), "not tournament contract"
-        );
+        require(msg.sender == address(TournamentHandler), "not tournament contract");
         _;
     }
 
     /// @notice Adds Tournament contract
-    function addTournamentHandler(address _tournamentHandler)
-        external
-        OnlyDeployer
-    {
+    function addTournamentHandler(address _tournamentHandler) external OnlyDeployer {
         TournamentHandler = _tournamentHandler;
     }
 
     /// @notice Starts tournament games
-    function startgamesInTournament(address gameAddress)
-        external
-        onlyTournament
-    {
+    function startgamesInTournament(address gameAddress) external onlyTournament {
         gameData[gameAddress].timeLastMove = block.timestamp;
     }
 
@@ -555,15 +526,11 @@ contract ChessGame is MoveHelper {
             false // hasBeenPaid
         );
 
-        IERC20(gameToken).safeTransferFrom(
-            msg.sender, address(this), gameAmount
-        );
+        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), gameAmount);
 
         gameAddress = getgameAddress(game);
 
-        require(
-            gameData[gameAddress].player0 == address(0), "failed to create game"
-        );
+        require(gameData[gameAddress].player0 == address(0), "failed to create game");
 
         gameData[gameAddress] = game;
 
@@ -591,10 +558,7 @@ contract ChessGame is MoveHelper {
             gameData[gameAddress].player1 = msg.sender;
             userGames[msg.sender].push(gameAddress);
         } else {
-            require(
-                gameData[gameAddress].player1 == msg.sender,
-                "msg.sender != player1"
-            );
+            require(gameData[gameAddress].player1 == msg.sender, "msg.sender != player1");
         }
 
         address gameToken = gameData[gameAddress].gameToken;
@@ -610,23 +574,13 @@ contract ChessGame is MoveHelper {
 
     /// @notice Plays move on the board
     /// @return bool true if endGame, adds extra game if stalemate
-    function playMove(
-        address gameAddress,
-        uint16 move
-    )
-        external
-        returns (bool)
-    {
+    function playMove(address gameAddress, uint16 move) external returns (bool) {
         require(getPlayerMove(gameAddress) == msg.sender, "Not your turn");
         require(
-            getNumberOfGamesPlayed(gameAddress)
-                <= gameData[gameAddress].numberOfGames,
+            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "Game ended"
         );
-        require(
-            gameData[gameAddress].timeLastMove != 0,
-            "Tournament not started yet"
-        );
+        require(gameData[gameAddress].timeLastMove != 0, "Tournament not started yet");
 
         /// @dev checking if time ran out
         updateTime(gameAddress, msg.sender);
@@ -685,18 +639,12 @@ contract ChessGame is MoveHelper {
         /// @dev if there was a stalemate and now both players have the same
         /// score
         /// @dev add another game to play, and return payout successful as false
-        if (
-            gameStatus[gameAddress].winsPlayer0
-                == gameStatus[gameAddress].winsPlayer1
-        ) {
+        if (gameStatus[gameAddress].winsPlayer0 == gameStatus[gameAddress].winsPlayer1) {
             gameData[gameAddress].numberOfGames++;
             return false;
         }
 
-        if (
-            gameStatus[gameAddress].winsPlayer0
-                > gameStatus[gameAddress].winsPlayer1
-        ) {
+        if (gameStatus[gameAddress].winsPlayer0 > gameStatus[gameAddress].winsPlayer1) {
             winner = gameData[gameAddress].player0;
         } else {
             winner = gameData[gameAddress].player1;
@@ -719,9 +667,7 @@ contract ChessGame is MoveHelper {
         IERC20(token).safeTransfer(DividendSplitter, shareHolderFee);
         IERC20(token).safeTransfer(winner, gamePayout);
 
-        emit payoutGameEvent(
-            gameAddress, winner, token, gamePayout, protocolFee
-        );
+        emit payoutGameEvent(gameAddress, winner, token, gamePayout, protocolFee);
 
         return true;
     }
@@ -753,8 +699,7 @@ contract ChessGame is MoveHelper {
         require(gameData[gameAddress].hasPlayerAccepted == false, "in progress");
         require(gameData[gameAddress].player0 == msg.sender, "not listed");
         require(
-            gameData[gameAddress].isTournament == false,
-            "cannot cancel tournament game"
+            gameData[gameAddress].isTournament == false, "cannot cancel tournament game"
         );
 
         address token = gameData[gameAddress].gameToken;
@@ -773,20 +718,17 @@ contract ChessGame is MoveHelper {
     /// @return wasUpdated returns true if status was updated
     function updateGameStateTime(address gameAddress) public returns (bool) {
         require(
-            getNumberOfGamesPlayed(gameAddress)
-                <= gameData[gameAddress].numberOfGames,
+            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "game ended"
         );
         require(
-            gameData[gameAddress].timeLastMove != 0,
-            "tournament match not started yet"
+            gameData[gameAddress].timeLastMove != 0, "tournament match not started yet"
         );
 
-        (int256 timePlayer0, int256 timePlayer1) =
-            checkTimeRemaining(gameAddress);
+        (int256 timePlayer0, int256 timePlayer1) = checkTimeRemaining(gameAddress);
 
-        uint256 addedWins = gameData[gameAddress].numberOfGames
-            - getNumberOfGamesPlayed(gameAddress) + 1;
+        uint256 addedWins =
+            gameData[gameAddress].numberOfGames - getNumberOfGamesPlayed(gameAddress) + 1;
 
         if (timePlayer0 < 0) {
             gameStatus[gameAddress].winsPlayer1 += addedWins;
@@ -809,8 +751,7 @@ contract ChessGame is MoveHelper {
         returns (bool)
     {
         require(
-            getNumberOfGamesPlayed(gameAddress)
-                <= gameData[gameAddress].numberOfGames,
+            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "game ended"
         );
 
@@ -849,8 +790,7 @@ contract ChessGame is MoveHelper {
     /// @return isEndGame
     function updateGameState(address gameAddress) private returns (bool) {
         require(
-            getNumberOfGamesPlayed(gameAddress)
-                <= gameData[gameAddress].numberOfGames,
+            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "game ended"
         );
 
@@ -884,10 +824,7 @@ contract ChessGame is MoveHelper {
             gameStatus[gameAddress].isPlayer0White =
                 !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
-            if (
-                gameIDs[gameAddress].length
-                    == gameData[gameAddress].numberOfGames
-            ) {
+            if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
                 gameData[gameAddress].isComplete = true;
             }
             return true;
@@ -902,10 +839,7 @@ contract ChessGame is MoveHelper {
             gameStatus[gameAddress].isPlayer0White =
                 !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
-            if (
-                gameIDs[gameAddress].length
-                    == gameData[gameAddress].numberOfGames
-            ) {
+            if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
                 gameData[gameAddress].isComplete = true;
             }
             return true;
