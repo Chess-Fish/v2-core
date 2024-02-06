@@ -84,8 +84,8 @@ contract ChessFishNFT_V2 is ERC721 {
         returns (string memory)
     {
         return generateBoardSVG(
-            "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
-            // "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
+            // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
+            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
             address(5),
             address(4)
         );
@@ -140,8 +140,9 @@ contract ChessFishNFT_V2 is ERC721 {
         uint256 index = 0;
         for (uint256 row = 0; row < 8; row++) {
             for (uint256 col = 0; col < 8; col++) {
-                uint256 x = col * 40;
-                uint256 y = row * 40;
+            uint256 x = (7 - col) * 40; // Adjusted to start from the right
+            uint256 y = (7 - row) * 40; // Adjusted to start from the bottom
+
 
                 bool isDark = (row + col) % 2 == 1;
                 string memory squareColor = isDark ? "dark" : "light";
