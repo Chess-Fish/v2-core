@@ -120,7 +120,6 @@ contract ChessFishNFT_V2 is ERC721 {
     if (piece == bytes1(0x20)) return " "; // Return space for empty squares
         return " "; // Fallback to a space for unrecognized characters
     } */
-
     function generateBoardSVG(
         string memory boardString,
         address player0,
@@ -131,18 +130,21 @@ contract ChessFishNFT_V2 is ERC721 {
         returns (string memory)
     {
         bytes memory boardBytes = bytes(boardString);
+        // Double the size of the board and add extra space for the rectangle
         bytes memory svg = abi.encodePacked(
             '<?xml version="1.0" encoding="UTF-8"?>',
-            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="320" height="320" viewBox="0 0 320 320">',
-            '<style type="text/css"><![CDATA[.square { width: 40px; height: 40px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; }]]></style>'
+            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="640" height="720" viewBox="0 0 640 720">', // Adjusted
+                // dimensions
+            '<style type="text/css"><![CDATA[.square { width: 80px; height: 80px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; }]]></style>'
         );
 
         uint256 index = 0;
         for (uint256 row = 0; row < 8; row++) {
             for (uint256 col = 0; col < 8; col++) {
-            uint256 x = (7 - col) * 40; // Adjusted to start from the right
-            uint256 y = (7 - row) * 40; // Adjusted to start from the bottom
-
+                uint256 x = (7 - col) * 80; // Adjusted to start from the right,
+                    // size doubled
+                uint256 y = (7 - row) * 80; // Adjusted to start from the
+                    // bottom, size doubled
 
                 bool isDark = (row + col) % 2 == 1;
                 string memory squareColor = isDark ? "dark" : "light";
@@ -170,20 +172,59 @@ contract ChessFishNFT_V2 is ERC721 {
                     '"/>'
                 );
 
-                // Add piece SVG if not an empty square, ensuring it's added
-                // after squares
                 if (piece != bytes1(0x20)) {
                     bytes memory pieceSVG =
-                        svg_container.getPieceSymbol(piece, x, y);
-                    // string memory pieceSVG = getPieceSymbol(piece);
+                        svg_container.getPieceSymbol(piece, x, y); // Ensure
+                        // getPieceSymbol function handles new dimensions
                     svg = abi.encodePacked(svg, pieceSVG);
                 }
             }
         }
+
+        // Add a rectangle for player addresses at the bottom
+        svg = abi.encodePacked(
+            svg,
+            '<rect x="0" y="640" width="640" height="80" fill="#ffffff"/>', // Placeholder
+                // rectangle for data
+            '<text x="10" y="670" font-family="Arial" font-size="14" fill="#000000">Player 0: ',
+            toHexString(uint256(uint160(player0)), 20),
+            "</text>",
+            '<text x="10" y="690" font-family="Arial" font-size="14" fill="#000000">Player 1: ',
+            toHexString(uint256(uint160(player1)), 20),
+            "</text>"
+        );
+
         svg = abi.encodePacked(svg, "</svg>");
 
         return string(
             abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg))
         );
     }
+
+    function toHexString(
+        uint256 value,
+        uint256 length
+    )
+        internal
+        pure
+        returns (string memory)
+    {
+        // Pre-compute length: 2 characters per byte
+        bytes memory buffer = new bytes(2 * length);
+
+        for (uint256 i = 2 * length; i > 0; --i) {
+            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf))); // Convert last
+                // nibble to character
+            // Check if the character is above '9' and adjust to get 'a'-'f'
+            if (buffer[i - 1] >= bytes1(uint8(58))) {
+                buffer[i - 1] = bytes1(uint8(87 + (uint8(buffer[i - 1]) - 58)));
+            }
+            value >>= 4; // Shift right to process the next nibble
+        }
+
+        return string(buffer);
+    }
+
+    // Helper functions like uint2str, getPieceSymbol, and toHexString need to
+    // be defined or adjusted accordingly.
 }
