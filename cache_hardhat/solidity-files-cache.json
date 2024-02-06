@@ -618,7 +618,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/GaslessGame.sol": {
-      "lastModificationDate": 1707133765375,
+      "lastModificationDate": 1707139267603,
       "contentHash": "f0da5628ee7799e8d6afeac7a6f3cbf9",
       "sourceName": "src/GaslessGame.sol",
       "solcConfig": {
@@ -745,8 +745,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveHelper.sol": {
-      "lastModificationDate": 1707133480038,
-      "contentHash": "d878eba4f7bdad352049d33ebfab9f93",
+      "lastModificationDate": 1707139267602,
+      "contentHash": "348afdddc2cf01de1a4b72b25b794977",
       "sourceName": "src/MoveHelper.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -827,8 +827,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707133783898,
-      "contentHash": "5426663cf40e63b45d02d907dd8c2608",
+      "lastModificationDate": 1707224677775,
+      "contentHash": "8983ec89a283775ed2e04353b1368456",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -861,7 +861,9 @@
         "@openzeppelin/contracts/token/ERC721/ERC721.sol",
         "@openzeppelin/contracts/utils/Strings.sol",
         "@openzeppelin/contracts/utils/Base64.sol",
-        "./../ChessGame.sol"
+        "./../ChessGame.sol",
+        "./../MoveVerification.sol",
+        "forge-std/console.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -910,7 +912,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ChessGame.sol": {
-      "lastModificationDate": 1707133966428,
+      "lastModificationDate": 1707139267610,
       "contentHash": "29161366222cd1236216a6566aa2d180",
       "sourceName": "src/ChessGame.sol",
       "solcConfig": {

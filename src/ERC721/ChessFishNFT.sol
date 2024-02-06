@@ -23,6 +23,8 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import { ChessGame } from "./../ChessGame.sol";
 import { MoveVerification } from "./../MoveVerification.sol";
 
+import "forge-std/console.sol";
+
 contract ChessFishNFT_V2 is ERC721 {
     uint256 private _tokenIdCounter;
 
@@ -71,66 +73,137 @@ contract ChessFishNFT_V2 is ERC721 {
         override
         returns (string memory)
     {
-        return _buildTokenURI(id);
+        return generateBoardSVG(
+            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,."
+        );
+        // return _buildTokenURI(id);
     }
 
-    // Constructs the encoded svg string to be returned by tokenURI()
-    function _buildTokenURI(uint256 id) internal view returns (string memory) {
-        // bool minted = id <= _tokenIdCounter;
-        bool minted = true; // dev testing
+    function bytes1ToString(bytes1 _byte) public pure returns (string memory) {
+        return string(abi.encodePacked(_byte));
+    }
 
-        string memory streamBalance = "";
-        // Don't include stream in URI until token is minted
-        if (minted) {
-            // Get stream address, to check it's current balance
-            streamBalance = string(
-                abi.encodePacked(
-                    unicode'<text x="20" y="305">Stream Ξ', "</text>"
-                )
-            );
+    function getPieceSymbol(bytes1 piece)
+        private
+        pure
+        returns (string memory)
+    {
+        // Mapping of piece codes to Unicode symbols for chess pieces
+        if (piece == "K") {
+            return "&#9812;";
         }
+        if (piece == "Q") return "&#9813;"; // White Queen
+        if (piece == "R") return "&#9814;"; // White Rook
+        if (piece == "B") return "&#9815;"; // White Bishop
+        if (piece == "N") return "&#9816;"; // White Knight
+        if (piece == "P") return "&#9817;"; // White Pawn
+        if (piece == "k") return "&#9818;"; // Black King
+        if (piece == "q") return "&#9819;"; // Black Queen
+        if (piece == "r") return "&#9820;"; // Black Rook
+        if (piece == "b") return "&#9821;"; // Black Bishop
+        if (piece == "n") return "&#9822;"; // Black Knight
+        if (piece == "p") return "&#9823;"; // Black Pawn
 
-        string[64] memory boardArr = game.getBoard(
-            0xcbaedabc99999999000000000000000000000000000000001111111143265234
+        if (piece == bytes1(0x20)) return " "; // Return space for empty squares
+        return " "; // Fallback to a space for unrecognized characters
+    }
+
+    function generateBoardSVG(string memory boardString)
+        public
+        pure
+        returns (string memory)
+    {
+        bytes memory boardBytes = bytes(boardString);
+        bytes memory svg = abi.encodePacked(
+            '<?xml version="1.0" encoding="UTF-8"?>',
+            '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="320" height="320" viewBox="0 0 320 320">',
+            '<style type="text/css"><![CDATA[.square { width: 40px; height: 40px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; } .piece { font-family: Arial; font-size: 36px; text-anchor: middle; dominant-baseline: middle; }]]></style>'
         );
 
-        bytes memory image = abi.encodePacked(
-            "data:image/svg+xml;base64,",
-            Base64.encode(
-                bytes(
-                    abi.encodePacked(
-                        '<?xml version="1.0" encoding="UTF-8"?>',
-                        '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">',
-                        '<style type="text/css"><![CDATA[text { font-family: monospace; font-size: 21px;} .h1 {font-size: 40px; font-weight: 600;}]]></style>',
-                        '<rect width="400" height="400" fill="#ffffff" />',
-                        '<text class="h1" x="50" y="70">Knight of the</text>',
-                        '<text class="h1" x="80" y="120" >BuidlGuidl</text>',
-                        unicode'<text x="70" y="240" style="font-size:100px;">🏗️ 🏰</text>',
-                        streamBalance,
-                        unicode'<text x="210" y="305">Wallet Ξ',
-                        "</text>",
-                        '<text x="20" y="350" style="font-size:28px;"> ',
-                        "</text>",
-                        '<text x="20" y="380" style="font-size:14px;">0x',
-                        "</text>",
-                        "</svg>"
-                    )
-                )
-            )
-        );
+        uint256 index = 0; // Initialize index to start at the beginning of the
+            // boardBytes
+        for (uint256 row = 0; row < 8; row++) {
+            for (uint256 col = 0; col < 8; col++) {
+                // Adjust the x and y positions to start from the bottom right
+                // corner
+                uint256 x = (7 - col) * 40; // Adjusted to start from the right
+                uint256 y = (7 - row) * 40; // Adjusted to start from the bottom
+
+                // Determine if the square should be dark or light
+                bool isDark = (row + col) % 2 == 1; // Adjusted the calculation
+                    // for the board pattern
+                string memory squareColor = isDark ? "dark" : "light";
+
+                // Skip commas in the boardString
+                while (index < boardBytes.length && boardBytes[index] == ",") {
+                    index++;
+                }
+
+                // Ensure we do not exceed the boardBytes length
+                if (index >= boardBytes.length) {
+                    break;
+                }
+
+                // Replace '.' with a space for SVG display
+                bytes1 piece =
+                    boardBytes[index] == "." ? bytes1(0x20) : boardBytes[index];
+
+                // Correctly increment index after processing a character
+                index++;
+
+                // Generate SVG elements for the square and the piece
+                svg = abi.encodePacked(
+                    svg,
+                    '<rect x="',
+                    uint2str(x),
+                    '" y="',
+                    uint2str(y),
+                    '" class="square ',
+                    squareColor,
+                    '"/>',
+                    '<text x="',
+                    uint2str(x + 20),
+                    '" y="',
+                    uint2str(y + 20),
+                    '" class="piece">',
+                    piece != bytes1(0x20)
+                        ? string(abi.encodePacked(getPieceSymbol(piece)))
+                        : " ", // Correctly display space for '.' characters
+                    "</text>"
+                );
+            }
+        }
+        svg = abi.encodePacked(svg, "</svg>");
+
         return string(
-            abi.encodePacked(
-                "data:application/json;base64,",
-                Base64.encode(
-                    bytes(
-                        abi.encodePacked(
-                            '{"name":"BuidlGuidl Tabard", "image":"',
-                            image,
-                            unicode'", "description": "This NFT marks the bound address as a member of the BuidlGuidl. The image is a fully-onchain dynamic SVG reflecting current balances of the bound wallet and builder work stream."}'
-                        )
-                    )
-                )
-            )
+            abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg))
         );
+    }
+
+    // Helper function to convert uint to string
+    function uint2str(uint256 _i)
+        internal
+        pure
+        returns (string memory _uintAsString)
+    {
+        if (_i == 0) {
+            return "0";
+        }
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
     }
 }

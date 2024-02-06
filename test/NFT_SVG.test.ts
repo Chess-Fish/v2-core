@@ -1,8 +1,12 @@
+const fs = require('fs');
+const path = require('path');
+
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { coordinates_array, bitCoordinates_array } from "../scripts/constants";
+
 
 // This function assumes `svg` is a string containing the full URI returned by `tokenURI`
 async function decodeSVG(svg: string): Promise<string> {
@@ -50,11 +54,18 @@ describe("ChessFish NFT Unit Tests", function () {
         it("Should deploy", async function () {
             const { chessNFT } = await loadFixture(deploy);
 
-            console.log(await chessNFT.getAddress())
-        
             const svgURI = await chessNFT.tokenURI(0);
-        
-            // Step 1: Decode the JSON object from base64
+
+            const svgBase64 = svgURI.split(',')[1]; // Assuming the structure is "data:image/svg+xml;base64,..."
+const svgContent = Buffer.from(svgBase64, 'base64').toString('utf-8');
+
+       
+    // Define the file path for the output HTML file
+    const filePath = path.join(__dirname, 'NFT_SVG_output.html');
+
+    // Write the SVG content to the file
+    fs.writeFileSync(filePath, svgContent); 
+/*             // Step 1: Decode the JSON object from base64
             const jsonBase64 = svgURI.split(',')[1]; // Assuming the structure is always "data:application/json;base64,..."
             const jsonString = Buffer.from(jsonBase64, 'base64').toString('utf-8');
         
@@ -64,8 +75,8 @@ describe("ChessFish NFT Unit Tests", function () {
         
             // Step 3: Decode the SVG data from base64
             const svgContent = Buffer.from(svgBase64, 'base64').toString('utf-8');
-        
-            console.log(svgContent);
+         */
+            // console.log(svgContent);
         });
         
 	});
