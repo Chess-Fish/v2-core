@@ -11,13 +11,13 @@ describe("ChessFish Wager Unit Tests", function () {
 		const chessGame = await ChessGame.deploy();
 
 		return {
-			chessGame
-		}
-    }
+			chessGame,
+		};
+	}
 	describe("Hardhat Tests", function () {
 		it("Should deploy", async function () {
 			const { chessGame } = await loadFixture(deploy);
-			
+
 			console.log(chessGame.address);
 		});
 	});

@@ -207,4 +207,3 @@ export const moves_stalemate = [
 	"e5e4",
 	"f5e4",
 ];
-

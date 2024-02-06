@@ -123,7 +123,6 @@ async function deploy(): Promise<void> {
 	}
 
 	console.log("___________");
-
 }
 
 async function main(): Promise<void> {
