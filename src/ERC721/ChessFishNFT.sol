@@ -213,50 +213,54 @@ contract ChessFishNFT_V2 is ERC721 {
 
     uint256[12] monthDays = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
-    function timestampToDate(uint256 timestamp) public view returns (string memory) {
-        uint256 secondsInADay = 24 * 60 * 60;
-        uint256 year = 1970;
-        uint256 month;
-        uint256 day;
+function timestampToDate(uint256 timestamp) public view returns (string memory) {
+    uint256 secondsInADay = 24 * 60 * 60;
+    uint256 year = 1970;
+    uint256 month;
+    uint256 day;
+    uint256 hour;
+    uint256 minute;
+    uint256 second;
 
-        // Days per month (ignoring leap years for February)
-        // Calculate elapsed days since 1970
-        uint256 daysSince1970 = timestamp / secondsInADay;
+    // Calculate elapsed days since 1970
+    uint256 daysSince1970 = timestamp / secondsInADay;
+    // Calculate leftover seconds for time calculation
+    uint256 leftoverSeconds = timestamp % secondsInADay;
+    
+    // Calculate hour, minute, and second
+    hour = leftoverSeconds / (60 * 60);
+    leftoverSeconds -= hour * (60 * 60);
+    minute = leftoverSeconds / 60;
+    second = leftoverSeconds % 60;
 
-        // Leap year calculation
-        uint256 daysInYear;
-        while (daysSince1970 >= (daysInYear = (isLeapYear(year) ? 366 : 365))) {
-            daysSince1970 -= daysInYear;
-            year += 1;
-        }
-
-        // Calculate the month and day
-        for (uint256 i = 0; i < monthDays.length; i++) {
-            uint256 daysInMonth = monthDays[i];
-            // Adjust for leap year February
-            if (i == 1 && isLeapYear(year)) {
-                daysInMonth += 1;
-            }
-
-            if (daysSince1970 < daysInMonth) {
-                month = i + 1;
-                day = daysSince1970 + 1; 
-                break;
-            } else {
-                daysSince1970 -= daysInMonth;
-            }
-        }
-
-        return string(
-            abi.encodePacked(
-                svg_container.uint2str(month),
-                "/",
-                svg_container.uint2str(day),
-                "/",
-                svg_container.uint2str(year)
-            )
-        );
+    // Leap year calculation
+    uint256 daysInYear;
+    while (daysSince1970 >= (daysInYear = (isLeapYear(year) ? 366 : 365))) {
+        daysSince1970 -= daysInYear;
+        year += 1;
     }
+    
+    // Calculate the month and day
+    for (uint256 i = 0; i < monthDays.length; i++) {
+        uint256 daysInMonth = monthDays[i];
+        // Adjust for leap year February
+        if (i == 1 && isLeapYear(year)) {
+            daysInMonth += 1;
+        }
+
+        if (daysSince1970 < daysInMonth) {
+            month = i + 1;
+            day = daysSince1970 + 1; // Day of month is 1-indexed
+            break;
+        } else {
+            daysSince1970 -= daysInMonth;
+        }
+    }
+    
+    // Format date and time into a string
+    return string(abi.encodePacked(svg_container.uint2str(month), "/", svg_container.uint2str(day), "/", svg_container.uint2str(year), " ", svg_container.uint2str(hour), ":", svg_container.uint2str(minute), ":", svg_container.uint2str(second)));
+}
+
 
     function isLeapYear(uint256 year) internal pure returns (bool) {
         if (year % 4 != 0) {
