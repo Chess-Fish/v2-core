@@ -471,7 +471,7 @@ contract ChessGame is MoveHelper {
     /// @notice Creates a game between two players
     /// @dev only the tournament contract can call
     /// @return gameAddress created game address
-    function createGameGameTournamentSingle(
+    function createGameTournamentSingle(
         address player0,
         address player1,
         address gameToken,

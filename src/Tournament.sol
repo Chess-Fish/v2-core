@@ -31,14 +31,15 @@ contract ChessFishTournament {
 
     struct Tournament {
         uint256 numberOfPlayers; // number of players in tournament
-        address[] authed_players; // authenticated players
-        address[] joined_players; // joined players
+        address[] authedPlayers; // authenticated players
+        address[] joinedPlayers; // joined players
         bool isByInvite; // is tournament by invite only
         uint256 numberOfGames; // number of games per match
-        address token; // wager token address
+        address gameToken; // game token address
         uint256 tokenAmount; // token amount
         uint256 prizePool; // size of prize pool
         bool isInProgress; // is tournament in progress
+        uint256 creationTime;
         uint256 startTime; // unix timestamp start time
         uint256 timeLimit; // timeLimit for tournament
         bool isComplete; // is tournament complete
@@ -67,17 +68,17 @@ contract ChessFishTournament {
     /// @dev uint tournamentNonce => Tournament struct
     mapping(uint256 => Tournament) public tournaments;
 
-    /// @dev uint tournament nonce => address[] wagerIDs
-    mapping(uint256 => address[]) internal tournamentWagerAddresses;
+    /// @dev uint tournament nonce => address[] gameIDs
+    mapping(uint256 => address[]) internal tournamentGameAddresses;
 
     /// @dev uint tournamentID => address player => wins
     mapping(uint256 => mapping(address => uint256)) public tournamentWins;
 
-    address public immutable ChessWagerAddress;
+    address public immutable ChessGameAddress;
     address public immutable PaymentSplitter;
 
-    constructor(address _chessWager, address _paymentSplitter) {
-        ChessWagerAddress = _chessWager;
+    constructor(address _chessGame, address _paymentSplitter) {
+        ChessGameAddress = _chessGame;
         PaymentSplitter = _paymentSplitter;
     }
 
@@ -91,7 +92,7 @@ contract ChessFishTournament {
         view
         returns (address[] memory)
     {
-        return (tournaments[tournamentID].joined_players);
+        return (tournaments[tournamentID].joinedPlayers);
     }
 
     /// @notice Returns authorized players in tournament
@@ -100,7 +101,7 @@ contract ChessFishTournament {
         view
         returns (address[] memory)
     {
-        return (tournaments[tournamentID].authed_players);
+        return (tournaments[tournamentID].authedPlayers);
     }
 
     /// @notice Returns wager addresses in tournament
@@ -109,7 +110,7 @@ contract ChessFishTournament {
         view
         returns (address[] memory)
     {
-        return (tournamentWagerAddresses[tournamentID]);
+        return (tournamentGameAddresses[tournamentID]);
     }
 
     /// @notice Calculates score
@@ -121,15 +122,15 @@ contract ChessFishTournament {
         view
         returns (address[] memory, uint256[] memory)
     {
-        address[] memory players = tournaments[tournamentID].joined_players;
-        uint256 numberOfWagersInTournament = tournamentWagerAddresses[tournamentID].length;
+        address[] memory players = tournaments[tournamentID].joinedPlayers;
+        uint256 numberOfWagersInTournament = tournamentGameAddresses[tournamentID].length;
 
         uint256[] memory wins = new uint256[](players.length);
 
         for (uint256 i = 0; i < numberOfWagersInTournament;) {
             (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
-                ChessWagerAddress
-            ).getWagerStatus(tournamentWagerAddresses[tournamentID][i]);
+                ChessGameAddress
+            ).getGameStatus(tournamentGameAddresses[tournamentID][i]);
 
             for (uint256 j = 0; j < players.length;) {
                 if (players[j] == player0) wins[j] += wins0;
@@ -158,7 +159,7 @@ contract ChessFishTournament {
             "Tournament not finished yet"
         );
 
-        address[] memory players = tournaments[tournamentID].joined_players;
+        address[] memory players = tournaments[tournamentID].joinedPlayers;
         PlayerWins[] memory playerWinsArray = new PlayerWins[](players.length);
 
         for (uint256 i = 0; i < players.length;) {
@@ -211,8 +212,8 @@ contract ChessFishTournament {
         view
         returns (bool)
     {
-        for (uint256 i = 0; i < tournaments[tournamentID].joined_players.length;) {
-            if (tournaments[tournamentID].joined_players[i] == player) {
+        for (uint256 i = 0; i < tournaments[tournamentID].joinedPlayers.length;) {
+            if (tournaments[tournamentID].joinedPlayers[i] == player) {
                 return true;
             }
             unchecked {
@@ -231,8 +232,8 @@ contract ChessFishTournament {
         returns (bool)
     {
         if (tournaments[tournamentID].isByInvite == true) {
-            for (uint256 i = 0; i < tournaments[tournamentID].authed_players.length;) {
-                if (tournaments[tournamentID].authed_players[i] == player) {
+            for (uint256 i = 0; i < tournaments[tournamentID].authedPlayers.length;) {
+                if (tournaments[tournamentID].authedPlayers[i] == player) {
                     return true;
                 }
                 unchecked {
@@ -276,10 +277,10 @@ contract ChessFishTournament {
 
         tournament.numberOfPlayers = numberOfPlayers;
 
-        tournament.joined_players = player;
+        tournament.joinedPlayers = player;
         tournament.isByInvite = false;
 
-        tournament.token = gameToken;
+        tournament.gameToken = gameToken;
         tournament.tokenAmount = tokenAmount;
         tournament.numberOfGames = numberOfGames;
         tournament.isInProgress = false;
@@ -306,51 +307,59 @@ contract ChessFishTournament {
         uint256 timeLimit
     )
         external
-        returns (uint256)
     {
-        require(numberOfGames > 0, "Number of games must be positive");
+        require(numberOfGames > 0, "numberOfGames > 0");
+        require(specificPlayers.length <= 25, "lte 25");
 
         Tournament memory tournament;
 
         // Use the provided specific players
-        tournament.authed_players = specificPlayers;
+        tournament.authedPlayers = specificPlayers;
         tournament.isByInvite = true;
 
-        if (gameToken != address(0)) {
-            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), tokenAmount);
-        } else {
-            require(tokenAmount == 0, "not zero");
-        }
-
-        address[] memory authed_players =
-            new address[](tournament.authed_players.length + 1);
-
-        for (uint256 i = 0; i < tournament.authed_players.length; i++) {
-            authed_players[i] = tournament.authed_players[i];
-        }
-
-        authed_players[tournament.authed_players.length] = msg.sender;
-        tournament.authed_players = authed_players;
-
-        address[] memory joined_players = new address[](1);
-        joined_players[0] = msg.sender;
-        tournament.joined_players = joined_players;
-
-        require(tournament.authed_players.length <= 25, "Too many players");
-
-        tournament.numberOfPlayers = tournament.authed_players.length;
-        tournament.token = gameToken;
+        tournament.numberOfPlayers = specificPlayers.length;
+        tournament.gameToken = gameToken;
         tournament.tokenAmount = tokenAmount;
         tournament.numberOfGames = numberOfGames;
         tournament.isInProgress = false;
+        tournament.creationTime = block.timestamp;
         tournament.startTime = block.timestamp;
         tournament.timeLimit = timeLimit;
         tournament.isComplete = false;
 
         tournaments[tournamentNonce] = tournament;
-        tournamentNonce++;
 
-        return tournamentNonce - 1;
+        if (gameToken != address(0)) {
+            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), tokenAmount);
+        } else {
+            require(tokenAmount == 0, "not zero");
+            tournament.joinedPlayers = specificPlayers;
+
+            for (uint256 i = 0; i < specificPlayers.length;) {
+                address player0 = tournaments[tournamentNonce].joinedPlayers[i];
+
+                address wagerAddress = IChessGame(ChessGameAddress)
+                    .createGameTournamentSingle(
+                    player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
+                );
+                tournamentGameAddresses[tournamentNonce].push(wagerAddress);
+                unchecked {
+                    i++;
+                }
+            }
+
+            tournaments[tournamentNonce].isInProgress = true;
+            for (uint256 i = 0; i < tournamentGameAddresses[tournamentNonce].length;) {
+                IChessGame(ChessGameAddress).startGamesInTournament(
+                    tournamentGameAddresses[tournamentNonce][i]
+                );
+                unchecked {
+                    i++;
+                }
+            }
+        }
+
+        tournamentNonce++;
     }
 
     /// @notice Join tournament
@@ -371,7 +380,7 @@ contract ChessFishTournament {
         } else {
             require(
                 tournaments[tournamentID].numberOfPlayers
-                    >= tournaments[tournamentID].joined_players.length,
+                    >= tournaments[tournamentID].joinedPlayers.length,
                 "max number of players reached"
             );
             require(
@@ -380,7 +389,7 @@ contract ChessFishTournament {
             require(!isPlayerInTournament(tournamentID, msg.sender), "already Joined");
         }
 
-        address gameToken = tournaments[tournamentID].token;
+        address gameToken = tournaments[tournamentID].gameToken;
         uint256 tokenAmount = tournaments[tournamentID].tokenAmount;
         uint256 numberOfGames = tournaments[tournamentID].numberOfGames;
         uint256 timeLimit = tournaments[tournamentID].timeLimit;
@@ -390,20 +399,19 @@ contract ChessFishTournament {
         }
 
         // creating wager for msg.sender and each player already joined
-        for (uint256 i = 0; i < tournaments[tournamentID].joined_players.length;) {
-            address player0 = tournaments[tournamentID].joined_players[i];
+        for (uint256 i = 0; i < tournaments[tournamentID].joinedPlayers.length;) {
+            address player0 = tournaments[tournamentID].joinedPlayers[i];
 
-            address wagerAddress = IChessGame(ChessWagerAddress)
-                .createGameWagerTournamentSingle(
+            address wagerAddress = IChessGame(ChessGameAddress).createGameTournamentSingle(
                 player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
             );
-            tournamentWagerAddresses[tournamentID].push(wagerAddress);
+            tournamentGameAddresses[tournamentID].push(wagerAddress);
             unchecked {
                 i++;
             }
         }
 
-        tournaments[tournamentID].joined_players.push(msg.sender);
+        tournaments[tournamentID].joinedPlayers.push(msg.sender);
     }
 
     /// @notice Starts the tournament
@@ -412,12 +420,10 @@ contract ChessFishTournament {
     /// the maxNumber of players the tournament can start 1 day after creation
     function startTournament(uint256 tournamentID) external {
         require(tournaments[tournamentID].isInProgress == false, "already started");
-        require(
-            tournaments[tournamentID].joined_players.length >= 3, "not enough players"
-        );
+        require(tournaments[tournamentID].joinedPlayers.length >= 3, "not enough players");
 
         if (
-            tournaments[tournamentID].joined_players.length
+            tournaments[tournamentID].joinedPlayers.length
                 != tournaments[tournamentID].numberOfPlayers
         ) {
             require(
@@ -427,9 +433,10 @@ contract ChessFishTournament {
         }
 
         tournaments[tournamentID].isInProgress = true;
-        for (uint256 i = 0; i < tournamentWagerAddresses[tournamentID].length;) {
-            IChessGame(ChessWagerAddress).startWagersInTournament(
-                tournamentWagerAddresses[tournamentID][i]
+        tournaments[tournamentID].startTime = block.timestamp;
+        for (uint256 i = 0; i < tournamentGameAddresses[tournamentID].length;) {
+            IChessGame(ChessGameAddress).startGamesInTournament(
+                tournamentGameAddresses[tournamentID][i]
             );
             unchecked {
                 i++;
@@ -445,12 +452,12 @@ contract ChessFishTournament {
             isPlayerInTournament(tournamentID, msg.sender), "msg.sender not in tournament"
         );
 
-        address token = tournaments[tournamentID].token;
+        address gameToken = tournaments[tournamentID].gameToken;
         uint256 tokenAmount = tournaments[tournamentID].tokenAmount;
 
         removePlayerFromPlayers(tournamentID, msg.sender);
 
-        IERC20(token).safeTransfer(msg.sender, tokenAmount);
+        IERC20(gameToken).safeTransfer(msg.sender, tokenAmount);
     }
 
     /// @notice Handle payout of tournament
@@ -467,7 +474,7 @@ contract ChessFishTournament {
         tallyWins(tournamentID);
 
         tournaments[tournamentID].isComplete = true;
-        uint256 numberOfPlayers = tournaments[tournamentID].joined_players.length;
+        uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
         uint256[] memory payoutProfile;
 
         /// @dev handling different payout profiles
@@ -498,9 +505,9 @@ contract ChessFishTournament {
         }
 
         address[] memory playersSorted = getPlayersSortedByWins(tournamentID);
-        address payoutToken = tournaments[tournamentID].token;
+        address payoutToken = tournaments[tournamentID].gameToken;
 
-        uint256 poolSize = tournaments[tournamentID].joined_players.length
+        uint256 poolSize = tournaments[tournamentID].joinedPlayers.length
             * tournaments[tournamentID].tokenAmount + tournaments[tournamentID].prizePool;
         uint256 poolRemaining = poolSize;
 
@@ -525,14 +532,14 @@ contract ChessFishTournament {
         private
         returns (address[] memory, uint256[] memory)
     {
-        address[] memory players = tournaments[tournamentID].joined_players;
+        address[] memory players = tournaments[tournamentID].joinedPlayers;
 
-        uint256 numberOfWagersInTournament = tournamentWagerAddresses[tournamentID].length;
+        uint256 numberOfWagersInTournament = tournamentGameAddresses[tournamentID].length;
 
         for (uint256 i = 0; i < numberOfWagersInTournament;) {
             (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
-                ChessWagerAddress
-            ).getWagerStatus(tournamentWagerAddresses[tournamentID][i]);
+                ChessGameAddress
+            ).getGameStatus(tournamentGameAddresses[tournamentID][i]);
             tournamentWins[tournamentID][player0] += wins0;
             tournamentWins[tournamentID][player1] += wins1;
             unchecked {
@@ -555,8 +562,8 @@ contract ChessFishTournament {
     function removePlayerFromPlayers(uint256 tournamentID, address player) private {
         bool isInPlayers = false;
         uint256 i = 0;
-        for (i; i < tournaments[tournamentID].joined_players.length;) {
-            if (tournaments[tournamentID].joined_players[i] == player) {
+        for (i; i < tournaments[tournamentID].joinedPlayers.length;) {
+            if (tournaments[tournamentID].joinedPlayers[i] == player) {
                 isInPlayers = true;
                 break;
             }
@@ -566,10 +573,10 @@ contract ChessFishTournament {
         }
 
         if (isInPlayers == true) {
-            assert(i < tournaments[tournamentID].joined_players.length);
-            tournaments[tournamentID].joined_players[i] = tournaments[tournamentID]
-                .joined_players[tournaments[tournamentID].joined_players.length - 1];
-            tournaments[tournamentID].joined_players.pop();
+            assert(i < tournaments[tournamentID].joinedPlayers.length);
+            tournaments[tournamentID].joinedPlayers[i] = tournaments[tournamentID]
+                .joinedPlayers[tournaments[tournamentID].joinedPlayers.length - 1];
+            tournaments[tournamentID].joinedPlayers.pop();
         }
     }
 
@@ -578,7 +585,7 @@ contract ChessFishTournament {
         require(!tournaments[tournamentID].isComplete, "tournament completed");
         tournaments[tournamentID].prizePool += amount;
 
-        IERC20(tournaments[tournamentID].token).safeTransferFrom(
+        IERC20(tournaments[tournamentID].gameToken).safeTransferFrom(
             msg.sender, address(this), amount
         );
     }
