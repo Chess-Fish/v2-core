@@ -756,8 +756,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707296359152,
-      "contentHash": "4166bcea87ba39f61286fb5bb6f5b10e",
+      "lastModificationDate": 1707303899482,
+      "contentHash": "191a9947af1d98199c34e740bc158f0d",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -2245,8 +2245,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/TokenSVG.sol": {
-      "lastModificationDate": 1707296440486,
-      "contentHash": "15452ed2403ba37bf6bcc2f4b1ef50cb",
+      "lastModificationDate": 1707303554496,
+      "contentHash": "87fa0d5508ce914c25bf97ee9263e8be",
       "sourceName": "src/ERC721/TokenSVG.sol",
       "solcConfig": {
         "version": "0.8.24",

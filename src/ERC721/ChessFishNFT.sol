@@ -86,8 +86,12 @@ contract ChessFishNFT is ERC721 {
         return generateBoardSVG(
             // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
             "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
-            address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20),
-            address(0x388C818CA8B9251b393131C08a736A67ccB19297)
+            address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20), // winner
+            address(0x388C818CA8B9251b393131C08a736A67ccB19297), // loser
+            block.timestamp, // endtime
+            address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), // token
+            true, // wasTournament
+            2 // place in tournament
         );
         // return _buildTokenURI(id);
     }
@@ -99,7 +103,11 @@ contract ChessFishNFT is ERC721 {
     function generateBoardSVG(
         string memory boardString,
         address player0,
-        address player1
+        address player1,
+        uint256 endTime,
+        address token,
+        bool isTournament,
+        uint256 place
     )
         public
         view
@@ -153,7 +161,7 @@ contract ChessFishNFT is ERC721 {
             }
         }
 
-        svg = paramsContainer(svg, player0, player1);
+        svg = paramsContainer(svg, player0, player1, endTime, token, isTournament, place);
 
         svg = abi.encodePacked(svg, "</svg>");
 
@@ -163,13 +171,17 @@ contract ChessFishNFT is ERC721 {
     function paramsContainer(
         bytes memory svg,
         address player0,
-        address player1
+        address player1,
+        uint256 endTime,
+        address token,
+        bool isTournament,
+        uint256 place
     )
         internal
         view
         returns (bytes memory)
     {
-        string memory dateString = timestampToDateTimeString(block.timestamp);
+        string memory dateString = timestampToDateTimeString(endTime);
 
         // Append the date string to the SVG
         // Part 1: Initial SVG (if there's content before the black box, add it here)
@@ -178,10 +190,10 @@ contract ChessFishNFT is ERC721 {
         // Part 2: Black Box under board and related text
         bytes memory blackBoxAndText = abi.encodePacked(
             '<rect x="0" y="640" width="640" height="100" fill="#000000"/>',
-            '<text x="10" y="660" font-family="Courier New" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
+            '<text x="10" y="660" font-family="Courier New" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: 0x',
             toAsciiString(player0),
             "</text>",
-            '<text x="10" y="680" font-family="Courier New" font-size="12" fill="#FFFFFF">Loser: ',
+            '<text x="10" y="680" font-family="Courier New" font-size="12" fill="#FFFFFF">Loser: 0x',
             toAsciiString(player1),
             "</text>",
             '<text x="10" y="700" font-family="Courier New" font-size="12" fill="#FFFFFF">Date: ',
@@ -191,10 +203,15 @@ contract ChessFishNFT is ERC721 {
         svg = abi.encodePacked(svg, blackBoxAndText);
 
         // Part 3: Circle Animation and Border
+        string memory randomColor = getHexColor(endTime, player0, player1, token); // Generate
+            // a random color for
+            // the circle
         bytes memory circleAnimation = abi.encodePacked(
             '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
             '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
-            '<circle r="7" fill="#3DFF30">',
+            '<circle r="7" fill="',
+            randomColor,
+            '">', // Use the random color here
             '<animateMotion dur="10s" repeatCount="indefinite">',
             '<mpath href="#borderPath"/>',
             "</animateMotion>",
@@ -203,34 +220,99 @@ contract ChessFishNFT is ERC721 {
         );
         svg = abi.encodePacked(svg, circleAnimation);
 
+        if (isTournament) {
+            bytes memory tournamentEmoji = abi.encodePacked(
+                "<g>",
+                '<text x="535" y="700" font-family="Arial" font-size="30" fill="#FFFFFF">&#x1f396;</text>',
+                "</g>"
+            );
+            svg = abi.encodePacked(svg, tournamentEmoji);
+        }
+
+        uint256 x = 580 + 30 / 2;
+        uint256 y = 695 - 6;
+
+        // Convert x and y from uint to string for SVG parameters
+        string memory xStr = Strings.toString(x);
+        string memory yStr = Strings.toString(y);
+
+        string memory placeEmoji = getPlaceSVG(place);
+
         // Part 4: Emoji and Animation
         bytes memory emojiAndAnimation = abi.encodePacked(
             "<g>",
-            '<text x="580" y="680" font-family="Arial" font-size="26" fill="#FFFFFF">&#x1f451;</text>',
-            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 580 690" to="360 580 680" dur="10s" repeatCount="indefinite"/>',
+            '<text x="580" y="695" font-family="Arial" font-size="30" fill="#FFFFFF">',
+            placeEmoji,
+            "</text>",
+            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 ',
+            xStr,
+            " ",
+            yStr,
+            '" to="360 ',
+            xStr,
+            " ",
+            yStr,
+            '" dur="7s" repeatCount="indefinite"/>',
             "</g>"
         );
-        // "</svg>"
 
         svg = abi.encodePacked(svg, emojiAndAnimation);
 
         // Part 5: Token
-        bytes memory _tokenSVG =
-            tokenSVG.getTokenSVG(0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9);
+        bytes memory _tokenSVG = tokenSVG.getTokenSVG(token);
         svg = abi.encodePacked(svg, _tokenSVG);
 
         return svg;
     }
 
-    function params(
-        bytes memory svg,
+    function getPlaceSVG(uint256 place) internal pure returns (string memory) {
+        if (place > 3) {
+            return "&#x1f9a5;";
+        } else if (place == 1) {
+            return "&#x1f947;";
+        } else if (place == 2) {
+            return "&#x1f948;";
+        } else if (place == 3) {
+            return "&#x1f949;";
+        } else {
+            return "";
+        }
+    }
+
+    function getHexColor(
+        uint256 endTime,
         address player0,
         address player1,
-        string memory dateString
+        address token
     )
-        internal
-        returns (bytes memory)
-    { }
+        public
+        pure
+        returns (string memory)
+    {
+        uint256 random = uint256(
+            keccak256(abi.encodePacked(endTime, player0, player1, token))
+        ) % 16_777_215;
+
+        // Convert the pseudo-random number to a hexadecimal string
+        bytes memory b = new bytes(3);
+        for (uint256 i = 0; i < 3; i++) {
+            b[i] = bytes1(uint8(random / (2 ** (8 * (2 - i)))));
+        }
+        return string(abi.encodePacked("#", toHexString(b)));
+    }
+
+    // Helper function to convert bytes to a hexadecimal string
+    function toHexString(bytes memory data) internal pure returns (string memory) {
+        bytes memory hexNum = "0123456789ABCDEF";
+        bytes memory result = new bytes(2 * data.length);
+
+        for (uint256 i = 0; i < data.length; i++) {
+            result[2 * i] = hexNum[uint8(data[i] >> 4)];
+            result[2 * i + 1] = hexNum[uint8(data[i] & 0x0f)];
+        }
+
+        return string(result);
+    }
 
     // Helper function to convert uint to string
     function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
