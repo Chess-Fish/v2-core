@@ -370,7 +370,7 @@ contract ChessGame is MoveHelper {
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
-    function verifyGameUpdateState(
+    /*    function verifyGameUpdateState(
         bytes[] memory message,
         bytes[] memory signature
     )
@@ -392,26 +392,51 @@ contract ChessGame is MoveHelper {
         } else {
             return false;
         }
-    }
+    } */
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
     function verifyGameUpdateStateDelegated(
-        bytes[2] memory delegations,
-        bytes[] memory messages,
-        bytes[] memory signatures
+        bytes[2] memory rawSignedDelegations,
+        bytes[2] memory rawMoveData
     )
         external
         returns (bool)
     {
-        (address gameAddress, uint256 outcome, uint16[] memory moves) =
-            gaslessGame.verifyGameViewDelegated(delegations, messages, signatures);
+        (address gameAddress, uint8 outcome, uint16[] memory moves) =
+            gaslessGame.verifyGameViewDelegated(rawSignedDelegations, rawMoveData);
+
+        // Play a gasless game off chain, submitting on chain
+        if (gameAddress == address(0)) {
+            // generate game address
+            GaslessGame.SignedDelegation memory delegation0 =
+                abi.decode(rawSignedDelegations[0], (GaslessGame.SignedDelegation));
+            GaslessGame.SignedDelegation memory delegation1 =
+                abi.decode(rawSignedDelegations[1], (GaslessGame.SignedDelegation));
+
+            GameData memory gameParams = GameData(
+                delegation0.delegation.delegatorAddress, // player0
+                delegation1.delegation.delegatorAddress, // player1
+                address(0), // gameToken
+                0, // tokenAmount
+                1, // numberOfGames
+                true, // hasPlayerAccepted
+                0, // timeLimit
+                block.timestamp, // timeLastMove
+                0, // timePlayer0
+                0, // timePlayer1
+                false, // isTournament
+                true, // isComplete
+                true // hasBeenPaid
+            );
+            gameAddress = getgameAddress(gameParams);
+        }
 
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
 
         if (outcome != 0) {
-            updateGameState(gameAddress);
+            updateGameState(gameAddress, false, outcome);
             return true;
         }
         if (outcome == 0) {
@@ -526,11 +551,15 @@ contract ChessGame is MoveHelper {
             false // hasBeenPaid
         );
 
-        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), gameAmount);
+        if (gameToken != address(0)) {
+            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), gameAmount);
+        } else {
+            require(gameAmount == 0, "not zero");
+        }
 
         gameAddress = getgameAddress(game);
 
-        require(gameData[gameAddress].player0 == address(0), "failed to create game");
+        require(gameData[gameAddress].player0 == address(0), "already initialized");
 
         gameData[gameAddress] = game;
 
@@ -567,7 +596,9 @@ contract ChessGame is MoveHelper {
         gameData[gameAddress].hasPlayerAccepted = true;
         gameData[gameAddress].timeLastMove = block.timestamp;
 
-        IERC20(gameToken).safeTransferFrom(msg.sender, address(this), game);
+        if (gameToken != address(0)) {
+            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), game);
+        }
 
         emit acceptGameEvent(gameAddress, msg.sender);
     }
@@ -610,7 +641,7 @@ contract ChessGame is MoveHelper {
         gameMoves[gameAddress][gameID].moves = moves;
 
         /// @dev fails on invalid move
-        bool isEndgame = updateGameState(gameAddress);
+        bool isEndgame = updateGameState(gameAddress, true, 0);
 
         emit playMoveEvent(gameAddress, move);
 
@@ -650,24 +681,26 @@ contract ChessGame is MoveHelper {
             winner = gameData[gameAddress].player1;
         }
 
-        address token = gameData[gameAddress].gameToken;
+        address gameToken = gameData[gameAddress].gameToken;
         uint256 gameAmount = gameData[gameAddress].tokenAmount * 2;
         uint256 prize = gamePrizes[gameAddress];
 
-        gameData[gameAddress].tokenAmount = 0;
-        gamePrizes[gameAddress] = 0;
+        if (gameToken != address(0)) {
+            gameData[gameAddress].tokenAmount = 0;
+            gamePrizes[gameAddress] = 0;
 
-        /// @dev Mint NFT for Winner
-        IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
+            /// @dev Mint NFT for Winner
+            IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
 
-        /// @dev 5% shareholder fee
-        uint256 shareHolderFee = ((gameAmount + prize) * protocolFee) / 10_000;
-        uint256 gamePayout = (gameAmount + prize) - shareHolderFee;
+            /// @dev 5% shareholder fee
+            uint256 shareHolderFee = ((gameAmount + prize) * protocolFee) / 10_000;
+            uint256 gamePayout = (gameAmount + prize) - shareHolderFee;
 
-        IERC20(token).safeTransfer(DividendSplitter, shareHolderFee);
-        IERC20(token).safeTransfer(winner, gamePayout);
+            IERC20(gameToken).safeTransfer(DividendSplitter, shareHolderFee);
+            IERC20(gameToken).safeTransfer(winner, gamePayout);
+        }
 
-        emit payoutGameEvent(gameAddress, winner, token, gamePayout, protocolFee);
+        emit payoutGameEvent(gameAddress, winner, gameToken, gameAmount, protocolFee);
 
         return true;
     }
@@ -788,7 +821,14 @@ contract ChessGame is MoveHelper {
 
     /// @notice Checks the moves of the game and updates state if neccessary
     /// @return isEndGame
-    function updateGameState(address gameAddress) private returns (bool) {
+    function updateGameState(
+        address gameAddress,
+        bool checkMoves,
+        uint8 outcome
+    )
+        private
+        returns (bool)
+    {
         require(
             getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "game ended"
@@ -798,7 +838,9 @@ contract ChessGame is MoveHelper {
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
 
         // fails on invalid move
-        (uint8 outcome,,,) = moveVerification.checkGameFromStart(moves);
+        if (checkMoves) {
+            (outcome,,,) = moveVerification.checkGameFromStart(moves);
+        }
 
         // Inconclusive Outcome
         if (outcome == 0) {

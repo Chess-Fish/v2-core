@@ -10,7 +10,7 @@
                              
 */
 
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -111,15 +111,7 @@ contract GaslessGame is EIP712 {
         verifyDelegation(signedDelegation);
     }
 
-    function verifyGaslessMove(bytes memory rawMoveData) external returns (bool) {
-        GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
-
-        // verifyMoveSigner(moveData, moveData.signature);
-
-        return true;
-    }
-
-    function verifyMoveDelegated(
+    function verifyGameViewDelegatedSingle(
         bytes memory rawSignedDelegation,
         bytes memory rawMoveData
     )
@@ -140,14 +132,78 @@ contract GaslessGame is EIP712 {
     }
 
     function verifyGameViewDelegated(
-        bytes[2] memory delegations,
-        bytes[] memory messages,
-        bytes[] memory signatures
+        bytes[2] memory rawSignedDelegations,
+        bytes[2] memory rawMoveData
     )
         external
         view
-        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
-    { }
+        returns (address gameAddress, uint8 outcome, uint16[] memory)
+    {
+        SignedDelegation memory signedDelegation0 =
+            decodeSignedDelegation(rawSignedDelegations[0]);
+        verifyDelegation(signedDelegation0);
+
+        SignedDelegation memory signedDelegation1 =
+            decodeSignedDelegation(rawSignedDelegations[1]);
+        verifyDelegation(signedDelegation1);
+
+        GaslessMoveData memory moveData0 = decodeMoveData(rawMoveData[0]);
+        GaslessMoveData memory moveData1 = decodeMoveData(rawMoveData[1]);
+
+        require(
+            moveData0.move.moves.length == moveData1.move.moves.length - 1,
+            "size mismatch"
+        );
+
+        uint256 size = moveData0.move.moves.length;
+        uint16[] memory moves0 = new uint16[](size);
+        uint16[] memory moves1 = new uint16[](size);
+        for (uint256 i = 0; i < size; i++) {
+            moves0[i] = moveData0.move.moves[i];
+            moves1[i] = moveData1.move.moves[i];
+        }
+
+        require(
+            keccak256(abi.encode(moves0)) == keccak256(abi.encode(moves1)),
+            "non matching arrays"
+        );
+
+        verifyMoveSigner(
+            moveData0, moveData0.signature, signedDelegation0.delegation.delegatedAddress
+        );
+
+        verifyMoveSigner(
+            moveData1, moveData1.signature, signedDelegation1.delegation.delegatedAddress
+        );
+
+        checkIfAddressesArePlayers(
+            signedDelegation0.delegation.delegatorAddress,
+            signedDelegation1.delegation.delegatorAddress,
+            gameAddress
+        );
+
+        require(moveData0.move.expiration >= block.timestamp, "move0 expired");
+        require(moveData1.move.expiration >= block.timestamp, "move1 expired");
+
+        uint16[] memory moves = new uint16[](moveData1.move.moves.length);
+
+        uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
+        if (onChainMoves.length > 0) {
+            uint16[] memory combinedMoves =
+                new uint16[](onChainMoves.length + moves.length);
+            for (uint256 i = 0; i < onChainMoves.length; i++) {
+                combinedMoves[i] = onChainMoves[i];
+            }
+            for (uint256 i = 0; i < moves.length; i++) {
+                combinedMoves[i + onChainMoves.length] = moves[i];
+            }
+            moves = combinedMoves;
+        }
+
+        (outcome,,,) = moveVerification.checkGameFromStart(moves);
+
+        return (gameAddress, outcome, moves);
+    }
 
     function decodeMoveData(bytes memory moveData)
         internal
@@ -160,12 +216,6 @@ contract GaslessGame is EIP712 {
     /// @notice set ChessGame contract
     function setChessGame(address _chessGame) external onlyDeployer {
         chessGame = ChessGame(_chessGame);
-    }
-
-    /// @notice Decodes gasless move message and returns game address
-    function decodegameAddress(bytes memory message) internal pure returns (address) {
-        GaslessMove memory move = abi.decode(message, (GaslessMove));
-        return move.gameAddress;
     }
 
     /// @dev typed signature verification
@@ -194,15 +244,6 @@ contract GaslessGame is EIP712 {
 
         require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
     }
-
-    function verifyGameView(
-        bytes[] memory messages,
-        bytes[] memory signatures
-    )
-        public
-        view
-        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
-    { }
 
     /*
       //// DELEGATED GASLESS MOVE VERIFICATION FUNCTIONS ////
@@ -294,58 +335,4 @@ contract GaslessGame is EIP712 {
             "Invalid signature"
         );
     }
-    /*     /// @notice Verify game moves via delegated signature
-    function verifyGameViewDelegated(
-        bytes[2] memory delegations,
-        bytes[] memory messages,
-        bytes[] memory signatures
-    )
-        external
-        view
-        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
-    {
-        require(messages.length == signatures.length, "573");
-
-    SignedDelegation memory signedDelegation0 = decodeSignedDelegation(delegations[0]);
-    SignedDelegation memory signedDelegation1 = decodeSignedDelegation(delegations[1]);
-
-        checkDelegations(signedDelegation0, signedDelegation1);
-
-        gameAddress = signedDelegation0.delegation.gameAddress;
-
-        GaslessMoveData memory moveData;
-        moveData.player0 = signedDelegation0.delegation.delegatedAddress;
-        moveData.player1 = signedDelegation1.delegation.delegatedAddress;
-        moveData.move.gameAddress = gameAddress;
-
-        checkIfAddressesArePlayers(
-            signedDelegation0.delegation.delegatorAddress,
-            signedDelegation1.delegation.delegatorAddress,
-            gameAddress
-        );
-
-        address playerToMove = chessGame.getPlayerMove(gameAddress)
-            == signedDelegation0.delegation.delegatorAddress
-            ? moveData.player0
-            : moveData.player1;
-
-        moves = verifyMoves(playerToMove, moveData, messages, signatures);
-
-        uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
-        if (onChainMoves.length > 0) {
-            uint16[] memory combinedMoves =
-                new uint16[](onChainMoves.length + moves.length);
-            for (uint256 i = 0; i < onChainMoves.length; i++) {
-                combinedMoves[i] = onChainMoves[i];
-            }
-            for (uint256 i = 0; i < moves.length; i++) {
-                combinedMoves[i + onChainMoves.length] = moves[i];
-            }
-            moves = combinedMoves;
-        }
-
-        (outcome,,,) = moveVerification.checkGameFromStart(moves);
-
-        return (gameAddress, outcome, moves);
-    } */
 }

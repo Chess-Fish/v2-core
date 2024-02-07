@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
 
 import { Test, console } from "forge-std/Test.sol";
 import { GaslessGame } from "../src/GaslessGame.sol";
@@ -20,7 +20,6 @@ contract GameTest is Test, SigUtils {
     }
 
     function testSignature() public {
-        // address user1 = vm.addr()
         uint256 privateKey1 = vm.deriveKey(mnemonic, 0);
         uint256 privateKey2 = vm.deriveKey(mnemonic, 1);
 
@@ -71,10 +70,12 @@ contract GameTest is Test, SigUtils {
             signature1 = abi.encodePacked(r, s, v);
         }
 
-        GaslessGame.GaslessMoveData memory moveData =
+        GaslessGame.GaslessMoveData memory moveData1 =
             GaslessGame.GaslessMoveData(move1, signature1);
 
-        gaslessGame.verifyMoveDelegated(rawSignedDelegation1, abi.encode(moveData));
+        gaslessGame.verifyGameViewDelegatedSingle(
+            rawSignedDelegation1, abi.encode(moveData1)
+        );
 
         vm.stopPrank();
 
@@ -120,30 +121,17 @@ contract GameTest is Test, SigUtils {
         GaslessGame.GaslessMoveData memory moveData2 =
             GaslessGame.GaslessMoveData(move2, signature2);
 
-        gaslessGame.verifyMoveDelegated(rawSignedDelegation2, abi.encode(moveData2));
+        gaslessGame.verifyGameViewDelegatedSingle(
+            rawSignedDelegation2, abi.encode(moveData2)
+        );
 
         vm.stopPrank();
 
-        /*         // USER 2
-        uint16[] memory moves2 = new uint16[](2);
-        moves2[0] = moves1[0]; // previous move
-        moves2[1] = 2; // new move
+        bytes[2] memory rawSignedDelegations =
+            [rawSignedDelegation1, rawSignedDelegation2];
 
-        bytes32 movesHash2 = keccak256(abi.encode(moves2));
+        bytes[2] memory rawMoveData = [abi.encode(moveData1), abi.encode(moveData2)];
 
-        vm.startPrank(user2);
-        bytes memory signature2;
-        {
-            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey1, movesHash2);
-            signature2 = abi.encodePacked(r, s, v);
-        }
-        // game.verifySignature(moves2, signature1, user1);
-        vm.stopPrank();
-
-        bytes[2] memory signatures;
-        signatures[0] = signature1;
-        signatures[1] = signature2;
-
-        // game.verifySignatures(moves2, signatures, user1, user2); */
+        gaslessGame.verifyGameViewDelegated(rawSignedDelegations, rawMoveData);
     }
 }
