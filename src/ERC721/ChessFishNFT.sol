@@ -84,14 +84,14 @@ contract ChessFishNFT is ERC721 {
 
     function tokenURI(uint256 id) public view override returns (string memory) {
         return generateBoardSVG(
-            // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
-            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
+            "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
+            // "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
             address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20), // winner
             address(0x388C818CA8B9251b393131C08a736A67ccB19297), // loser
             block.timestamp, // endtime
             address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), // token
             true, // wasTournament
-            2 // place in tournament
+            7 // place in tournament
         );
         // return _buildTokenURI(id);
     }
@@ -183,7 +183,6 @@ contract ChessFishNFT is ERC721 {
     {
         string memory dateString = timestampToDateTimeString(endTime);
 
-        // Append the date string to the SVG
         // Part 1: Initial SVG (if there's content before the black box, add it here)
         svg = abi.encodePacked(svg);
 
@@ -203,15 +202,13 @@ contract ChessFishNFT is ERC721 {
         svg = abi.encodePacked(svg, blackBoxAndText);
 
         // Part 3: Circle Animation and Border
-        string memory randomColor = getHexColor(endTime, player0, player1, token); // Generate
-            // a random color for
-            // the circle
+        string memory randomColor = getHexColor(endTime, player0, player1, token);
         bytes memory circleAnimation = abi.encodePacked(
             '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
             '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
             '<circle r="7" fill="',
             randomColor,
-            '">', // Use the random color here
+            '">',
             '<animateMotion dur="10s" repeatCount="indefinite">',
             '<mpath href="#borderPath"/>',
             "</animateMotion>",
@@ -220,43 +217,40 @@ contract ChessFishNFT is ERC721 {
         );
         svg = abi.encodePacked(svg, circleAnimation);
 
+        // if tournament add tournament emoji and place
         if (isTournament) {
+            // Tournament emoji
             bytes memory tournamentEmoji = abi.encodePacked(
                 "<g>",
                 '<text x="535" y="700" font-family="Arial" font-size="30" fill="#FFFFFF">&#x1f396;</text>',
                 "</g>"
             );
-            svg = abi.encodePacked(svg, tournamentEmoji);
+
+            // Place SVG
+            bytes memory placeSVG = abi.encodePacked(
+                "<g>",
+                '<text x="580" y="695" font-family="Arial" font-size="30" fill="#FFFFFF">',
+                getPlaceSVG(place),
+                "</text>"
+            );
+
+            // Animation
+            bytes memory animation = abi.encodePacked(
+                '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 ',
+                Strings.toString(580 + 15),
+                " ",
+                Strings.toString(695 - 6),
+                '" to="360 ',
+                Strings.toString(580 + 15),
+                " ",
+                Strings.toString(695 - 6),
+                '" dur="7s" repeatCount="indefinite"/>',
+                "</g>"
+            );
+
+            // Combine all parts and append to svg
+            svg = abi.encodePacked(svg, tournamentEmoji, placeSVG, animation);
         }
-
-        uint256 x = 580 + 30 / 2;
-        uint256 y = 695 - 6;
-
-        // Convert x and y from uint to string for SVG parameters
-        string memory xStr = Strings.toString(x);
-        string memory yStr = Strings.toString(y);
-
-        string memory placeEmoji = getPlaceSVG(place);
-
-        // Part 4: Emoji and Animation
-        bytes memory emojiAndAnimation = abi.encodePacked(
-            "<g>",
-            '<text x="580" y="695" font-family="Arial" font-size="30" fill="#FFFFFF">',
-            placeEmoji,
-            "</text>",
-            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 ',
-            xStr,
-            " ",
-            yStr,
-            '" to="360 ',
-            xStr,
-            " ",
-            yStr,
-            '" dur="7s" repeatCount="indefinite"/>',
-            "</g>"
-        );
-
-        svg = abi.encodePacked(svg, emojiAndAnimation);
 
         // Part 5: Token
         bytes memory _tokenSVG = tokenSVG.getTokenSVG(token);
