@@ -18,15 +18,18 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
+import "./Init.sol";
 
-contract SVG_Container {
+import "forge-std/console.sol";
+
+contract PieceSVG is Init {
     function getPieceSymbol(
         bytes1 piece,
         uint256 x,
         uint256 y
     )
         external
-        pure
+        view
         returns (bytes memory)
     {
         {
@@ -34,9 +37,9 @@ contract SVG_Container {
             if (piece == "p") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     "<g transform='translate(0, 0) scale(1)'>",
                     '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #ffffff; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>',
@@ -50,9 +53,9 @@ contract SVG_Container {
             if (piece == "P") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     "<g transform='translate(0, 0) scale(1)'>",
                     '<path d="M 22,9 C 19.79,9 18,10.79 18,13 C 18,13.89 18.29,14.71 18.78,15.38 C 16.83,16.5 15.5,18.59 15.5,21 C 15.5,23.03 16.44,24.84 17.91,26.03 C 14.91,27.09 10.5,31.58 10.5,39.5 L 33.5,39.5 C 33.5,31.58 29.09,27.09 26.09,26.03 C 27.56,24.84 28.5,23.03 28.5,21 C 28.5,18.59 27.17,16.5 25.22,15.38 C 25.71,14.71 26,13.89 26,13 C 26,10.79 24.21,9 22,9 z " style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: nonzero; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: miter; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1"/>'
@@ -65,9 +68,9 @@ contract SVG_Container {
         if (piece == "R") {
             return abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                uint2str(x),
+                NFT.uint2str(x),
                 '" y="',
-                uint2str(y),
+                NFT.uint2str(y),
                 '" width="80" height="80">',
                 '<g style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">'
                 '<path d="M 9,39 L 36,39 L 36,36 L 9,36 L 9,39 z " style="stroke-linecap: butt" />',
@@ -90,9 +93,9 @@ contract SVG_Container {
             if (piece == "r") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: #ffffff; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">'
                     '<path d="M 9,39 L 36,39 L 36,36 L 9,36 L 9,39 z " style="stroke-linecap: butt" />'
@@ -111,9 +114,9 @@ contract SVG_Container {
             if (piece == "N") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: none; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                     '<path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" style="fill: #000000; stroke: #000000" />',
@@ -130,9 +133,9 @@ contract SVG_Container {
             if (piece == "n") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: none; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                     '<path d="M 22,10 C 32.5,11 38.5,18 38,39 L 15,39 C 15,30 25,32.5 23,18" style="fill: #ffffff; stroke: #000000" />',
@@ -148,9 +151,9 @@ contract SVG_Container {
             if (piece == "B") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: none; fill-rule: evenodd; fill-opacity: 1; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                     '<g style="fill: #000000; stroke: #000000; stroke-linecap: butt">'
@@ -168,9 +171,9 @@ contract SVG_Container {
             if (piece == "b") {
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: none; fill-rule: evenodd; fill-opacity: 1; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                     '<g style="fill: #ffffff; stroke: #000000; stroke-linecap: butt">',
@@ -189,9 +192,9 @@ contract SVG_Container {
                 // Assuming "q" represents a queen piece in your logic
                 return abi.encodePacked(
                     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                    uint2str(x),
+                    NFT.uint2str(x),
                     '" y="',
-                    uint2str(y),
+                    NFT.uint2str(y),
                     '" width="80" height="80">',
                     '<g style="opacity: 1; fill: #000000; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                     '<path d="M 9 13 A 2 2 0 1 1  5,13 A 2 2 0 1 1  9 13 z" transform="translate(-1,-1)" />',
@@ -215,9 +218,9 @@ contract SVG_Container {
         if (piece == "q") {
             return abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                uint2str(x),
+                NFT.uint2str(x),
                 '" y="',
-                uint2str(y),
+                NFT.uint2str(y),
                 '" width="80" height="80">',
                 '<g style="opacity: 1;  fill: #ffffff; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; strokeOpacity: 1">',
                 '<path d="M 9 13 A 2 2 0 1 1  5,13 A 2 2 0 1 1  9 13 z" transform="translate(-1,-1)" />',
@@ -238,9 +241,9 @@ contract SVG_Container {
             // Changed from "q" to "k" to represent a king piece
             return abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                uint2str(x),
+                NFT.uint2str(x),
                 '" y="',
-                uint2str(y),
+                NFT.uint2str(y),
                 '" width="80" height="80">',
                 '<g style="fill: none; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                 '<path d="M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25" style="fill: #ffffff; stroke: #000000; stroke-linecap: butt; stroke-linejoin: miter" />',
@@ -258,9 +261,9 @@ contract SVG_Container {
             // Assuming "k" represents a king piece in your logic
             return abi.encodePacked(
                 '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" x="',
-                uint2str(x),
+                NFT.uint2str(x),
                 '" y="',
-                uint2str(y),
+                NFT.uint2str(y),
                 '" width="80" height="80">',
                 '<g style="fill: none; fill-opacity: 1; fill-rule: evenodd; stroke: #000000; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; stroke-miterlimit: 4; stroke-dasharray: none; stroke-opacity: 1">',
                 '<path d="M 22.5,25 C 22.5,25 27,17.5 25.5,14.5 C 25.5,14.5 24.5,12 22.5,12 C 20.5,12 19.5,14.5 19.5,14.5 C 18,17.5 22.5,25 22.5,25" style="fill: #000000; fill-opacity: 1; stroke-linecap: butt; stroke-linejoin: miter" />',
@@ -276,28 +279,5 @@ contract SVG_Container {
         // Handle other pieces similarly
         if (piece == bytes1(0x20)) return abi.encodePacked("");
         return abi.encodePacked("");
-    }
-
-    // Helper function to convert uint to string
-    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint256 k = len;
-        while (_i != 0) {
-            k = k - 1;
-            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
-            bytes1 b1 = bytes1(temp);
-            bstr[k] = b1;
-            _i /= 10;
-        }
-        return string(bstr);
     }
 }

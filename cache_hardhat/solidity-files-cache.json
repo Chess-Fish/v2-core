@@ -756,8 +756,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1707246296435,
-      "contentHash": "c4b6fd3f512816f54ed0b135277ba742",
+      "lastModificationDate": 1707296359152,
+      "contentHash": "4166bcea87ba39f61286fb5bb6f5b10e",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -793,14 +793,15 @@
         "@openzeppelin/contracts/utils/Base64.sol",
         "./../ChessGame.sol",
         "./../MoveVerification.sol",
-        "forge-std/console.sol",
-        "./SVGContainer.sol"
+        "./PieceSVG.sol",
+        "./TokenSVG.sol",
+        "forge-std/console.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "ChessFishNFT_V2"
+        "ChessFishNFT"
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/lib/forge-std/src/console.sol": {
@@ -2198,10 +2199,10 @@
         "Token"
       ]
     },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/SVGContainer.sol": {
-      "lastModificationDate": 1707243299515,
-      "contentHash": "609ede7058bb8ca795533bb7699638a4",
-      "sourceName": "src/ERC721/SVGContainer.sol",
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/PieceSVG.sol": {
+      "lastModificationDate": 1707294022907,
+      "contentHash": "794dc88f031a14b74303dfd72d2ce443",
+      "sourceName": "src/ERC721/PieceSVG.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
@@ -2232,13 +2233,100 @@
       },
       "imports": [
         "@openzeppelin/contracts/utils/Strings.sol",
-        "@openzeppelin/contracts/utils/Base64.sol"
+        "@openzeppelin/contracts/utils/Base64.sol",
+        "./Init.sol",
+        "forge-std/console.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
       ],
       "artifacts": [
-        "SVG_Container"
+        "PieceSVG"
+      ]
+    },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/TokenSVG.sol": {
+      "lastModificationDate": 1707296440486,
+      "contentHash": "15452ed2403ba37bf6bcc2f4b1ef50cb",
+      "sourceName": "src/ERC721/TokenSVG.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/utils/Strings.sol",
+        "@openzeppelin/contracts/utils/Base64.sol",
+        "./Init.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "TokenSVG"
+      ]
+    },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/Init.sol": {
+      "lastModificationDate": 1707293500071,
+      "contentHash": "041b708a7fb6362cb5fddd0313e2eb17",
+      "sourceName": "src/ERC721/Init.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": true,
+          "metadata": {
+            "bytecodeHash": "none"
+          },
+          "optimizer": {
+            "enabled": true,
+            "runs": 20000
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "IChessFishNFT",
+        "Init"
       ]
     }
   }

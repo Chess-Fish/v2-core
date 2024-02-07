@@ -23,18 +23,21 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import { ChessGame } from "./../ChessGame.sol";
 import { MoveVerification } from "./../MoveVerification.sol";
 
+import "./PieceSVG.sol";
+import "./TokenSVG.sol";
+
 import "forge-std/console.sol";
 
-import "./SVGContainer.sol";
-
-contract ChessFishNFT_V2 is ERC721 {
+contract ChessFishNFT is ERC721 {
     uint256 private _tokenIdCounter;
 
     mapping(uint256 => address) public gameAddresses;
 
     ChessGame public immutable game;
     MoveVerification public moveVerification;
-    SVG_Container public svg_container;
+
+    PieceSVG public pieceSVG;
+    TokenSVG public tokenSVG;
 
     address public deployer;
 
@@ -48,11 +51,18 @@ contract ChessFishNFT_V2 is ERC721 {
         _;
     }
 
-    constructor(address _chessFish, address _svg) ERC721("ChessFishNFT", "CFSH") {
+    constructor(
+        address _chessFish,
+        address _pieceSVG,
+        address _tokenSVG
+    )
+        ERC721("ChessFishNFT", "CFSH")
+    {
         deployer = msg.sender;
         game = ChessGame(_chessFish);
 
-        svg_container = SVG_Container(_svg);
+        pieceSVG = PieceSVG(_pieceSVG);
+        tokenSVG = TokenSVG(_tokenSVG);
     }
 
     function awardWinner(
@@ -76,8 +86,8 @@ contract ChessFishNFT_V2 is ERC721 {
         return generateBoardSVG(
             // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
             "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
-            address(5),
-            address(4)
+            address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20),
+            address(0x388C818CA8B9251b393131C08a736A67ccB19297)
         );
         // return _buildTokenURI(id);
     }
@@ -86,30 +96,6 @@ contract ChessFishNFT_V2 is ERC721 {
         return string(abi.encodePacked(_byte));
     }
 
-    /*     function getPieceSymbol(bytes1 piece)
-        private
-        pure
-        returns (string memory)
-    {
-        // Mapping of piece codes to Unicode symbols for chess pieces
-        if (piece == "K") {
-            return "&#9812;";
-        }
-        if (piece == "Q") return "&#9813;"; // White Queen
-        if (piece == "R") return "&#9814;"; // White Rook
-        if (piece == "B") return "&#9815;"; // White Bishop
-        if (piece == "N") return "&#9816;"; // White Knight
-        if (piece == "P") return "&#9817;"; // White Pawn
-        if (piece == "k") return "&#9818;"; // Black King
-        if (piece == "q") return "&#9819;"; // Black Queen
-        if (piece == "r") return "&#9820;"; // Black Rook
-        if (piece == "b") return "&#9821;"; // Black Bishop
-        if (piece == "n") return "&#9822;"; // Black Knight
-        if (piece == "p") return "&#9823;"; // Black Pawn
-
-    if (piece == bytes1(0x20)) return " "; // Return space for empty squares
-        return " "; // Fallback to a space for unrecognized characters
-    } */
     function generateBoardSVG(
         string memory boardString,
         address player0,
@@ -152,77 +138,138 @@ contract ChessFishNFT_V2 is ERC721 {
                 svg = abi.encodePacked(
                     svg,
                     '<rect x="',
-                    svg_container.uint2str(x),
+                    uint2str(x),
                     '" y="',
-                    svg_container.uint2str(y),
+                    uint2str(y),
                     '" class="square ',
                     squareColor,
                     '"/>'
                 );
 
                 if (piece != bytes1(0x20)) {
-                    bytes memory pieceSVG = svg_container.getPieceSymbol(piece, x, y);
-                    svg = abi.encodePacked(svg, pieceSVG);
+                    bytes memory _pieceSVG = pieceSVG.getPieceSymbol(piece, x, y);
+                    svg = abi.encodePacked(svg, _pieceSVG);
                 }
             }
         }
 
-        string memory dateString = timestampToDateTimeString(block.timestamp);
-
-        // Append the date string to the SVG
-        svg = abi.encodePacked(
-            svg,
-            '<rect x="0" y="640" width="640" height="80" fill="#000000"/>',
-            '<text x="20" y="670" font-family="Arial" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
-            toHexString(uint256(uint160(player0)), 20),
-            "</text>",
-            '<text x="20" y="690" font-family="Arial" font-size="12" fill="#FFFFFF">Loser: ',
-            toHexString(uint256(uint160(player1)), 20),
-            "</text>",
-            '<text x="20" y="710" font-family="Arial" font-size="14" fill="#FFFFFF">Date: ',
-            dateString,
-            "</text>",
-            // Adjusting circle animation to go around the border of the board
-            '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
-            '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
-            '<circle r="5" fill="#3DFF30">',
-            '<animateMotion dur="10s" repeatCount="indefinite">',
-            '<mpath href="#borderPath"/>',
-            "</animateMotion>",
-            "</circle>",
-            '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>',
-            // Directly positioning the spinning emoji
-            "<g>",
-            '<text x="600" y="650" font-family="Arial" font-size="18" fill="#FFFFFF">&#x1f451;</text>',
-            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 600 650" to="360 600 650" dur="10s" repeatCount="indefinite"/>',
-            "</g>",
-            "</svg>"
-        );
+        svg = paramsContainer(svg, player0, player1);
 
         svg = abi.encodePacked(svg, "</svg>");
 
         return string(abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg)));
     }
 
-    function toHexString(
-        uint256 value,
-        uint256 length
+    function paramsContainer(
+        bytes memory svg,
+        address player0,
+        address player1
     )
         internal
-        pure
-        returns (string memory)
+        view
+        returns (bytes memory)
     {
-        bytes memory buffer = new bytes(2 * length);
+        string memory dateString = timestampToDateTimeString(block.timestamp);
 
-        for (uint256 i = 2 * length; i > 0; --i) {
-            buffer[i - 1] = bytes1(uint8(48 + (value & 0xf)));
-            if (buffer[i - 1] >= bytes1(uint8(58))) {
-                buffer[i - 1] = bytes1(uint8(87 + (uint8(buffer[i - 1]) - 58)));
-            }
-            value >>= 4;
+        // Append the date string to the SVG
+        // Part 1: Initial SVG (if there's content before the black box, add it here)
+        svg = abi.encodePacked(svg);
+
+        // Part 2: Black Box under board and related text
+        bytes memory blackBoxAndText = abi.encodePacked(
+            '<rect x="0" y="640" width="640" height="100" fill="#000000"/>',
+            '<text x="10" y="660" font-family="Courier New" font-size="18" font-weight="bold" fill="#FFFFFF">&#x1f3c6; Winner: ',
+            toAsciiString(player0),
+            "</text>",
+            '<text x="10" y="680" font-family="Courier New" font-size="12" fill="#FFFFFF">Loser: ',
+            toAsciiString(player1),
+            "</text>",
+            '<text x="10" y="700" font-family="Courier New" font-size="12" fill="#FFFFFF">Date: ',
+            dateString,
+            "</text>"
+        );
+        svg = abi.encodePacked(svg, blackBoxAndText);
+
+        // Part 3: Circle Animation and Border
+        bytes memory circleAnimation = abi.encodePacked(
+            '<svg viewBox="0 0 640 720" xmlns="http://www.w3.org/2000/svg">',
+            '<path fill="none" stroke="lightgrey" d="M0,0 H640 V720 H0 V0" />',
+            '<circle r="7" fill="#3DFF30">',
+            '<animateMotion dur="10s" repeatCount="indefinite">',
+            '<mpath href="#borderPath"/>',
+            "</animateMotion>",
+            "</circle>",
+            '<path id="borderPath" fill="none" d="M0,0 H640 V720 H0 V0 z"/>'
+        );
+        svg = abi.encodePacked(svg, circleAnimation);
+
+        // Part 4: Emoji and Animation
+        bytes memory emojiAndAnimation = abi.encodePacked(
+            "<g>",
+            '<text x="580" y="680" font-family="Arial" font-size="26" fill="#FFFFFF">&#x1f451;</text>',
+            '<animateTransform attributeName="transform" attributeType="XML" type="rotate" from="0 580 690" to="360 580 680" dur="10s" repeatCount="indefinite"/>',
+            "</g>"
+        );
+        // "</svg>"
+
+        svg = abi.encodePacked(svg, emojiAndAnimation);
+
+        // Part 5: Token
+        bytes memory _tokenSVG =
+            tokenSVG.getTokenSVG(0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9);
+        svg = abi.encodePacked(svg, _tokenSVG);
+
+        return svg;
+    }
+
+    function params(
+        bytes memory svg,
+        address player0,
+        address player1,
+        string memory dateString
+    )
+        internal
+        returns (bytes memory)
+    { }
+
+    // Helper function to convert uint to string
+    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
         }
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            k = k - 1;
+            uint8 temp = (48 + uint8(_i - _i / 10 * 10));
+            bytes1 b1 = bytes1(temp);
+            bstr[k] = b1;
+            _i /= 10;
+        }
+        return string(bstr);
+    }
 
-        return string(buffer);
+    function toAsciiString(address x) internal pure returns (string memory) {
+        bytes memory s = new bytes(40);
+        for (uint256 i = 0; i < 20; i++) {
+            bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i)))));
+            bytes1 hi = bytes1(uint8(b) / 16);
+            bytes1 lo = bytes1(uint8(b) - 16 * uint8(hi));
+            s[2 * i] = char(hi);
+            s[2 * i + 1] = char(lo);
+        }
+        return string(s);
+    }
+
+    function char(bytes1 b) internal pure returns (bytes1 c) {
+        if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
+        else return bytes1(uint8(b) + 0x57);
     }
 
     uint256 constant SECONDS_PER_DAY = 24 * 60 * 60;

@@ -44,11 +44,17 @@ describe("ChessFish NFT Unit Tests", function () {
 
 		await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
 
-        const SVG_Container = await ethers.getContractFactory("SVG_Container");
-		const container = await SVG_Container.deploy();
+        const PieceSVG = await ethers.getContractFactory("PieceSVG");
+		const pieceSVG = await PieceSVG.deploy();
 
-		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT_V2");
-		const chessNFT = await ChessFishNFT.deploy("0x0000000000000000000000000000000000000000", await container.getAddress());
+        const TokenSVG = await ethers.getContractFactory("TokenSVG");
+		const tokenSVG = await TokenSVG.deploy();
+
+		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
+		const chessNFT = await ChessFishNFT.deploy(await chessGame.getAddress(), await pieceSVG.getAddress(), await tokenSVG.getAddress());
+
+        await pieceSVG.connect(deployer).setNFT(await chessNFT.getAddress());
+        await tokenSVG.connect(deployer).setNFT(await tokenSVG.getAddress());
 
 		return {
 			chessNFT,
