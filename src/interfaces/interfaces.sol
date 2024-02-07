@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.22;
+pragma solidity ^0.8.24;
 
 interface IChessFishNFT {
-    function awardWinner(address player, address gameHash) external returns (uint256);
+    function awardWinner(address player, address wagerHash) external returns (uint256);
 }
 
 interface IChessGame {
-    function createChessGameTournamentSingle(
+    function createGameWagerTournamentSingle(
         address player0,
         address player1,
-        address gameToken,
-        uint256 gameAmount,
+        address wagerToken,
+        uint256 wagerAmount,
         uint256 numberOfGames,
         uint256 timeLimit
     )
         external
-        returns (address gameAddress);
+        returns (address wagerAddress);
 
-    function startGamesInTournament(address gameAddress) external;
+    function startWagersInTournament(address wagerAddress) external;
 
-    function getGameStatus(address gameAddress)
+    function getWagerStatus(address wagerAddress)
         external
         view
         returns (address, address, uint256, uint256);
