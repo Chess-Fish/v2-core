@@ -20,6 +20,8 @@ import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import "./MoveVerification.sol";
 import "./ChessGame.sol";
 
+import "forge-std/console.sol";
+
 /**
  * @title ChessFish GaslessGame Contract
  * @author ChessFish
@@ -45,21 +47,7 @@ import "./ChessGame.sol";
  * confirmations.
  */
 contract GaslessGame is EIP712 {
-    struct GaslessMove {
-        address gameAddress;
-        uint256 gameNumber;
-        uint256 moveNumber;
-        uint16 move;
-        uint256 expiration;
-    }
-
-    struct GaslessMoveData {
-        address signer;
-        address player0;
-        address player1;
-        GaslessMove move;
-        bytes signature;
-    }
+    /*       */
 
     struct Delegation {
         address delegatorAddress;
@@ -105,11 +93,53 @@ contract GaslessGame is EIP712 {
         );
     }
 
+    struct GaslessMove {
+        address gameAddress;
+        uint256 gameNumber;
+        uint256 expiration;
+        uint16[] moves;
+    }
+
+    struct GaslessMoveData {
+        address signer;
+        address player0;
+        address player1;
+        GaslessMove move;
+        bytes signature;
+    }
+
+    function verifyGaslessMove(bytes memory rawMoveData) external returns (bool) {
+        GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
+
+        console.log("moveData");
+        console.log(moveData.signer);
+        console.log(moveData.move.gameAddress);
+        console.log("moves");
+        for (uint256 i = 0; i < moveData.move.moves.length; i++) {
+            console.log(moveData.move.moves[i]);
+        }
+
+        verifyMoveSigner(moveData, moveData.signature);
+
+        return true;
+    }
+
+    function decodeMoveData(bytes memory moveData)
+        internal
+        pure
+        returns (GaslessMoveData memory)
+    {
+        return abi.decode(moveData, (GaslessMoveData));
+    }
+
     /// @notice set ChessGame contract
     function setChessGame(address _chessGame) external onlyDeployer {
         chessGame = ChessGame(_chessGame);
     }
 
+    // function verifyGameView(
+
+    /* 
     /// @notice Generates gasless move message
     function encodeMoveMessage(GaslessMove memory move)
         external
@@ -117,9 +147,9 @@ contract GaslessGame is EIP712 {
         returns (bytes memory)
     {
         return abi.encode(move);
-    }
+    } */
 
-    /// @notice Decodes gasless move message
+    /*     /// @notice Decodes gasless move message
     function decodeMoveMessage(bytes memory message)
         internal
         pure
@@ -127,7 +157,7 @@ contract GaslessGame is EIP712 {
     {
         move = abi.decode(message, (GaslessMove));
         return move;
-    }
+    } */
 
     /// @notice Decodes gasless move message and returns game address
     function decodegameAddress(bytes memory message) internal pure returns (address) {
@@ -149,9 +179,8 @@ contract GaslessGame is EIP712 {
                     MOVE_METHOD_HASH,
                     moveData.move.gameAddress,
                     moveData.move.gameNumber,
-                    moveData.move.moveNumber,
-                    moveData.move.move,
-                    moveData.move.expiration
+                    moveData.move.expiration,
+                    moveData.move.moves
                 )
             )
         );
@@ -160,7 +189,7 @@ contract GaslessGame is EIP712 {
         );
     }
 
-    /// @notice Verifies signed messages and signatures in for loop
+    /*     /// @notice Verifies signed messages and signatures in for loop
     /// @dev returns array of the gasless moves
     function verifyMoves(
         address playerToMove,
@@ -191,7 +220,7 @@ contract GaslessGame is EIP712 {
 
             if (i != 0) {
                 require(
-                    moveNumbers[i - 1] < moveData.move.moveNumber, "must be sequential"
+    moveNumbers[i - 1] < moveData.move.moveNumber, "must be sequential"
                 );
             }
             moveNumbers[i] = moveData.move.moveNumber;
@@ -202,9 +231,16 @@ contract GaslessGame is EIP712 {
             }
         }
         return moves;
-    }
-
-    /// @notice Verifies all signed messages and signatures
+    } */
+    function verifyGameView(
+        bytes[] memory messages,
+        bytes[] memory signatures
+    )
+        public
+        view
+        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
+    { }
+    /*     /// @notice Verifies all signed messages and signatures
     /// @dev appends onchain moves to gasless moves
     /// @dev reverts if invalid signature
     function verifyGameView(
@@ -250,7 +286,7 @@ contract GaslessGame is EIP712 {
 
         return (gameAddress, outcome, moves);
     }
-
+    */
     /*
       //// DELEGATED GASLESS MOVE VERIFICATION FUNCTIONS ////
       */
@@ -342,7 +378,17 @@ contract GaslessGame is EIP712 {
         );
     }
 
-    /// @notice Verify game moves via delegated signature
+    function verifyGameViewDelegated(
+        bytes[2] memory delegations,
+        bytes[] memory messages,
+        bytes[] memory signatures
+    )
+        external
+        view
+        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
+    { }
+
+    /*     /// @notice Verify game moves via delegated signature
     function verifyGameViewDelegated(
         bytes[2] memory delegations,
         bytes[] memory messages,
@@ -354,8 +400,8 @@ contract GaslessGame is EIP712 {
     {
         require(messages.length == signatures.length, "573");
 
-        SignedDelegation memory signedDelegation0 = decodeSignedDelegation(delegations[0]);
-        SignedDelegation memory signedDelegation1 = decodeSignedDelegation(delegations[1]);
+    SignedDelegation memory signedDelegation0 = decodeSignedDelegation(delegations[0]);
+    SignedDelegation memory signedDelegation1 = decodeSignedDelegation(delegations[1]);
 
         checkDelegations(signedDelegation0, signedDelegation1);
 
@@ -395,5 +441,5 @@ contract GaslessGame is EIP712 {
         (outcome,,,) = moveVerification.checkGameFromStart(moves);
 
         return (gameAddress, outcome, moves);
-    }
+    } */
 }
