@@ -85,7 +85,7 @@ contract GaslessGame is EIP712 {
         deployer = msg.sender;
 
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address gameAddress,uint gameNumber,uint moveNumber,uint16 move,uint expiration)"
+            "GaslessMove(address gameAddress,uint gameNumber,uint expiration,uint16[] moves)"
         );
 
         DELEGATION_METHOD_HASH = keccak256(
@@ -101,27 +101,43 @@ contract GaslessGame is EIP712 {
     }
 
     struct GaslessMoveData {
-        address signer;
-        address player0;
-        address player1;
         GaslessMove move;
         bytes signature;
+    }
+
+    function verifyDelegation(bytes memory rawSignedDelegation) external returns (bool) {
+        SignedDelegation memory signedDelegation =
+            decodeSignedDelegation(rawSignedDelegation);
+        verifyDelegation(signedDelegation);
     }
 
     function verifyGaslessMove(bytes memory rawMoveData) external returns (bool) {
         GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
 
-        console.log("moveData");
-        console.log(moveData.signer);
-        console.log(moveData.move.gameAddress);
-        console.log("moves");
-        for (uint256 i = 0; i < moveData.move.moves.length; i++) {
-            console.log(moveData.move.moves[i]);
-        }
-
-        verifyMoveSigner(moveData, moveData.signature);
+        // verifyMoveSigner(moveData, moveData.signature);
 
         return true;
+    }
+
+    function verifyMoveDelegated(
+        bytes memory rawSignedDelegation,
+        bytes memory rawMoveData
+    )
+        external
+        view
+    {
+        SignedDelegation memory signedDelegation =
+            decodeSignedDelegation(rawSignedDelegation);
+        verifyDelegation(signedDelegation);
+
+        GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
+
+        console.log(signedDelegation.delegation.delegatedAddress);
+
+        verifyMoveSigner(
+            moveData, moveData.signature, signedDelegation.delegation.delegatedAddress
+        );
+
     }
 
     function decodeMoveData(bytes memory moveData)
@@ -137,27 +153,6 @@ contract GaslessGame is EIP712 {
         chessGame = ChessGame(_chessGame);
     }
 
-    // function verifyGameView(
-
-    /* 
-    /// @notice Generates gasless move message
-    function encodeMoveMessage(GaslessMove memory move)
-        external
-        pure
-        returns (bytes memory)
-    {
-        return abi.encode(move);
-    } */
-
-    /*     /// @notice Decodes gasless move message
-    function decodeMoveMessage(bytes memory message)
-        internal
-        pure
-        returns (GaslessMove memory move)
-    {
-        move = abi.decode(message, (GaslessMove));
-        return move;
-    } */
 
     /// @notice Decodes gasless move message and returns game address
     function decodegameAddress(bytes memory message) internal pure returns (address) {
@@ -168,7 +163,8 @@ contract GaslessGame is EIP712 {
     /// @dev typed signature verification
     function verifyMoveSigner(
         GaslessMoveData memory moveData,
-        bytes memory signature
+        bytes memory signature,
+        address signer
     )
         internal
         view
@@ -184,54 +180,14 @@ contract GaslessGame is EIP712 {
                 )
             )
         );
-        require(
-            ECDSA.recover(digest, signature) == moveData.signer, "140 invalid signature"
-        );
+        console.logBytes32(digest);
+        console.log(signer);
+        console.log(ECDSA.recover(digest, signature));
+
+        require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
     }
 
-    /*     /// @notice Verifies signed messages and signatures in for loop
-    /// @dev returns array of the gasless moves
-    function verifyMoves(
-        address playerToMove,
-        GaslessMoveData memory moveData,
-        bytes[] memory messages,
-        bytes[] memory signatures
-    )
-        internal
-        view
-        returns (uint16[] memory moves)
-    {
-        moves = new uint16[](messages.length);
-        uint256[] memory moveNumbers = new uint256[](messages.length);
 
-        for (uint256 i = 0; i < messages.length;) {
-            /// @dev determine signer based on the move index
-            moveData.signer = (i % 2 == 0) == (playerToMove == moveData.player0)
-                ? moveData.player0
-                : moveData.player1;
-
-            address gameAddress = moveData.move.gameAddress;
-            moveData.move = decodeMoveMessage(messages[i]);
-
-            require(gameAddress == moveData.move.gameAddress, "non matching games");
-            require(moveData.move.expiration >= block.timestamp, "move expired");
-
-            verifyMoveSigner(moveData, signatures[i]);
-
-            if (i != 0) {
-                require(
-    moveNumbers[i - 1] < moveData.move.moveNumber, "must be sequential"
-                );
-            }
-            moveNumbers[i] = moveData.move.moveNumber;
-            moves[i] = moveData.move.move;
-
-            unchecked {
-                i++;
-            }
-        }
-        return moves;
-    } */
     function verifyGameView(
         bytes[] memory messages,
         bytes[] memory signatures
@@ -240,53 +196,7 @@ contract GaslessGame is EIP712 {
         view
         returns (address gameAddress, uint8 outcome, uint16[] memory moves)
     { }
-    /*     /// @notice Verifies all signed messages and signatures
-    /// @dev appends onchain moves to gasless moves
-    /// @dev reverts if invalid signature
-    function verifyGameView(
-        bytes[] memory messages,
-        bytes[] memory signatures
-    )
-        public
-        view
-        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
-    {
-        require(messages.length == signatures.length, "msg.len == sig.len");
 
-        // optimistically use the gameAddress from the first index
-        gameAddress = decodegameAddress(messages[0]);
-
-        address playerToMove = chessGame.getPlayerMove(gameAddress);
-
-        (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
-
-        GaslessMoveData memory moveData;
-        moveData.player0 = player0;
-        moveData.player1 = player1;
-        moveData.move.gameAddress = gameAddress;
-
-        moves = verifyMoves(playerToMove, moveData, messages, signatures);
-
-        /// @dev appending moves to onChainMoves if they exist
-        uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
-
-        if (onChainMoves.length > 0) {
-            uint16[] memory combinedMoves =
-                new uint16[](onChainMoves.length + moves.length);
-            for (uint256 i = 0; i < onChainMoves.length; i++) {
-                combinedMoves[i] = onChainMoves[i];
-            }
-            for (uint256 i = 0; i < moves.length; i++) {
-                combinedMoves[i + onChainMoves.length] = moves[i];
-            }
-            moves = combinedMoves;
-        }
-
-        (outcome,,,) = moveVerification.checkGameFromStart(moves);
-
-        return (gameAddress, outcome, moves);
-    }
-    */
     /*
       //// DELEGATED GASLESS MOVE VERIFICATION FUNCTIONS ////
       */
