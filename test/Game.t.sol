@@ -59,9 +59,9 @@ contract GameTest is Test, SigUtils {
         uint16[] memory moves1 = new uint16[](1);
         moves1[0] = 1; // first move
 
-        GaslessGame.GaslessMove memory move =
+        GaslessGame.GaslessMove memory move1 =
             GaslessGame.GaslessMove(address(0), 0, 0, moves1);
-        bytes32 movesHash1 = getTypedDataHashMove(move, address(gaslessGame));
+        bytes32 movesHash1 = getTypedDataHashMove(move1, address(gaslessGame));
         console.logBytes32(movesHash1);
 
         vm.startPrank(delegatedSigner1);
@@ -72,7 +72,7 @@ contract GameTest is Test, SigUtils {
         }
 
         GaslessGame.GaslessMoveData memory moveData =
-            GaslessGame.GaslessMoveData(move, signature1);
+            GaslessGame.GaslessMoveData(move1, signature1);
 
         gaslessGame.verifyMoveDelegated(rawSignedDelegation1, abi.encode(moveData));
 
@@ -101,16 +101,16 @@ contract GameTest is Test, SigUtils {
         vm.stopPrank();
 
         // 2) Sign Move with Delegated Address
-        uint16[] memory moves2 = new uint16[](1);
+        uint16[] memory moves2 = new uint16[](2);
         moves2[0] = 1; // first move
         moves2[1] = 2;
 
         GaslessGame.GaslessMove memory move2 =
             GaslessGame.GaslessMove(address(0), 0, 0, moves2);
         bytes32 movesHash2 = getTypedDataHashMove(move2, address(gaslessGame));
-        console.logBytes32(movesHash1);
+        console.logBytes32(movesHash2);
 
-        vm.startPrank(delegatedSigner1);
+        vm.startPrank(delegatedSigner2);
         bytes memory signature2;
         {
             (uint8 v, bytes32 r, bytes32 s) = vm.sign(delegatedPrivateKey2, movesHash2);
@@ -118,7 +118,7 @@ contract GameTest is Test, SigUtils {
         }
 
         GaslessGame.GaslessMoveData memory moveData2 =
-            GaslessGame.GaslessMoveData(move, signature2);
+            GaslessGame.GaslessMoveData(move2, signature2);
 
         gaslessGame.verifyMoveDelegated(rawSignedDelegation2, abi.encode(moveData2));
 
