@@ -34,11 +34,11 @@ contract GameTest is Test, SigUtils {
         address delegatedSigner2 = vm.addr(delegatedPrivateKey2);
 
         // 1) Create Delegation
-        GaslessGame.Delegation memory delegation =
+        GaslessGame.Delegation memory delegation1 =
             GaslessGame.Delegation(user1, delegatedSigner1, address(0));
 
         bytes32 delegationHash1 =
-            getTypedDataHashDelegation(delegation, address(gaslessGame));
+            getTypedDataHashDelegation(delegation1, address(gaslessGame));
 
         vm.startPrank(user1);
         bytes memory delegationSig1;
@@ -48,14 +48,14 @@ contract GameTest is Test, SigUtils {
         }
 
         GaslessGame.SignedDelegation memory signedDelegation1 =
-            GaslessGame.SignedDelegation(delegation, delegationSig1);
+            GaslessGame.SignedDelegation(delegation1, delegationSig1);
 
         bytes memory rawSignedDelegation1 = abi.encode(signedDelegation1);
 
         gaslessGame.verifyDelegation(rawSignedDelegation1);
         vm.stopPrank();
 
-        // USER 1
+        // 2) Sign Move with Delegated Address
         uint16[] memory moves1 = new uint16[](1);
         moves1[0] = 1; // first move
 
@@ -74,13 +74,53 @@ contract GameTest is Test, SigUtils {
         GaslessGame.GaslessMoveData memory moveData =
             GaslessGame.GaslessMoveData(move, signature1);
 
-        console.log("Signer");
-        console.log(delegatedSigner1);
-
-        console.log("USER1");
-        console.log(user1);
-
         gaslessGame.verifyMoveDelegated(rawSignedDelegation1, abi.encode(moveData));
+
+        vm.stopPrank();
+
+        // 2) Create Delegation #2
+        GaslessGame.Delegation memory delegation2 =
+            GaslessGame.Delegation(user2, delegatedSigner2, address(0));
+
+        bytes32 delegationHash2 =
+            getTypedDataHashDelegation(delegation2, address(gaslessGame));
+
+        vm.startPrank(user2);
+        bytes memory delegationSig2;
+        {
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(privateKey2, delegationHash2);
+            delegationSig2 = abi.encodePacked(r, s, v);
+        }
+
+        GaslessGame.SignedDelegation memory signedDelegation2 =
+            GaslessGame.SignedDelegation(delegation2, delegationSig2);
+
+        bytes memory rawSignedDelegation2 = abi.encode(signedDelegation2);
+
+        gaslessGame.verifyDelegation(rawSignedDelegation2);
+        vm.stopPrank();
+
+        // 2) Sign Move with Delegated Address
+        uint16[] memory moves2 = new uint16[](1);
+        moves2[0] = 1; // first move
+        moves2[1] = 2;
+
+        GaslessGame.GaslessMove memory move2 =
+            GaslessGame.GaslessMove(address(0), 0, 0, moves2);
+        bytes32 movesHash2 = getTypedDataHashMove(move2, address(gaslessGame));
+        console.logBytes32(movesHash1);
+
+        vm.startPrank(delegatedSigner1);
+        bytes memory signature2;
+        {
+            (uint8 v, bytes32 r, bytes32 s) = vm.sign(delegatedPrivateKey2, movesHash2);
+            signature2 = abi.encodePacked(r, s, v);
+        }
+
+        GaslessGame.GaslessMoveData memory moveData2 =
+            GaslessGame.GaslessMoveData(move, signature2);
+
+        gaslessGame.verifyMoveDelegated(rawSignedDelegation2, abi.encode(moveData2));
 
         vm.stopPrank();
 

@@ -137,8 +137,17 @@ contract GaslessGame is EIP712 {
         verifyMoveSigner(
             moveData, moveData.signature, signedDelegation.delegation.delegatedAddress
         );
-
     }
+
+    function verifyGameViewDelegated(
+        bytes[2] memory delegations,
+        bytes[] memory messages,
+        bytes[] memory signatures
+    )
+        external
+        view
+        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
+    { }
 
     function decodeMoveData(bytes memory moveData)
         internal
@@ -152,7 +161,6 @@ contract GaslessGame is EIP712 {
     function setChessGame(address _chessGame) external onlyDeployer {
         chessGame = ChessGame(_chessGame);
     }
-
 
     /// @notice Decodes gasless move message and returns game address
     function decodegameAddress(bytes memory message) internal pure returns (address) {
@@ -187,7 +195,6 @@ contract GaslessGame is EIP712 {
         require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
     }
 
-
     function verifyGameView(
         bytes[] memory messages,
         bytes[] memory signatures
@@ -199,7 +206,7 @@ contract GaslessGame is EIP712 {
 
     /*
       //// DELEGATED GASLESS MOVE VERIFICATION FUNCTIONS ////
-      */
+    */
 
     /// @notice Create delegation data type helper function
     function createDelegation(
@@ -287,17 +294,6 @@ contract GaslessGame is EIP712 {
             "Invalid signature"
         );
     }
-
-    function verifyGameViewDelegated(
-        bytes[2] memory delegations,
-        bytes[] memory messages,
-        bytes[] memory signatures
-    )
-        external
-        view
-        returns (address gameAddress, uint8 outcome, uint16[] memory moves)
-    { }
-
     /*     /// @notice Verify game moves via delegated signature
     function verifyGameViewDelegated(
         bytes[2] memory delegations,
