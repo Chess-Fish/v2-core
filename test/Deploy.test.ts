@@ -47,7 +47,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			moveVerification.address,
 			gaslessGame.address,
 			tournament.address,
-			tournament.address
+			dividendSplitter,
+			chessNFT.address	
 		);
 
 		await chessGame.initCoordinatesAndSymbols(
