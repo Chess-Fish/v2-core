@@ -39,9 +39,9 @@ describe("ChessFish NFT Unit Tests", function () {
 		const GaslessGame = await ethers.getContractFactory("GaslessGame");
 		const gaslessGame = await GaslessGame.deploy();
 
-		const Tournament = await ethers.getContractFactory("ChessFishTournament");
+		const Tournament = await ethers.getContractFactory("Tournament");
 		const tournament = await Tournament.deploy(await chessGame.getAddress(), addressZero);
- 
+
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
@@ -52,13 +52,14 @@ describe("ChessFish NFT Unit Tests", function () {
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
 			await chessGame.getAddress(),
-            await moveVerification.getAddress(),
+			await moveVerification.getAddress(),
+			await tournament.getAddress(),
 			await pieceSVG.getAddress(),
 			await tokenSVG.getAddress()
 		);
 
-        await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
-        await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
+		await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
+		await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
 
 		// Initializing
 		await chessGame.initialize(
@@ -80,60 +81,64 @@ describe("ChessFish NFT Unit Tests", function () {
 		const initialBlack = "0x383f3cff";
 
 		return {
- 			chessGame,
+			chessGame,
 			gaslessGame,
 			moveVerification,
 			tournament,
-		 	chessNFT,
-            pieceSVG,
-            tokenSVG,
+			chessNFT,
+			pieceSVG,
+			tokenSVG,
 			deployer,
 			otherAccount,
 			initalState,
 			initialWhite,
-			initialBlack, 
+			initialBlack,
 		};
 	}
-    
+
 	describe("NFT Tests", function () {
 		it("Should deploy", async function () {
-			const { chessGame, gaslessGame, moveVerification, tournament, chessNFT, pieceSVG, tokenSVG } = await loadFixture(deploy);
+			const { chessGame, moveVerification, chessNFT, pieceSVG, tokenSVG } = await loadFixture(
+				deploy
+			);
 
-            expect(await chessGame.getAddress()).to.equal(await chessNFT.chessGame());
-            expect(await moveVerification.getAddress()).to.equal(await chessNFT.moveVerification());
-            expect(await pieceSVG.getAddress()).to.equal(await chessNFT.pieceSVG());
-            expect(await tokenSVG.getAddress()).to.equal(await chessNFT.tokenSVG());
+			expect(await chessGame.getAddress()).to.equal(await chessNFT.chessGame());
+			expect(await moveVerification.getAddress()).to.equal(await chessNFT.moveVerification());
+			expect(await pieceSVG.getAddress()).to.equal(await chessNFT.pieceSVG());
+			expect(await tokenSVG.getAddress()).to.equal(await chessNFT.tokenSVG());
 
+			// const svgURI = await chessNFT.tokenURI(0);
 
-            console.log(await chessNFT.getAddress());
-            console.log(await chessNFT.chessGame());
-            console.log(await chessNFT.moveVerification());
-            console.log(await chessNFT.pieceSVG());
-            console.log(await chessNFT.tokenSVG());
+			const svgURI = await chessNFT.generateBoardSVG(
+				"R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
+				"0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20",
+				"0x388C818CA8B9251b393131C08a736A67ccB19297",
+				1632825600,
+				"0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
+				true,
+				7
+			);
 
+			// Step 1: Decode the JSON object from base64
+			const jsonBase64 = svgURI.split(",")[1]; // Assuming the structure is "data:application/json;base64,..."
+			const jsonString = Buffer.from(jsonBase64, "base64").toString("utf-8");
 
-			const svgURI = await chessNFT.tokenURI(0);
+			// Step 2: Parse the JSON to extract the SVG
+			const json = JSON.parse(jsonString);
+			const svgBase64 = json.image.split(",")[1]; // Assuming the image data starts with "data:image/svg+xml;base64,"
 
-			const svgBase64 = svgURI.split(",")[1]; // Assuming the structure is "data:image/svg+xml;base64,..."
+			// Step 3: Decode the SVG data from base64
 			const svgContent = Buffer.from(svgBase64, "base64").toString("utf-8");
 
 			// Define the file path for the output HTML file
 			const filePath = path.join(__dirname, "SVG_output.html");
 
 			// Write the SVG content to the file
-			fs.writeFileSync(filePath, svgContent); 
-			/*             // Step 1: Decode the JSON object from base64
-            const jsonBase64 = svgURI.split(',')[1]; // Assuming the structure is always "data:application/json;base64,..."
-            const jsonString = Buffer.from(jsonBase64, 'base64').toString('utf-8');
-        
-            // Step 2: Parse the JSON to extract the SVG
-            const json = JSON.parse(jsonString);
-            const svgBase64 = json.image.split(',')[1]; // Assuming the image data is always "data:image/svg+xml;base64,..."
-        
-            // Step 3: Decode the SVG data from base64
-            const svgContent = Buffer.from(svgBase64, 'base64').toString('utf-8');
-         */
-			// console.log(svgContent);
+			fs.writeFileSync(filePath, svgContent);
+
+			console.log(json.name);
+			console.log(json.description);
+			console.log(json.attributes);
 		});
 	});
 });

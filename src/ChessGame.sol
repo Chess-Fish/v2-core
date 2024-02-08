@@ -87,6 +87,9 @@ contract ChessGame is Initializable, MoveHelper {
     /// @dev player can see game challenges
     mapping(address => address[]) public userGames;
 
+    /// @dev gameAddress => tournamentID
+    mapping(address => uint256) public tournamentGames;
+
     /// @dev address[] games
     address[] public allGames;
 

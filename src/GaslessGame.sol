@@ -60,6 +60,18 @@ contract GaslessGame is Initializable, EIP712 {
         bytes signature;
     }
 
+    struct GaslessMove {
+        address gameAddress;
+        uint256 gameNumber;
+        uint256 expiration;
+        uint16[] moves;
+    }
+
+    struct GaslessMoveData {
+        GaslessMove move;
+        bytes signature;
+    }
+
     /// @dev MoveVerification contract
     MoveVerification public moveVerification;
 
@@ -102,23 +114,20 @@ contract GaslessGame is Initializable, EIP712 {
         chessGame = ChessGame(_chessGame);
     }
 
-    struct GaslessMove {
-        address gameAddress;
-        uint256 gameNumber;
-        uint256 expiration;
-        uint16[] moves;
+    function encodeMoveMessage(GaslessMove memory move, bytes memory signature)
+        external
+        pure
+        returns (bytes memory)
+    {
+        GaslessMoveData memory moveData = GaslessMoveData(move, signature);
+        return abi.encode(moveData);
     }
 
-    struct GaslessMoveData {
-        GaslessMove move;
-        bytes signature;
-    }
-
-    function verifyDelegation(bytes memory rawSignedDelegation) external returns (bool) {
+/*     function verifyDelegation(bytes memory rawSignedDelegation) external returns (bool) {
         SignedDelegation memory signedDelegation =
             decodeSignedDelegation(rawSignedDelegation);
         verifyDelegation(signedDelegation);
-    }
+    } */
 
     function verifyGameViewDelegatedSingle(
         bytes memory rawSignedDelegation,
@@ -220,11 +229,6 @@ contract GaslessGame is Initializable, EIP712 {
         returns (GaslessMoveData memory)
     {
         return abi.decode(moveData, (GaslessMoveData));
-    }
-
-    /// @notice set ChessGame contract
-    function setChessGame(address _chessGame) external onlyDeployer {
-        chessGame = ChessGame(_chessGame);
     }
 
     /// @dev typed signature verification
@@ -338,6 +342,9 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
+        console.log("VERIFY SIG");
+        console.log(ECDSA.recover(digest, signedDelegation.signature));
+        console.log(signedDelegation.delegation.delegatorAddress);
         require(
             ECDSA.recover(digest, signedDelegation.signature)
                 == signedDelegation.delegation.delegatorAddress,

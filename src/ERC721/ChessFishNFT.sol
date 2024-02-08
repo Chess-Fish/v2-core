@@ -21,6 +21,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
 import { MoveVerification } from "./../MoveVerification.sol";
+import { ChessGame } from "./../ChessGame.sol";
+import { Tournament } from "./../Tournament.sol";
 
 import "./PieceSVG.sol";
 import "./TokenSVG.sol";
@@ -33,12 +35,15 @@ contract ChessFishNFT is ERC721 {
     mapping(uint256 => address) public gameAddresses;
 
     ChessGame public immutable chessGame;
-    MoveVerification public moveVerification;
+    MoveVerification public immutable moveVerification;
+    Tournament public immutable tournament;
 
     PieceSVG public pieceSVG;
     TokenSVG public tokenSVG;
 
     address public deployer;
+
+    mapping(address => uint256) internal endTime;
 
     modifier onlyChessGame() {
         require(msg.sender == address(chessGame));
@@ -53,14 +58,17 @@ contract ChessFishNFT is ERC721 {
     constructor(
         address _chessGame,
         address _moveVerification,
+        address _tournament,
         address _pieceSVG,
         address _tokenSVG
     )
-        ERC721("ChessFishNFT", "CFSH")
+        ERC721("ChessFishNFT", "CFSH_NFT")
     {
         deployer = msg.sender;
         chessGame = ChessGame(_chessGame);
         moveVerification = MoveVerification(_moveVerification);
+        tournament = Tournament(_tournament);
+
         pieceSVG = PieceSVG(_pieceSVG);
         tokenSVG = TokenSVG(_tokenSVG);
     }
@@ -77,23 +85,59 @@ contract ChessFishNFT is ERC721 {
         _mint(player, tokenId);
         gameAddresses[tokenId] = gameAddress;
 
+        endTime[gameAddress] = block.timestamp;
+
         _tokenIdCounter += 1;
 
         return tokenId;
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
+        ChessGame.GameData memory gameData = chessGame.getGameData(gameAddresses[id]);
+        uint256 gameID = gameData.numberOfGames;
+
+        uint16[] memory gameMoves =
+            chessGame.getGameMoves(gameAddresses[id], gameID).moves;
+
+        (, uint256 gameState,,) = moveVerification.checkGameFromStart(gameMoves);
+
+        string[64] memory boardStringArray = chessGame.getBoard(gameState);
+
+        string memory boardString = arrayToString(boardStringArray);
+
+        uint256 place;
+        if (gameData.isTournament) {
+            address owner = ownerOf(id);
+            uint256 tournamentId = chessGame.tournamentGames(gameAddresses[id]);
+            place = tournament.getPlayerRankByWins(tournamentId, owner);
+        } else {
+            place = 0;
+        }
+
+        uint256 _endTime = endTime[gameAddresses[id]];
+
         return generateBoardSVG(
-            // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
-            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
-            address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20), // winner
-            address(0x388C818CA8B9251b393131C08a736A67ccB19297), // loser
-            block.timestamp, // endtime
-            address(0x82aF49447D8a07e3bd95BD0d56f35241523fBab1), // token
-            true, // wasTournament
-            7 // place in tournament
+            boardString,
+            gameData.player0,
+            gameData.player1,
+            _endTime,
+            gameData.gameToken,
+            gameData.isTournament,
+            place
         );
-        // return _buildTokenURI(id);
+    }
+
+    function arrayToString(string[64] memory array) public pure returns (string memory) {
+        string memory result = "";
+        for (uint256 i = 0; i < array.length; i++) {
+            // Append the current element
+            result = string(abi.encodePacked(result, array[i]));
+            // Append a comma after the element unless it's the last one
+            if (i < array.length - 1) {
+                result = string(abi.encodePacked(result, ","));
+            }
+        }
+        return result;
     }
 
     function bytes1ToString(bytes1 _byte) public pure returns (string memory) {
@@ -161,7 +205,38 @@ contract ChessFishNFT is ERC721 {
         svg = paramsContainer(svg, player0, player1, endTime, token, isTournament, place);
 
         svg = abi.encodePacked(svg, "</svg>");
-        return string(abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg)));
+        // return string(abi.encodePacked("data:image/svg+xml;base64,",
+        // Base64.encode(svg)));
+
+        bytes memory image =
+            abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg));
+
+        string memory json = string(
+            abi.encodePacked(
+                '{"name":"ChessFish NFT #',
+                uint2str(_tokenIdCounter),
+                '",',
+                '"description":"",',
+                '"external_url":"https://app.chess.fish/",',
+                '"image":"',
+                image,
+                '",',
+                '"attributes":[',
+                '{"trait_type":"Base","value":"',
+                getPlaceSVG(place),
+                '"}',
+                "]"
+            )
+        );
+
+        // Close the JSON structure
+        json = string(abi.encodePacked(json, "}"));
+
+        string memory output = string(
+            abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json)))
+        );
+
+        return output;
     }
 
     function paramsContainer(

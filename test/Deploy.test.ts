@@ -20,8 +20,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const GaslessGame = await ethers.getContractFactory("GaslessGame");
 		const gaslessGame = await GaslessGame.deploy();
 
-		const Tournament = await ethers.getContractFactory("ChessFishTournament");
-		const tournament = await Tournament.deploy(await chessGame.getAddress(), addressZero);
+		const Tournament = await ethers.getContractFactory("Tournament");
+		const tournament = await Tournament.deploy(await chessGame.getAddress(), dividendSplitter);
  
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
@@ -34,6 +34,7 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const chessNFT = await ChessFishNFT.deploy(
 			await chessGame.getAddress(),
             await moveVerification.getAddress(),
+			await tournament.getAddress(),
 			await pieceSVG.getAddress(),
 			await tokenSVG.getAddress()
 		);
@@ -83,5 +84,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			const moveVerificationAddress = await chessGame.moveVerification();
 			expect(moveVerificationAddress).to.equal(await moveVerification.getAddress()); 
 		});
+
+		
+
 	});
 });

@@ -27,10 +27,10 @@ import "./interfaces/interfaces.sol";
  * This contract creates wagers in the ChessWager smart contract and then reads the result
  * of the created wagers to calculate the number of wins for each user in the tournament.
  */
-contract ChessFishTournament {
+contract Tournament {
     using SafeERC20 for IERC20;
 
-    struct Tournament {
+    struct TournamentParams {
         uint256 numberOfPlayers; // number of players in tournament
         address[] authedPlayers; // authenticated players
         address[] joinedPlayers; // joined players
@@ -67,7 +67,7 @@ contract ChessFishTournament {
     uint256 public tournamentNonce;
 
     /// @dev uint tournamentNonce => Tournament struct
-    mapping(uint256 => Tournament) public tournaments;
+    mapping(uint256 => TournamentParams) public tournaments;
 
     /// @dev uint tournament nonce => address[] gameIDs
     mapping(uint256 => address[]) internal tournamentGameAddresses;
@@ -146,6 +146,71 @@ contract ChessFishTournament {
         }
 
         return (players, wins);
+    }
+
+    /// @notice Returns the rank of a player in a tournament based on wins
+    /// @param tournamentID The ID of the tournament
+    /// @param playerAddress The address of the player whose rank is to be found
+    /// @return rank The rank of the player in the tournament (1-based index), returns 0
+    /// if the player did not join or the tournament is not finished
+    function getPlayerRankByWins(
+        uint256 tournamentID,
+        address playerAddress
+    )
+        public
+        view
+        returns (uint256 rank)
+    {
+        // Check if tournament is finished
+        require(
+            tournaments[tournamentID].timeLimit
+                < block.timestamp - tournaments[tournamentID].startTime,
+            "Tournament not finished yet"
+        );
+
+        address[] memory players = tournaments[tournamentID].joinedPlayers;
+        PlayerWins[] memory playerWinsArray = new PlayerWins[](players.length);
+
+        // Populate the playerWinsArray
+        for (uint256 i = 0; i < players.length;) {
+            playerWinsArray[i] = PlayerWins({
+                player: players[i],
+                wins: tournamentWins[tournamentID][players[i]]
+            });
+            unchecked {
+                i++;
+            }
+        }
+
+        // Bubble sort (consider optimizing for large arrays)
+        bool swapped;
+        for (uint256 i = 0; i < playerWinsArray.length - 1;) {
+            swapped = false;
+            for (uint256 j = 0; j < playerWinsArray.length - i - 1;) {
+                if (playerWinsArray[j].wins < playerWinsArray[j + 1].wins) {
+                    // swap
+                    (playerWinsArray[j], playerWinsArray[j + 1]) =
+                        (playerWinsArray[j + 1], playerWinsArray[j]);
+                    swapped = true;
+                }
+                unchecked {
+                    j++;
+                }
+            }
+            if (!swapped) break;
+            unchecked {
+                i++;
+            }
+        }
+
+        // Find the rank of the playerAddress
+        for (uint256 i = 0; i < playerWinsArray.length; i++) {
+            if (playerWinsArray[i].player == playerAddress) {
+                return i + 1; // Return 1-based rank
+            }
+        }
+
+        return 0; // Player not found or did not join
     }
 
     /// @notice Returns addresses winners sorted by highest wins
@@ -271,7 +336,7 @@ contract ChessFishTournament {
             require(tokenAmount == 0, "not zero");
         }
 
-        Tournament memory tournament;
+        TournamentParams memory tournament;
 
         address[] memory player = new address[](1);
         player[0] = msg.sender;
@@ -312,7 +377,7 @@ contract ChessFishTournament {
         require(numberOfGames > 0, "numberOfGames > 0");
         require(specificPlayers.length <= 25, "lte 25");
 
-        Tournament memory tournament;
+        TournamentParams memory tournament;
 
         // Use the provided specific players
         tournament.authedPlayers = specificPlayers;

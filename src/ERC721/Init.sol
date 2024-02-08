@@ -43,13 +43,7 @@ contract Init {
         deployer = msg.sender;
     }
 
-    function initialize(
-        address _NFT
-    )
-        external
-        onlyDeployer
-        checkIsSet
-    {
+    function initialize(address _NFT) external onlyDeployer checkIsSet {
         NFT = IChessFishNFT(_NFT);
         isSet = true;
     }

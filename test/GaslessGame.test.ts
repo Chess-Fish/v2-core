@@ -2,71 +2,67 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { coordinates_array, bitCoordinates_array } from "../scripts/constants";
+import {
+	generateRandomHash,
+	coordinates_array,
+	bitCoordinates_array,
+	pieceSymbols,
+} from "../scripts/constants";
 
 describe("ChessFish Wager Unit Tests", function () {
-	// We define a fixture to reuse the same setup in every test.
 	async function deploy() {
-		const [deployer, otherAccount] = await ethers.getSigners();
+		const [signer0, signer1] = await ethers.getSigners();
 
-		const ERC20_token = await ethers.getContractFactory("Token");
-		const token = await ERC20_token.deploy();
+		const addressZero = "0x0000000000000000000000000000000000000000";
+		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
-		const ChessFishToken = await ethers.getContractFactory("ChessFish");
-		const chessFishToken = await ChessFishToken.deploy(deployer.address);
-		await chessFishToken.deployed();
-
-		const PaymentSplitter = await ethers.getContractFactory("PaymentSplitter");
-		const paymentSplitter = await PaymentSplitter.deploy(chessFishToken.address);
-		await paymentSplitter.deployed();
-
-        const MoveVerification = await ethers.getContractFactory("MoveVerification");
+		const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
 
 		const ChessGame = await ethers.getContractFactory("ChessGame");
 		const chessGame = await ChessGame.deploy();
 
-		await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
+		const GaslessGame = await ethers.getContractFactory("GaslessGame");
+		const gaslessGame = await GaslessGame.deploy();
 
-        const GaslessGame = await ethers.getContractFactory("GaslessGame");
-        const gaslessGame = await GaslessGame.deploy(
-            await moveVerification.getAddress(),
-            await chessGame.getAddress()
-        )
+		const Tournament = await ethers.getContractFactory("Tournament");
+		const tournament = await Tournament.deploy(await chessGame.address, addressZero);
 
-
-
-
-
+		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
 
 		const TokenSVG = await ethers.getContractFactory("TokenSVG");
 		const tokenSVG = await TokenSVG.deploy();
 
+		console.log(await tokenSVG.address);
+
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
-			await chessGame.getAddress(),
-			await pieceSVG.getAddress(),
-			await tokenSVG.getAddress()
+			chessGame.address,
+			moveVerification.address,
+			tournament.address,
+			pieceSVG.address,
+			tokenSVG.address
 		);
 
-		await pieceSVG.connect(deployer).setNFT(await chessNFT.getAddress());
-		await tokenSVG.connect(deployer).setNFT(await tokenSVG.getAddress());
+		await pieceSVG.initialize(chessNFT.address);
+		await tokenSVG.initialize(chessNFT.address);
 
-		await gaslessGame.setChessWager(chess.address);
+		// Initializing
+		await chessGame.initialize(
+			moveVerification.address,
+			gaslessGame.address,
+			tournament.address,
+			tournament.address,
+			chessNFT.address
+		);
 
-
-
-
-
-
-
-		const amount = ethers.utils.parseEther("100");
-		await token.transfer(otherAccount.address, amount);
-
-		await chess.initCoordinates(coordinates_array, bitCoordinates_array);
-		await chessNFT.setChessFishAddress(chess.address);
+		await chessGame.initCoordinatesAndSymbols(
+			coordinates_array,
+			bitCoordinates_array,
+			pieceSymbols
+		);
 
 		// typed signature data
 		const domain = {
@@ -76,120 +72,122 @@ describe("ChessFish Wager Unit Tests", function () {
 			version: "1", // version
 		};
 
-		const types = {
+		const delegationTypes = {
+			Delegation: [
+				{ name: "delegatorAddress", type: "address" },
+				{ name: "delegatedAddress", type: "address" },
+				{ name: "gameAddress", type: "address" },
+			],
+		};
+
+		const gaslessMoveTypes = {
 			GaslessMove: [
-				{ name: "wagerAddress", type: "address" },
+				{ name: "gameAddress", type: "address" },
 				{ name: "gameNumber", type: "uint" },
-				{ name: "moveNumber", type: "uint" },
-				{ name: "move", type: "uint16" },
 				{ name: "expiration", type: "uint" },
+				{ name: "moves", type: "uint16[]" },
 			],
 		};
 
 		return {
-			chess,
+			signer0,
+			signer1,
+			chessGame,
 			gaslessGame,
-			chessFishToken,
-			paymentSplitter,
+			dividendSplitter,
 			chessNFT,
-			deployer,
-			otherAccount,
-			token,
 			domain,
-			types,
+			delegationTypes,
+			gaslessMoveTypes,
+			addressZero,
 		};
 	}
 
 	describe("Gasless Game Verification Unit Tests", function () {
 		it("Should play game", async function () {
-			const { chess, gaslessGame, deployer, otherAccount, token, domain, types } =
+			const { signer0, signer1, chessGame, gaslessGame, domain, delegationTypes, gaslessMoveTypes, addressZero } =
 				await loadFixture(deploy);
 
-			let player1 = otherAccount.address;
-			let wagerToken = token.address;
-			let wager = ethers.utils.parseEther("1.0");
-			let maxTimePerMove = 86400;
-			let numberOfGames = 3;
+			const entropy0 = generateRandomHash();
+			const delegatedSigner0 = ethers.Wallet.createRandom(entropy0);
 
-			await token.approve(chess.address, wager);
+			// 2) create deletation and hash it
+			const delegationData0 = [signer0.address, delegatedSigner0.address, addressZero];
 
-			let tx = await chess
-				.connect(deployer)
-				.createGameWager(player1, wagerToken, wager, maxTimePerMove, numberOfGames);
-			await tx.wait();
+			// 3 Sign Typed Data V4
+			const message0 = {
+				delegatorAddress: delegationData0[0],
+				delegatedAddress: delegationData0[1],
+				gameAddress: delegationData0[2],
+			};
 
-			let wagerAddress = await chess.userGames(deployer.address, 0);
-			let wagerAddress1 = await chess.userGames(otherAccount.address, 0);
-			expect(wagerAddress).to.equal(wagerAddress1);
+			// Sign the data
+			const signature0 = await signer0._signTypedData(domain, delegationTypes, message0);
 
-			// const moves = ["f2f3", "e7e5", "g2g4", "d8h4"]; // fool's mate
-			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
-			// approve chess contract
-			await token.connect(otherAccount).approve(chess.address, wager);
+			const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(message0, signature0);
 
-			// accept wager terms
-			let tx1 = await chess.connect(otherAccount).acceptWager(wagerAddress);
-			await tx1.wait();
+		    // ON THE FRONT END user 1
+			// 1) Generate random public private key pair
+			const entropy1 = generateRandomHash();
+			const delegatedSigner1 = ethers.Wallet.createRandom(entropy1);
+
+			// 2) create deletation and hash it
+			const delegationData1 = [signer1.address, delegatedSigner1.address, addressZero];
+
+			// 3 Sign Typed Data V4
+			const message1 = {
+				delegatorAddress: delegationData1[0],
+				delegatedAddress: delegationData1[1],
+				gameAddress: delegationData1[2],
+			};
+
+			const signature1 = await signer1._signTypedData(domain, delegationTypes, message1);
+
+			const signedDelegationData1 = await gaslessGame.encodeSignedDelegation(message1, signature1);
+
+            const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
 			const timeNow = Date.now();
-			const timeStamp = Math.floor(timeNow / 1000) + 86400 * 2; // plus two days
+			const timeStamp = Math.floor(timeNow / 1000) + 86400;
 
-			//// #### FIRST GAME #### ////
-			for (let game = 0; game < numberOfGames; game++) {
-				// reseting gasless data after each game
+			for (let game = 0; game < 1; game++) {
 				let messageArray: any[] = [];
 				let signatureArray: any[] = [];
-
-				let playerAddress = await chess.getPlayerMove(wagerAddress);
-				let startingPlayer = playerAddress === otherAccount.address ? otherAccount : deployer;
+                const hex_move_array: any = [];
 
 				for (let i = 0; i < moves.length; i++) {
-					let player;
-					if (i % 2 == 0) {
-						player = startingPlayer;
-					} else {
-						player = startingPlayer.address === otherAccount.address ? deployer : otherAccount;
-					}
+                    const player = i % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
 
-					const hex_move = await chess.moveToHex(moves[i]);
+                    const hex_move = await chessGame.moveToHex(moves[i]);
 
-					const messageData = {
-						wagerAddress: wagerAddress,
-						gameNumber: game,
-						moveNumber: i,
-						move: hex_move,
+                    hex_move_array.push(hex_move);
+                    
+                    const messageData = {
+						gameAddress: addressZero,
+						gameNumber: 0,
 						expiration: timeStamp,
+                        moves: hex_move_array,
 					};
-					const message = await gaslessGame.encodeMoveMessage(messageData);
-					messageArray.push(message);
-
-					const signature = await player._signTypedData(domain, types, messageData);
+					console.log(messageData);
+                    
+                    const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
 					signatureArray.push(signature);
 
-					const recoveredAddress = ethers.utils.verifyTypedData(
-						domain,
-						types,
-						messageData,
-						signature
-					);
-
-					expect(recoveredAddress.toLowerCase()).to.equal(player.address.toLowerCase());
+                    const message = await gaslessGame.encodeMoveMessage(messageData, signature);
+					messageArray.push(message);
 				}
-				await chess.verifyGameUpdateState(messageArray, signatureArray);
+				const delegations = [signedDelegationData0, signedDelegationData1];
+
+                const lastTwoMoves = messageArray.slice(-2);
+
+                console.log("SIGNER0",signer0.address);
+                console.log("SIGNER1",signer1.address);
+                console.log("DELEGATED SIGNER0",delegatedSigner0.address);
+                console.log("DELEGATED SIGNER1",delegatedSigner1.address);
+                
+    			await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
-
-			const wins = await chess.wagerStatus(wagerAddress);
-
-			const winsPlayer0 = Number(wins.winsPlayer0);
-			const winsPlayer1 = Number(wins.winsPlayer1);
-
-			expect(winsPlayer0).to.equal(1);
-			expect(winsPlayer1).to.equal(2);
-
-			const wagerAddresses = await chess.getAllUserGames(player1);
-			const gameLength = await chess.getGameLength(wagerAddresses[0]);
-			expect(gameLength).to.equal(3);
 		});
 	});
 });
