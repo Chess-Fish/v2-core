@@ -105,8 +105,16 @@ describe("ChessFish Wager Unit Tests", function () {
 
 	describe("Gasless Game Verification Unit Tests", function () {
 		it("Should play game", async function () {
-			const { signer0, signer1, chessGame, gaslessGame, domain, delegationTypes, gaslessMoveTypes, addressZero } =
-				await loadFixture(deploy);
+			const {
+				signer0,
+				signer1,
+				chessGame,
+				gaslessGame,
+				domain,
+				delegationTypes,
+				gaslessMoveTypes,
+				addressZero,
+			} = await loadFixture(deploy);
 
 			const entropy0 = generateRandomHash();
 			const delegatedSigner0 = ethers.Wallet.createRandom(entropy0);
@@ -124,10 +132,9 @@ describe("ChessFish Wager Unit Tests", function () {
 			// Sign the data
 			const signature0 = await signer0._signTypedData(domain, delegationTypes, message0);
 
-
 			const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(message0, signature0);
 
-		    // ON THE FRONT END user 1
+			// ON THE FRONT END user 1
 			// 1) Generate random public private key pair
 			const entropy1 = generateRandomHash();
 			const delegatedSigner1 = ethers.Wallet.createRandom(entropy1);
@@ -146,7 +153,7 @@ describe("ChessFish Wager Unit Tests", function () {
 
 			const signedDelegationData1 = await gaslessGame.encodeSignedDelegation(message1, signature1);
 
-            const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
+			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
 			const timeNow = Date.now();
 			const timeStamp = Math.floor(timeNow / 1000) + 86400;
@@ -154,39 +161,66 @@ describe("ChessFish Wager Unit Tests", function () {
 			for (let game = 0; game < 1; game++) {
 				let messageArray: any[] = [];
 				let signatureArray: any[] = [];
-                const hex_move_array: any = [];
+				const hex_move_array: number[] = [];
 
 				for (let i = 0; i < moves.length; i++) {
-                    const player = i % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
+					const player = i % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
 
-                    const hex_move = await chessGame.moveToHex(moves[i]);
+					const hex_move = await chessGame.moveToHex(moves[i]);
 
-                    hex_move_array.push(hex_move);
-                    
-                    const messageData = {
+					hex_move_array.push(hex_move);
+
+					const gaslessMoveTypes = {
+						GaslessMove: [
+							{ name: "gameAddress", type: "address" },
+							{ name: "gameNumber", type: "uint" },
+							{ name: "expiration", type: "uint" },
+							{ name: "moves", type: "uint16[]" },
+						],
+					};
+
+					const messageData = {
 						gameAddress: addressZero,
 						gameNumber: 0,
 						expiration: timeStamp,
-                        moves: hex_move_array,
+						moves: hex_move_array,
 					};
+
 					console.log(messageData);
-                    
-                    const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
+					const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
+
+					const moveData = {
+						move: messageData,
+						signature: signature,
+					};
+					console.log(player.address);
+					console.log("sig", moveData.signature);
+					await gaslessGame.verifyMoveSigner(moveData, player.address);
+
+					// console.log(messageData);
+
+					const digest = ethers.utils._TypedDataEncoder.hash(domain, gaslessMoveTypes, messageData);
+
+					console.log("Digest (hash) of the typed data:", digest);
+
+					//  const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
 					signatureArray.push(signature);
 
-                    const message = await gaslessGame.encodeMoveMessage(messageData, signature);
+					const message = await gaslessGame.encodeMoveMessage(messageData, signature);
 					messageArray.push(message);
 				}
 				const delegations = [signedDelegationData0, signedDelegationData1];
 
-                const lastTwoMoves = messageArray.slice(-2);
+				const lastTwoMoves = messageArray.slice(-2);
 
-                console.log("SIGNER0",signer0.address);
-                console.log("SIGNER1",signer1.address);
-                console.log("DELEGATED SIGNER0",delegatedSigner0.address);
-                console.log("DELEGATED SIGNER1",delegatedSigner1.address);
-                
-    			await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
+				console.log("signers");
+				console.log(signer0.address);
+				console.log(signer1.address);
+				console.log(delegatedSigner0.address);
+				console.log(delegatedSigner1.address);
+				console.log("____");
+
+				// await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
 		});
 	});

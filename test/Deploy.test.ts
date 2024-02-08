@@ -21,8 +21,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const gaslessGame = await GaslessGame.deploy();
 
 		const Tournament = await ethers.getContractFactory("Tournament");
-		const tournament = await Tournament.deploy(await chessGame.getAddress(), dividendSplitter);
- 
+		const tournament = await Tournament.deploy(chessGame.address, dividendSplitter);
+
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
@@ -32,23 +32,22 @@ describe("ChessFish Game Verification Unit Tests", function () {
 
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
-			await chessGame.getAddress(),
-            await moveVerification.getAddress(),
-			await tournament.getAddress(),
-			await pieceSVG.getAddress(),
-			await tokenSVG.getAddress()
+			chessGame.address,
+			moveVerification.address,
+			tournament.address,
+			pieceSVG.address,
+			tokenSVG.address
 		);
 
-        await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
-        await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
+		await pieceSVG.connect(deployer).initialize(chessNFT.address);
+		await tokenSVG.connect(deployer).initialize(chessNFT.address);
 
 		// Initializing
 		await chessGame.initialize(
-			await moveVerification.getAddress(),
-			await gaslessGame.getAddress(),
-			await tournament.getAddress(),
-			await tournament.getAddress(),
-			await chessNFT.getAddress()
+			moveVerification.address,
+			gaslessGame.address,
+			tournament.address,
+			tournament.address
 		);
 
 		await chessGame.initCoordinatesAndSymbols(
@@ -62,30 +61,27 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const initialBlack = "0x383f3cff";
 
 		return {
- 			chessGame,
+			chessGame,
 			gaslessGame,
 			moveVerification,
 			tournament,
-		 	chessNFT,
+			chessNFT,
 			deployer,
 			otherAccount,
 			initalState,
 			initialWhite,
-			initialBlack, 
+			initialBlack,
 		};
 	}
 
 	describe("Functionality Tests", function () {
 		it("Should check deployement", async function () {
-			const {  chessGame, moveVerification, gaslessGame, tournament, chessNFT  } = await loadFixture(
+			const { chessGame, moveVerification, gaslessGame, tournament, chessNFT } = await loadFixture(
 				deploy
 			);
 
 			const moveVerificationAddress = await chessGame.moveVerification();
-			expect(moveVerificationAddress).to.equal(await moveVerification.getAddress()); 
+			expect(moveVerificationAddress).to.equal(moveVerification.address);
 		});
-
-		
-
 	});
 });

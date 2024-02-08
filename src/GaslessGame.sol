@@ -114,7 +114,10 @@ contract GaslessGame is Initializable, EIP712 {
         chessGame = ChessGame(_chessGame);
     }
 
-    function encodeMoveMessage(GaslessMove memory move, bytes memory signature)
+    function encodeMoveMessage(
+        GaslessMove memory move,
+        bytes memory signature
+    )
         external
         pure
         returns (bytes memory)
@@ -123,7 +126,8 @@ contract GaslessGame is Initializable, EIP712 {
         return abi.encode(moveData);
     }
 
-/*     function verifyDelegation(bytes memory rawSignedDelegation) external returns (bool) {
+    /*     function verifyDelegation(bytes memory rawSignedDelegation) external returns
+    (bool) {
         SignedDelegation memory signedDelegation =
             decodeSignedDelegation(rawSignedDelegation);
         verifyDelegation(signedDelegation);
@@ -145,7 +149,7 @@ contract GaslessGame is Initializable, EIP712 {
         console.log(signedDelegation.delegation.delegatedAddress);
 
         verifyMoveSigner(
-            moveData, moveData.signature, signedDelegation.delegation.delegatedAddress
+            moveData, signedDelegation.delegation.delegatedAddress
         );
     }
 
@@ -187,11 +191,11 @@ contract GaslessGame is Initializable, EIP712 {
         );
 
         verifyMoveSigner(
-            moveData0, moveData0.signature, signedDelegation0.delegation.delegatedAddress
+            moveData0, signedDelegation0.delegation.delegatedAddress
         );
 
         verifyMoveSigner(
-            moveData1, moveData1.signature, signedDelegation1.delegation.delegatedAddress
+            moveData1, signedDelegation1.delegation.delegatedAddress
         );
 
         checkIfAddressesArePlayers(
@@ -234,12 +238,12 @@ contract GaslessGame is Initializable, EIP712 {
     /// @dev typed signature verification
     function verifyMoveSigner(
         GaslessMoveData memory moveData,
-        bytes memory signature,
         address signer
     )
-        internal
+        public
         view
     {
+        console.log("in verifyMoveSigner");
         bytes32 digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -251,11 +255,12 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
-        console.logBytes32(digest);
+        console.log("VERIFY SIG");
+        console.logBytes(moveData.signature);
         console.log(signer);
-        console.log(ECDSA.recover(digest, signature));
+        console.log(ECDSA.recover(digest, moveData.signature));
 
-        require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
+        require(ECDSA.recover(digest, moveData.signature) == signer, "140 invalid signature");
     }
 
     /*
@@ -342,9 +347,6 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
-        console.log("VERIFY SIG");
-        console.log(ECDSA.recover(digest, signedDelegation.signature));
-        console.log(signedDelegation.delegation.delegatorAddress);
         require(
             ECDSA.recover(digest, signedDelegation.signature)
                 == signedDelegation.delegation.delegatorAddress,

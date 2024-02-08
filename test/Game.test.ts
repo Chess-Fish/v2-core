@@ -22,11 +22,11 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const chessGame = await ChessWager.deploy();
 
 		await chessGame.initialize(
-			await moveVerification.getAddress(),
-			await owner.getAddress(),
-			await owner.getAddress(),
-			await owner.getAddress(),
-			await owner.getAddress()
+			moveVerification.address,
+			owner.address,
+			owner.address,
+			owner.address,
+			owner.address
 		);
 
 		await chessGame.initCoordinatesAndSymbols(
