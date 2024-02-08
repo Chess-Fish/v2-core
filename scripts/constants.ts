@@ -207,3 +207,5 @@ export const moves_stalemate = [
 	"e5e4",
 	"f5e4",
 ];
+
+export const pieceSymbols = [".", "P", "B", "N", "R", "Q", "K", "p", "b", "n", "r", "q", "k"];

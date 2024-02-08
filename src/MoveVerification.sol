@@ -340,7 +340,8 @@ contract MoveVerification {
                         || (
                             currentTurnBlack
                                 == ((pieceToPosition & color_const) == color_const)
-                        ) // Must be moving to occupied square // Must be different
+                        ) // Must
+                        // be moving to occupied square // Must be different
                         // color
                 ) {
                     return (invalid_move_constant, 0x0);

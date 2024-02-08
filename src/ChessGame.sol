@@ -14,11 +14,12 @@ pragma solidity ^0.8.24;
 
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
+// import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 
 import "./interfaces/interfaces.sol";
 import "./MoveHelper.sol";
-
 import "./GaslessGame.sol";
 
 /**
@@ -31,7 +32,7 @@ import "./GaslessGame.sol";
  *  The Tournament contract can call into this contract to
  * create tournament matches among users.
  */
-contract ChessGame is MoveHelper {
+contract ChessGame is Initializable, MoveHelper {
     using SafeERC20 for IERC20;
 
     struct GameData {
@@ -103,21 +104,26 @@ contract ChessGame is MoveHelper {
     /// @dev Gasless Game Helper Contract
     GaslessGame public gaslessGame;
 
-    constructor(
-        address moveVerificationAddress,
-        address _GaslessGame,
-        address _DividendSplitter,
-        address _ChessFishNFT
-    ) {
-        moveVerification = MoveVerification(moveVerificationAddress);
-        gaslessGame = GaslessGame(_GaslessGame);
-
-        initPieces();
-
-        DividendSplitter = _DividendSplitter;
-        ChessFishNFT = _ChessFishNFT;
-
+    constructor() {
         deployer = msg.sender;
+    }
+
+    function initialize(
+        address _moveVerification,
+        address _gaslessGame,
+        address _tournamentHandler,
+        address _dividendSplitter,
+        address _chessFishNFT
+    )
+        public
+        initializer
+    {
+        moveVerification = MoveVerification(_moveVerification);
+        gaslessGame = GaslessGame(_gaslessGame);
+
+        TournamentHandler = _tournamentHandler;
+        DividendSplitter = _dividendSplitter;
+        ChessFishNFT = _chessFishNFT;
     }
 
     /* 
@@ -456,11 +462,6 @@ contract ChessGame is MoveHelper {
     modifier onlyTournament() {
         require(msg.sender == address(TournamentHandler), "not tournament contract");
         _;
-    }
-
-    /// @notice Adds Tournament contract
-    function addTournamentHandler(address _tournamentHandler) external OnlyDeployer {
-        TournamentHandler = _tournamentHandler;
     }
 
     /// @notice Starts tournament games

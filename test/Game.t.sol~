@@ -15,23 +15,23 @@ contract GameTest is Test, SigUtils {
 
     string mnemonic = "test test test test test test test test test test test junk";
 
+    uint256 privateKey1 = vm.deriveKey(mnemonic, 0);
+    uint256 privateKey2 = vm.deriveKey(mnemonic, 1);
+
+    address user1 = vm.addr(privateKey1);
+    address user2 = vm.addr(privateKey2);
+
+    uint256 delegatedPrivateKey1 = vm.deriveKey(mnemonic, 3);
+    uint256 delegatedPrivateKey2 = vm.deriveKey(mnemonic, 4);
+
+    address delegatedSigner1 = vm.addr(delegatedPrivateKey1);
+    address delegatedSigner2 = vm.addr(delegatedPrivateKey2);
+
     function setUp() public {
         gaslessGame = new GaslessGame(address(0));
     }
 
-    function testSignature() public {
-        uint256 privateKey1 = vm.deriveKey(mnemonic, 0);
-        uint256 privateKey2 = vm.deriveKey(mnemonic, 1);
-
-        address user1 = vm.addr(privateKey1);
-        address user2 = vm.addr(privateKey2);
-
-        uint256 delegatedPrivateKey1 = vm.deriveKey(mnemonic, 3);
-        uint256 delegatedPrivateKey2 = vm.deriveKey(mnemonic, 4);
-
-        address delegatedSigner1 = vm.addr(delegatedPrivateKey1);
-        address delegatedSigner2 = vm.addr(delegatedPrivateKey2);
-
+    function testDelegation() public {
         // 1) Create Delegation
         GaslessGame.Delegation memory delegation1 =
             GaslessGame.Delegation(user1, delegatedSigner1, address(0));

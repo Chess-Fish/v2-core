@@ -20,7 +20,6 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-import { ChessGame } from "./../ChessGame.sol";
 import { MoveVerification } from "./../MoveVerification.sol";
 
 import "./PieceSVG.sol";
@@ -51,16 +50,8 @@ contract ChessFishNFT is ERC721 {
         _;
     }
 
-    constructor(
-        address _chessFish,
-        address _pieceSVG,
-        address _tokenSVG
-    )
-        ERC721("ChessFishNFT", "CFSH")
-    {
+    constructor(address _pieceSVG, address _tokenSVG) ERC721("ChessFishNFT", "CFSH") {
         deployer = msg.sender;
-        game = ChessGame(_chessFish);
-
         pieceSVG = PieceSVG(_pieceSVG);
         tokenSVG = TokenSVG(_tokenSVG);
     }
@@ -84,8 +75,8 @@ contract ChessFishNFT is ERC721 {
 
     function tokenURI(uint256 id) public view override returns (string memory) {
         return generateBoardSVG(
-            "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
-            // "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
+            // "R,N,B,K,Q,B,N,R,P,P,P,P,P,P,P,P,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,.,p,p,p,p,p,p,p,p,r,n,b,k,q,b,n,r",
+            "R,N,.,.,.,K,.,.,P,.,P,Q,.,P,P,.,B,.,.,.,.,.,.,P,.,.,.,.,.,.,.,.,.,.,.,.,N,n,.,.,p,.,p,.,.,.,.,.,.,p,.,.,.,.,p,p,r,n,.,.,Q,.,k,.",
             address(0xE2976A66E8CEF3932CDAEb935E114dCd5ce20F20), // winner
             address(0x388C818CA8B9251b393131C08a736A67ccB19297), // loser
             block.timestamp, // endtime
@@ -124,10 +115,8 @@ contract ChessFishNFT is ERC721 {
         uint256 index = 0;
         for (uint256 row = 0; row < 8; row++) {
             for (uint256 col = 0; col < 8; col++) {
-                uint256 x = (7 - col) * 80; // Adjusted to start from the right,
-                    // size doubled
-                uint256 y = (7 - row) * 80; // Adjusted to start from the
-                    // bottom, size doubled
+                uint256 x = (7 - col) * 80;
+                uint256 y = (7 - row) * 80;
 
                 bool isDark = (row + col) % 2 == 1;
                 string memory squareColor = isDark ? "dark" : "light";

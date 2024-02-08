@@ -17,6 +17,8 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 
+import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
+
 import "./MoveVerification.sol";
 import "./ChessGame.sol";
 
@@ -46,7 +48,7 @@ import "forge-std/console.sol";
  *    that players can focus on strategy rather than managing transaction
  * confirmations.
  */
-contract GaslessGame is EIP712 {
+contract GaslessGame is Initializable, EIP712 {
     /*       */
 
     struct Delegation {
@@ -61,9 +63,8 @@ contract GaslessGame is EIP712 {
     }
 
     /// @dev MoveVerification contract
-    MoveVerification public immutable moveVerification;
+    MoveVerification public moveVerification;
 
-    // @dev ChessGame contract
     ChessGame public chessGame;
 
     /// @dev address deployer
@@ -80,10 +81,7 @@ contract GaslessGame is EIP712 {
         require(msg.sender == deployer);
     }
 
-    constructor(address moveVerificationAddress) EIP712("ChessFish", "1") {
-        moveVerification = MoveVerification(moveVerificationAddress);
-        deployer = msg.sender;
-
+    constructor() EIP712("ChessFish", "1") {
         MOVE_METHOD_HASH = keccak256(
             "GaslessMove(address gameAddress,uint gameNumber,uint expiration,uint16[] moves)"
         );
@@ -91,6 +89,19 @@ contract GaslessGame is EIP712 {
         DELEGATION_METHOD_HASH = keccak256(
             "Delegation(address delegatorAddress,address delegatedAddress,address gameAddress)"
         );
+
+        deployer = msg.sender;
+    }
+
+    function initialize(
+        address _moveVerification,
+        address _chessGame
+    )
+        public
+        initializer
+    {
+        moveVerification = MoveVerification(_moveVerification);
+        chessGame = ChessGame(_chessGame);
     }
 
     struct GaslessMove {

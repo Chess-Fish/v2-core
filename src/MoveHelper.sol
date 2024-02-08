@@ -10,9 +10,9 @@
                              
 */
 
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.24;
 
-import "./MoveVerification.sol";
+import { MoveVerification } from "./MoveVerification.sol";
 
 /**
  * @title ChessFish MoveHelper Contract
@@ -46,9 +46,10 @@ contract MoveHelper {
 
     /// @dev called from ts since hardcoding the mapping makes the contract too
     /// large
-    function initCoordinates(
+    function initCoordinatesAndSymbols(
         string[64] calldata coordinate,
-        uint256[64] calldata value
+        uint256[64] calldata value,
+        string[13] calldata pieceSymbols
     )
         external
         OnlyDeployer
@@ -57,30 +58,10 @@ contract MoveHelper {
             coordinates[coordinate[uint256(i)]] = value[uint256(i)];
             squareToCoordinate[value[uint256(i)]] = coordinate[uint256(i)];
         }
-    }
 
-    /// @dev Initialize pieces
-    /// @dev This function significantly increases the size of the compiled
-    /// bytecode...
-    function initPieces() internal {
-        // blank square
-        pieces[0] = ".";
-
-        // white pieces
-        pieces[1] = "P";
-        pieces[2] = "B";
-        pieces[3] = "N";
-        pieces[4] = "R";
-        pieces[5] = "Q";
-        pieces[6] = "K";
-
-        // black pieces
-        pieces[9] = "p";
-        pieces[10] = "b";
-        pieces[11] = "n";
-        pieces[12] = "r";
-        pieces[13] = "q";
-        pieces[14] = "k";
+        for (uint256 i = 0; i < 13; i++) {
+            pieces[uint8(i)] = pieceSymbols[i];
+        }
     }
 
     /// @dev Convert the number of a piece to the string character
