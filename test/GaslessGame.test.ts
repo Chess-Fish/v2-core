@@ -103,6 +103,16 @@ describe("ChessFish Wager Unit Tests", function () {
 		};
 	}
 
+    interface TypedDataField {
+        name: string;
+        type: string;
+    }
+    
+    interface TypedDataTypes {
+        [typeName: string]: TypedDataField[];
+    }
+    
+
 	describe("Gasless Game Verification Unit Tests", function () {
 		it("Should play game", async function () {
 			const {
@@ -173,8 +183,8 @@ describe("ChessFish Wager Unit Tests", function () {
 					const gaslessMoveTypes = {
 						GaslessMove: [
 							{ name: "gameAddress", type: "address" },
-							{ name: "gameNumber", type: "uint" },
-							{ name: "expiration", type: "uint" },
+							{ name: "gameNumber", type: "uint256" },
+							{ name: "expiration", type: "uint256" },
 							{ name: "moves", type: "uint16[]" },
 						],
 					};
@@ -186,8 +196,21 @@ describe("ChessFish Wager Unit Tests", function () {
 						moves: hex_move_array,
 					};
 
-					console.log(messageData);
 					const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
+
+
+                    const { ethers } = require("ethers");
+                    
+                    // Adjusted computeTypeHash function
+                    function computeTypeHash(fields: TypedDataField[]): string {
+                        const typeString = `GaslessMove(${fields.map(field => `${field.type} ${field.name}`).join(',')})`;
+                        return ethers.utils.keccak256(ethers.utils.toUtf8Bytes(typeString));
+                    }
+                    
+                    // Use the function with the defined types
+                    const gaslessMoveTypeHash = computeTypeHash(gaslessMoveTypes["GaslessMove"]);
+                    console.log("GaslessMove Type Hash:", gaslessMoveTypeHash);
+                    
 
 					const moveData = {
 						move: messageData,

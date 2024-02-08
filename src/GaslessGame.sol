@@ -93,7 +93,7 @@ contract GaslessGame is Initializable, EIP712 {
 
     constructor() EIP712("ChessFish", "1") {
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address gameAddress,uint gameNumber,uint expiration,uint16[] moves)"
+            "GaslessMove(address gameAddress,uint256 gameNumber,uint256 expiration,uint16[] moves)"
         );
 
         DELEGATION_METHOD_HASH = keccak256(
@@ -255,7 +255,9 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
+
         console.log("VERIFY SIG");
+        console.logBytes32(MOVE_METHOD_HASH);
         console.logBytes(moveData.signature);
         console.log(signer);
         console.log(ECDSA.recover(digest, moveData.signature));
