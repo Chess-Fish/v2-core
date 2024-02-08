@@ -44,15 +44,13 @@ contract Init {
     }
 
     function initialize(
-        address _NFT,
-        address _chessGame
+        address _NFT
     )
         external
         onlyDeployer
         checkIsSet
     {
         NFT = IChessFishNFT(_NFT);
-        game = ChessGame(_chessGame);
         isSet = true;
     }
 }

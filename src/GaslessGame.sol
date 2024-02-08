@@ -49,8 +49,6 @@ import "forge-std/console.sol";
  * confirmations.
  */
 contract GaslessGame is Initializable, EIP712 {
-    /*       */
-
     struct Delegation {
         address delegatorAddress;
         address delegatedAddress;

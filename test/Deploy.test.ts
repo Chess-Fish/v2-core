@@ -3,10 +3,8 @@ import { expect } from "chai";
 import { ethers } from "hardhat";
 
 import { coordinates_array, bitCoordinates_array, pieceSymbols } from "../scripts/constants";
-import { moveToHex } from "../scripts/utils";
 
 describe("ChessFish Game Verification Unit Tests", function () {
-	// We define a fixture to reuse the same setup in every test.
 	async function deploy() {
 		const [deployer, otherAccount] = await ethers.getSigners();
 
@@ -22,9 +20,9 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const GaslessGame = await ethers.getContractFactory("GaslessGame");
 		const gaslessGame = await GaslessGame.deploy();
 
-		const Tournament = await ethers.getContractFactory("Tournament");
+		const Tournament = await ethers.getContractFactory("ChessFishTournament");
 		const tournament = await Tournament.deploy(await chessGame.getAddress(), addressZero);
-
+ 
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
@@ -35,48 +33,55 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
 			await chessGame.getAddress(),
+            await moveVerification.getAddress(),
 			await pieceSVG.getAddress(),
 			await tokenSVG.getAddress()
 		);
 
-		await pieceSVG.connect(deployer).setNFT(await chessNFT.getAddress());
-		await tokenSVG.connect(deployer).setNFT(await tokenSVG.getAddress());
+        await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
+        await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
 
 		// Initializing
 		await chessGame.initialize(
 			await moveVerification.getAddress(),
 			await gaslessGame.getAddress(),
 			await tournament.getAddress(),
-			dividendSplitter,
+			await tournament.getAddress(),
 			await chessNFT.getAddress()
 		);
 
-		await chessGame.initCoordinates(coordinates_array, bitCoordinates_array, pieceSymbols);
+		await chessGame.initCoordinatesAndSymbols(
+			coordinates_array,
+			bitCoordinates_array,
+			pieceSymbols
+		);
 
 		const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
 		const initialWhite = "0x000704ff";
 		const initialBlack = "0x383f3cff";
 
 		return {
-			chessGame,
+ 			chessGame,
+			gaslessGame,
 			moveVerification,
-			owner,
+			tournament,
+		 	chessNFT,
+			deployer,
 			otherAccount,
 			initalState,
 			initialWhite,
-			initialBlack,
+			initialBlack, 
 		};
 	}
 
 	describe("Functionality Tests", function () {
-		it("Should get piece at position", async function () {
-			const { moveVerification } = await loadFixture(deploy);
+		it("Should check deployement", async function () {
+			const {  chessGame, moveVerification, gaslessGame, tournament, chessNFT  } = await loadFixture(
+				deploy
+			);
 
-			let initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
-			let result = await moveVerification.pieceAtPosition(initalState, 0);
-
-			// expect piece on h1 to be a white rook
-			expect(result).to.equal(4);
+			const moveVerificationAddress = await chessGame.moveVerification();
+			expect(moveVerificationAddress).to.equal(await moveVerification.getAddress()); 
 		});
 	});
 });

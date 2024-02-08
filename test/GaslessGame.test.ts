@@ -20,21 +20,23 @@ describe("ChessFish Wager Unit Tests", function () {
 		const paymentSplitter = await PaymentSplitter.deploy(chessFishToken.address);
 		await paymentSplitter.deployed();
 
-		const MoveVerification = await ethers.getContractFactory("MoveVerification");
+        const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
-
-		const moveVerificationAddress = await moveVerification.getAddress();
 
 		const ChessGame = await ethers.getContractFactory("ChessGame");
 		const chessGame = await ChessGame.deploy();
 
 		await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
 
-		const GaslessGame = await ethers.getContractFactory("GaslessGame");
-		const gaslessGame = await GaslessGame.deploy(
-			await moveVerification.getAddress(),
-			await chessGame.getAddress()
-		);
+        const GaslessGame = await ethers.getContractFactory("GaslessGame");
+        const gaslessGame = await GaslessGame.deploy(
+            await moveVerification.getAddress(),
+            await chessGame.getAddress()
+        )
+
+
+
+
 
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
@@ -53,6 +55,12 @@ describe("ChessFish Wager Unit Tests", function () {
 		await tokenSVG.connect(deployer).setNFT(await tokenSVG.getAddress());
 
 		await gaslessGame.setChessWager(chess.address);
+
+
+
+
+
+
 
 		const amount = ethers.utils.parseEther("100");
 		await token.transfer(otherAccount.address, amount);

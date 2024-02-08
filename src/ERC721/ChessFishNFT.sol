@@ -32,7 +32,7 @@ contract ChessFishNFT is ERC721 {
 
     mapping(uint256 => address) public gameAddresses;
 
-    ChessGame public immutable game;
+    ChessGame public immutable chessGame;
     MoveVerification public moveVerification;
 
     PieceSVG public pieceSVG;
@@ -41,7 +41,7 @@ contract ChessFishNFT is ERC721 {
     address public deployer;
 
     modifier onlyChessGame() {
-        require(msg.sender == address(game));
+        require(msg.sender == address(chessGame));
         _;
     }
 
@@ -50,8 +50,17 @@ contract ChessFishNFT is ERC721 {
         _;
     }
 
-    constructor(address _pieceSVG, address _tokenSVG) ERC721("ChessFishNFT", "CFSH") {
+    constructor(
+        address _chessGame,
+        address _moveVerification,
+        address _pieceSVG,
+        address _tokenSVG
+    )
+        ERC721("ChessFishNFT", "CFSH")
+    {
         deployer = msg.sender;
+        chessGame = ChessGame(_chessGame);
+        moveVerification = MoveVerification(_moveVerification);
         pieceSVG = PieceSVG(_pieceSVG);
         tokenSVG = TokenSVG(_tokenSVG);
     }
@@ -111,7 +120,6 @@ contract ChessFishNFT is ERC721 {
             '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="640" height="720" viewBox="0 0 640 720">',
             '<style type="text/css"><![CDATA[.square { width: 80px; height: 80px; } .light { fill: #f0d9b5; } .dark { fill: #b58863; }]]></style>'
         );
-
         uint256 index = 0;
         for (uint256 row = 0; row < 8; row++) {
             for (uint256 col = 0; col < 8; col++) {
@@ -153,7 +161,6 @@ contract ChessFishNFT is ERC721 {
         svg = paramsContainer(svg, player0, player1, endTime, token, isTournament, place);
 
         svg = abi.encodePacked(svg, "</svg>");
-
         return string(abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg)));
     }
 

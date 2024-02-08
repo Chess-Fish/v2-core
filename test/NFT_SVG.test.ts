@@ -5,9 +5,8 @@ import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-import { coordinates_array, bitCoordinates_array } from "../scripts/constants";
+import { coordinates_array, bitCoordinates_array, pieceSymbols } from "../scripts/constants";
 
-// This function assumes `svg` is a string containing the full URI returned by `tokenURI`
 async function decodeSVG(svg: string): Promise<string> {
 	// Check if svg starts with the data URI scheme
 	const base64Prefix = "data:image/svg+xml;base64,";
@@ -25,25 +24,25 @@ async function decodeSVG(svg: string): Promise<string> {
 }
 
 describe("ChessFish NFT Unit Tests", function () {
-	// We define a fixture to reuse the same setup in every test.
 	async function deploy() {
 		const [deployer, otherAccount] = await ethers.getSigners();
+
+		const addressZero = "0x0000000000000000000000000000000000000000";
+		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
 		const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
 
-		const moveVerificationAddress = await moveVerification.getAddress();
-
 		const ChessGame = await ethers.getContractFactory("ChessGame");
-		const chessGame = await ChessGame.deploy(
-			moveVerificationAddress,
-			moveVerificationAddress,
-			moveVerificationAddress,
-			moveVerificationAddress
-		);
+		const chessGame = await ChessGame.deploy();
 
-		await chessGame.initCoordinates(coordinates_array, bitCoordinates_array);
+		const GaslessGame = await ethers.getContractFactory("GaslessGame");
+		const gaslessGame = await GaslessGame.deploy();
 
+		const Tournament = await ethers.getContractFactory("ChessFishTournament");
+		const tournament = await Tournament.deploy(await chessGame.getAddress(), addressZero);
+ 
+		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
 
@@ -53,20 +52,65 @@ describe("ChessFish NFT Unit Tests", function () {
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
 			await chessGame.getAddress(),
+            await moveVerification.getAddress(),
 			await pieceSVG.getAddress(),
 			await tokenSVG.getAddress()
 		);
 
-		await pieceSVG.connect(deployer).setNFT(await chessNFT.getAddress());
-		await tokenSVG.connect(deployer).setNFT(await tokenSVG.getAddress());
+        await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
+        await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
+
+		// Initializing
+		await chessGame.initialize(
+			await moveVerification.getAddress(),
+			await gaslessGame.getAddress(),
+			await tournament.getAddress(),
+			await tournament.getAddress(),
+			await chessNFT.getAddress()
+		);
+
+		await chessGame.initCoordinatesAndSymbols(
+			coordinates_array,
+			bitCoordinates_array,
+			pieceSymbols
+		);
+
+		const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
+		const initialWhite = "0x000704ff";
+		const initialBlack = "0x383f3cff";
 
 		return {
-			chessNFT,
+ 			chessGame,
+			gaslessGame,
+			moveVerification,
+			tournament,
+		 	chessNFT,
+            pieceSVG,
+            tokenSVG,
+			deployer,
+			otherAccount,
+			initalState,
+			initialWhite,
+			initialBlack, 
 		};
 	}
+    
 	describe("NFT Tests", function () {
 		it("Should deploy", async function () {
-			const { chessNFT } = await loadFixture(deploy);
+			const { chessGame, gaslessGame, moveVerification, tournament, chessNFT, pieceSVG, tokenSVG } = await loadFixture(deploy);
+
+            expect(await chessGame.getAddress()).to.equal(await chessNFT.chessGame());
+            expect(await moveVerification.getAddress()).to.equal(await chessNFT.moveVerification());
+            expect(await pieceSVG.getAddress()).to.equal(await chessNFT.pieceSVG());
+            expect(await tokenSVG.getAddress()).to.equal(await chessNFT.tokenSVG());
+
+
+            console.log(await chessNFT.getAddress());
+            console.log(await chessNFT.chessGame());
+            console.log(await chessNFT.moveVerification());
+            console.log(await chessNFT.pieceSVG());
+            console.log(await chessNFT.tokenSVG());
+
 
 			const svgURI = await chessNFT.tokenURI(0);
 
@@ -77,7 +121,7 @@ describe("ChessFish NFT Unit Tests", function () {
 			const filePath = path.join(__dirname, "SVG_output.html");
 
 			// Write the SVG content to the file
-			fs.writeFileSync(filePath, svgContent);
+			fs.writeFileSync(filePath, svgContent); 
 			/*             // Step 1: Decode the JSON object from base64
             const jsonBase64 = svgURI.split(',')[1]; // Assuming the structure is always "data:application/json;base64,..."
             const jsonString = Buffer.from(jsonBase64, 'base64').toString('utf-8');
