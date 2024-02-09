@@ -1,5 +1,5 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { expect } from "chai";
+import { expect, version } from "chai";
 import { ethers } from "hardhat";
 
 import {
@@ -8,6 +8,9 @@ import {
 	bitCoordinates_array,
 	pieceSymbols,
 } from "../scripts/constants";
+
+const { _TypedDataEncoder } = require('ethers/lib/utils');
+
 
 describe("ChessFish Wager Unit Tests", function () {
 	async function deploy() {
@@ -34,8 +37,6 @@ describe("ChessFish Wager Unit Tests", function () {
 
 		const TokenSVG = await ethers.getContractFactory("TokenSVG");
 		const tokenSVG = await TokenSVG.deploy();
-
-		console.log(await tokenSVG.address);
 
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
@@ -85,7 +86,7 @@ describe("ChessFish Wager Unit Tests", function () {
 				{ name: "gameAddress", type: "address" },
 				{ name: "gameNumber", type: "uint" },
 				{ name: "expiration", type: "uint" },
-				{ name: "moves", type: "uint16[]" },
+				{ name: "moves", type: "uint16" },
 			],
 		};
 
@@ -185,21 +186,62 @@ describe("ChessFish Wager Unit Tests", function () {
 							{ name: "gameAddress", type: "address" },
 							{ name: "gameNumber", type: "uint256" },
 							{ name: "expiration", type: "uint256" },
+							{ name: "moves", type: "uint16" },
+						],
+					};
+
+                    const TestMoveType = {
+						Test: [
+							{ name: "moves", type: "uint16" },
+						],
+					};
+
+                    let data = 1;
+
+                    const testData = {
+                        moves: data
+                    }
+
+                    const signatureTest = await player._signTypedData(domain, TestMoveType, testData);
+                    const typedDataHashTest = _TypedDataEncoder.hash(domain, TestMoveType, testData);
+                    console.log("typedDataHashTest", typedDataHashTest);
+
+                    await gaslessGame.verifyMoveTEST(testData, signatureTest, player.address);
+
+
+                    const TestMoveType1 = {
+						Test1: [
 							{ name: "moves", type: "uint16[]" },
 						],
 					};
 
-					const messageData = {
+                    let data1 = [1];
+
+                    const testData1 = {
+                        moves: data1
+                    }
+
+                    const signatureTest1 = await player._signTypedData(domain, TestMoveType1, testData1);
+                    const typedDataHashTest1 = _TypedDataEncoder.hash(domain, TestMoveType1, testData1);
+                    
+                    console.log("typedDataHashTest", typedDataHashTest1);
+
+                    // this doesn't work
+                    await gaslessGame.verifyMoveTEST1(testData1, signatureTest1, player.address);
+
+	/* 				const messageData = {
 						gameAddress: addressZero,
 						gameNumber: 0,
 						expiration: timeStamp,
-						moves: hex_move_array,
+                        moves: 0
+						// moves: hex_move_array,
 					};
 
 					const signature = await player._signTypedData(domain, gaslessMoveTypes, messageData);
 
+                    const typedDataHash = _TypedDataEncoder.hash(domain, gaslessMoveTypes, messageData);
 
-                    const { ethers } = require("ethers");
+                    console.log("typedDataHash", typedDataHash);
                     
                     // Adjusted computeTypeHash function
                     function computeTypeHash(fields: TypedDataField[]): string {
@@ -230,9 +272,9 @@ describe("ChessFish Wager Unit Tests", function () {
 					signatureArray.push(signature);
 
 					const message = await gaslessGame.encodeMoveMessage(messageData, signature);
-					messageArray.push(message);
+					messageArray.push(message); */
 				}
-				const delegations = [signedDelegationData0, signedDelegationData1];
+/* 				const delegations = [signedDelegationData0, signedDelegationData1];
 
 				const lastTwoMoves = messageArray.slice(-2);
 
@@ -242,7 +284,7 @@ describe("ChessFish Wager Unit Tests", function () {
 				console.log(delegatedSigner0.address);
 				console.log(delegatedSigner1.address);
 				console.log("____");
-
+ */
 				// await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
 		});

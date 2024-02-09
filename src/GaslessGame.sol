@@ -64,13 +64,15 @@ contract GaslessGame is Initializable, EIP712 {
         address gameAddress;
         uint256 gameNumber;
         uint256 expiration;
-        uint16[] moves;
+        uint16 moves;
     }
 
     struct GaslessMoveData {
         GaslessMove move;
         bytes signature;
     }
+
+  
 
     /// @dev MoveVerification contract
     MoveVerification public moveVerification;
@@ -86,6 +88,10 @@ contract GaslessGame is Initializable, EIP712 {
     /// @dev EIP-712 typed delegation signature
     bytes32 public immutable DELEGATION_METHOD_HASH;
 
+    bytes32 public immutable TEST_METHOD_HASH;
+    bytes32 public immutable TEST_METHOD_HASH1;
+
+
     modifier onlyDeployer() {
         _;
         require(msg.sender == deployer);
@@ -93,11 +99,18 @@ contract GaslessGame is Initializable, EIP712 {
 
     constructor() EIP712("ChessFish", "1") {
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address gameAddress,uint256 gameNumber,uint256 expiration,uint16[] moves)"
+            "GaslessMove(address gameAddress,uint256 gameNumber,uint256 expiration,uint16 moves)"
         );
 
         DELEGATION_METHOD_HASH = keccak256(
             "Delegation(address delegatorAddress,address delegatedAddress,address gameAddress)"
+        );
+
+        TEST_METHOD_HASH = keccak256(
+            "Test(uint16 moves)"
+        );
+        TEST_METHOD_HASH1 = keccak256(
+            "Test1(uint16 moves[])"
         );
 
         deployer = msg.sender;
@@ -172,12 +185,12 @@ contract GaslessGame is Initializable, EIP712 {
         GaslessMoveData memory moveData0 = decodeMoveData(rawMoveData[0]);
         GaslessMoveData memory moveData1 = decodeMoveData(rawMoveData[1]);
 
-        require(
+/*         require(
             moveData0.move.moves.length == moveData1.move.moves.length - 1,
             "size mismatch"
-        );
+        ); */
 
-        uint256 size = moveData0.move.moves.length;
+/*         uint256 size = moveData0.move.moves.length;
         uint16[] memory moves0 = new uint16[](size);
         uint16[] memory moves1 = new uint16[](size);
         for (uint256 i = 0; i < size; i++) {
@@ -188,12 +201,12 @@ contract GaslessGame is Initializable, EIP712 {
         require(
             keccak256(abi.encode(moves0)) == keccak256(abi.encode(moves1)),
             "non matching arrays"
-        );
+        ); */
 
         verifyMoveSigner(
             moveData0, signedDelegation0.delegation.delegatedAddress
         );
-
+/* 
         verifyMoveSigner(
             moveData1, signedDelegation1.delegation.delegatedAddress
         );
@@ -221,10 +234,10 @@ contract GaslessGame is Initializable, EIP712 {
             }
             moves = combinedMoves;
         }
+ */
+        // (outcome,,,) = moveVerification.checkGameFromStart(moves);
 
-        (outcome,,,) = moveVerification.checkGameFromStart(moves);
-
-        return (gameAddress, outcome, moves);
+        // return (gameAddress, outcome, moves);
     }
 
     function decodeMoveData(bytes memory moveData)
@@ -235,6 +248,68 @@ contract GaslessGame is Initializable, EIP712 {
         return abi.decode(moveData, (GaslessMoveData));
     }
 
+  struct Test {
+        uint16 moves;
+    }
+
+    struct Test1 {
+        uint16[] moves;
+    }
+
+    /// @dev typed signature verification
+    function verifyMoveTEST(
+        Test memory moveData,
+        bytes memory signature,
+        address signer
+    )
+        public
+        view
+    {
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    TEST_METHOD_HASH,
+                    moveData.moves
+                )
+            )
+        );
+
+        console.log("VERIFY SIG");
+        console.logBytes32(digest);
+        console.logBytes32(TEST_METHOD_HASH);
+
+        console.log(ECDSA.recover(digest, signature));
+
+        require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
+    }
+    /// @dev typed signature verification
+    function verifyMoveTEST1(
+        Test1 memory moveData,
+        bytes memory signature,
+        address signer
+    )
+        public
+        view
+    {
+        bytes32 digest = _hashTypedDataV4(
+            keccak256(
+                abi.encode(
+                    TEST_METHOD_HASH1,
+                    moveData.moves
+                )
+            )
+        );
+
+        console.log("VERIFY SIG");
+        console.logBytes32(digest);
+        console.logBytes32(TEST_METHOD_HASH);
+
+        console.log(ECDSA.recover(digest, signature));
+
+        require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
+    }
+
+
     /// @dev typed signature verification
     function verifyMoveSigner(
         GaslessMoveData memory moveData,
@@ -243,6 +318,11 @@ contract GaslessGame is Initializable, EIP712 {
         public
         view
     {
+
+
+
+
+
         console.log("in verifyMoveSigner");
         bytes32 digest = _hashTypedDataV4(
             keccak256(
@@ -257,6 +337,7 @@ contract GaslessGame is Initializable, EIP712 {
         );
 
         console.log("VERIFY SIG");
+        console.logBytes32(digest);
         console.logBytes32(MOVE_METHOD_HASH);
         console.logBytes(moveData.signature);
         console.log(signer);
