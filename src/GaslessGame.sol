@@ -72,7 +72,6 @@ contract GaslessGame is Initializable, EIP712 {
         bytes signature;
     }
 
-  
 
     /// @dev MoveVerification contract
     MoveVerification public moveVerification;
@@ -90,7 +89,6 @@ contract GaslessGame is Initializable, EIP712 {
 
     bytes32 public immutable TEST_METHOD_HASH;
     bytes32 public immutable TEST_METHOD_HASH1;
-
 
     modifier onlyDeployer() {
         _;
