@@ -64,7 +64,7 @@ contract GaslessGame is Initializable, EIP712 {
         address gameAddress;
         uint256 gameNumber;
         uint256 expiration;
-        uint16 moves;
+        bytes32 movesHash;
     }
 
     struct GaslessMoveData {
@@ -96,15 +96,12 @@ contract GaslessGame is Initializable, EIP712 {
 
     constructor() EIP712("ChessFish", "1") {
         MOVE_METHOD_HASH = keccak256(
-            "GaslessMove(address gameAddress,uint256 gameNumber,uint256 expiration,uint16 moves)"
+            "GaslessMove(address gameAddress,uint256 gameNumber,uint256 expiration,bytes32 movesHash)"
         );
 
         DELEGATION_METHOD_HASH = keccak256(
             "Delegation(address delegatorAddress,address delegatedAddress,address gameAddress)"
         );
-
-        TEST_METHOD_HASH = keccak256("Test(uint16 moves)");
-        TEST_METHOD_HASH1 = keccak256("Test1(uint16 moves[])");
 
         deployer = msg.sender;
     }
@@ -126,10 +123,11 @@ contract GaslessGame is Initializable, EIP712 {
     )
         external
         pure
-        returns (bytes memory)
+        returns (GaslessMoveData memory)
     {
         GaslessMoveData memory moveData = GaslessMoveData(move, signature);
-        return abi.encode(moveData);
+        // return abi.encode(moveData);
+        return moveData;
     }
 
     /*     function verifyDelegation(bytes memory rawSignedDelegation) external returns
@@ -237,66 +235,6 @@ contract GaslessGame is Initializable, EIP712 {
         return abi.decode(moveData, (GaslessMoveData));
     }
 
-    struct Test {
-        uint16 moves;
-    }
-
-    struct Test1 {
-        uint16[] moves;
-    }
-
-    /// @dev typed signature verification
-    function verifyMoveTEST(
-        Test memory moveData,
-        bytes memory signature,
-        address signer
-    )
-        public
-        view
-    {
-        bytes32 digest =
-            _hashTypedDataV4(keccak256(abi.encode(TEST_METHOD_HASH, moveData.moves)));
-
-        console.log("VERIFY SIG");
-        console.logBytes32(digest);
-        console.logBytes32(TEST_METHOD_HASH);
-
-        console.log(ECDSA.recover(digest, signature));
-
-        require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
-    }
-    /// @dev typed signature verification
-
-    struct Test2 {
-        bytes32 movesHash;
-    }
-
-    bytes32 TEST_METHOD_HASH2 = keccak256("Test2(bytes32 movesHash)");
-
-function verifyMoveTEST1(
-    Test2 memory moveData,
-    bytes memory signature,
-    address signer
-)
-    public
-    view
-{
-    // EIP-712 digest preparation would typically involve more direct use of the typed data structure
-    // Ensure the digest is prepared according to EIP-712 standards
-    bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(
-        TEST_METHOD_HASH2, // This might need adjustment to match EIP-712 structuring
-        moveData.movesHash
-    )));
-
-    // Debug logs (only works in environments that support it, like Hardhat)
-    console.log("VERIFY SIG 1");
-    console.logBytes32(digest);
-    console.logBytes32(TEST_METHOD_HASH2);
-    console.log(ECDSA.recover(digest, signature));
-
-    // Signature verification
-    require(ECDSA.recover(digest, signature) == signer, "140 invalid signature");
-}
 
     /// @dev typed signature verification
     function verifyMoveSigner(
@@ -306,7 +244,10 @@ function verifyMoveTEST1(
         public
         view
     {
+        console.log("HERE");
         console.log("in verifyMoveSigner");
+
+
         bytes32 digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -314,7 +255,7 @@ function verifyMoveTEST1(
                     moveData.move.gameAddress,
                     moveData.move.gameNumber,
                     moveData.move.expiration,
-                    moveData.move.moves
+                    moveData.move.movesHash
                 )
             )
         );

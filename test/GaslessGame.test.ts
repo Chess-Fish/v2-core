@@ -186,75 +186,34 @@ describe("ChessFish Wager Unit Tests", function () {
 							{ name: "gameAddress", type: "address" },
 							{ name: "gameNumber", type: "uint256" },
 							{ name: "expiration", type: "uint256" },
-							{ name: "moves", type: "uint16" },
+							{ name: "movesHash", type: "bytes32" },
 						],
 					};
-
-                    const TestMoveType = {
-						Test: [
-							{ name: "moves", type: "uint16" },
-						],
-					};
-
-                    let data = 1;
-
-                    const testData = {
-                        moves: data
-                    }
-
-                    const signatureTest = await player._signTypedData(domain, TestMoveType, testData);
-                    const typedDataHashTest = _TypedDataEncoder.hash(domain, TestMoveType, testData);
-                    console.log("typedDataHashTest", typedDataHashTest);
-
-                    await gaslessGame.verifyMoveTEST(testData, signatureTest, player.address);
-
-
-                    const TestMoveType1 = {
-						Test1: [
-							{ name: "moves", type: "uint16[]" },
-						],
-					};
-
-                    let data1 = [1];
-
-                    const testData1 = {
-                        moves: data1
-                    }
-
-                    const signatureTest1 = await player._signTypedData(domain, TestMoveType1, testData1);
-                    const typedDataHashTest1 = _TypedDataEncoder.hash(domain, TestMoveType1, testData1);
-                    
-                    console.log("typedDataHashTest", typedDataHashTest1);
-
-
 
                     const abi = new ethers.utils.AbiCoder;
-                    const array = [1, 2, 3, 4];
 
                     // Correctly pass the array as a single element within another array
-                    const hash = ethers.utils.keccak256(abi.encode(["uint256[]"], [array]));
+                    const hash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
 
-                    console.log("HASH", hash);
 
-                    const testData2 = {
+                    const moveData = {
+                        gameAddress: addressZero,
+                        gameNumber: 0,
+                        expiration: 0,
                         movesHash: hash
                     }
 
-                    const types = {
-                        Test2: [ // This should match the struct name expected in the smart contract
-                            { name: "movesHash", type: "bytes32" },
-                        ]
-                    };
-                    
-                    const value = {
-                        movesHash: hash, // The hash you calculated
-                    };
-                    
                     // Signing the data
-                    const signatureTest2 = await player._signTypedData(domain, types, value);
+                    const signatureTest2 = await player._signTypedData(domain, gaslessMoveTypes, moveData);
+                  
                     
+                    console.log("HER");
+                    const gaslessMoveData = await gaslessGame.encodeMoveMessage(moveData, signatureTest2)
+                    console.log("HER2");
+
+
                     // this doesn't work
-                    await gaslessGame.verifyMoveTEST1(testData2, signatureTest2, player.address);
+                    await gaslessGame.verifyMoveSigner(gaslessMoveData, player.address);
 
 	/* 				const messageData = {
 						gameAddress: addressZero,
