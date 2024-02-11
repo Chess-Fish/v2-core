@@ -1,6 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect, version } from "chai";
 import { ethers } from "hardhat";
+const abi = new ethers.utils.AbiCoder;
 
 import {
 	generateRandomHash,
@@ -64,6 +65,11 @@ describe("ChessFish Wager Unit Tests", function () {
 			bitCoordinates_array,
 			pieceSymbols
 		);
+
+        await gaslessGame.initialize(
+            moveVerification.address,
+            chessGame.address
+        )
 
 		// typed signature data
 		const domain = {
@@ -181,7 +187,6 @@ describe("ChessFish Wager Unit Tests", function () {
 
 					hex_move_array.push(hex_move);
 
-                    const abi = new ethers.utils.AbiCoder;
 
                     // Correctly pass the array as a single element within another array
                     const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
@@ -189,14 +194,15 @@ describe("ChessFish Wager Unit Tests", function () {
                     const moveData = {
                         gameAddress: addressZero,
                         gameNumber: 0,
-                        expiration: 0,
+                        expiration: Math.floor(Date.now() / 1000) + 3600,
                         movesHash: movesHash
                     }
+
 
                     // Signing the data
                     const signature = await player._signTypedData(domain, gaslessMoveTypes, moveData);
                   
-                    const gaslessMoveData = await gaslessGame.encodeMoveMessage(moveData, signature)
+                    const gaslessMoveData = await gaslessGame.encodeMoveMessage(moveData, signature, hex_move_array);
 
 					// await gaslessGame.verifyMoveSigner(gaslessMoveData, player.address);
 
@@ -215,8 +221,13 @@ describe("ChessFish Wager Unit Tests", function () {
 				console.log(delegatedSigner1.address);
 				console.log("____");
 
+                console.log("Hash");
+                const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
+                console.log(movesHash)
+
+                console.log("MOVES", hex_move_array);
 				await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
-				// await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
+				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
 		});
 	});
