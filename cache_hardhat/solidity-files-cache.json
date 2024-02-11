@@ -132,8 +132,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/GaslessGame.sol": {
-      "lastModificationDate": 1707654085479,
-      "contentHash": "eb51833cdabb06846bee74103b0a439b",
+      "lastModificationDate": 1707654677284,
+      "contentHash": "970ca5050af55ecd404b3e9c86a4cb39",
       "sourceName": "src/GaslessGame.sol",
       "solcConfig": {
         "version": "0.8.24",

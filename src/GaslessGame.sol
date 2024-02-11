@@ -123,11 +123,10 @@ contract GaslessGame is Initializable, EIP712 {
     )
         external
         pure
-        returns (GaslessMoveData memory)
+        returns (bytes memory)
     {
         GaslessMoveData memory moveData = GaslessMoveData(move, signature);
-        // return abi.encode(moveData);
-        return moveData;
+        return abi.encode(moveData);
     }
 
     /*     function verifyDelegation(bytes memory rawSignedDelegation) external returns
@@ -163,6 +162,8 @@ contract GaslessGame is Initializable, EIP712 {
         view
         returns (address gameAddress, uint8 outcome, uint16[] memory)
     {
+
+        console.log("HER");
         SignedDelegation memory signedDelegation0 =
             decodeSignedDelegation(rawSignedDelegations[0]);
         verifyDelegation(signedDelegation0);
@@ -244,9 +245,7 @@ contract GaslessGame is Initializable, EIP712 {
         public
         view
     {
-        console.log("HERE");
         console.log("in verifyMoveSigner");
-
 
         bytes32 digest = _hashTypedDataV4(
             keccak256(
@@ -262,8 +261,6 @@ contract GaslessGame is Initializable, EIP712 {
 
         console.log("VERIFY SIG");
         console.logBytes32(digest);
-        console.logBytes32(MOVE_METHOD_HASH);
-        console.logBytes(moveData.signature);
         console.log(signer);
         console.log(ECDSA.recover(digest, moveData.signature));
 
