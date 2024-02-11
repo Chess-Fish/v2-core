@@ -226,8 +226,35 @@ describe("ChessFish Wager Unit Tests", function () {
                     
                     console.log("typedDataHashTest", typedDataHashTest1);
 
+
+
+                    const abi = new ethers.utils.AbiCoder;
+                    const array = [1, 2, 3, 4];
+
+                    // Correctly pass the array as a single element within another array
+                    const hash = ethers.utils.keccak256(abi.encode(["uint256[]"], [array]));
+
+                    console.log("HASH", hash);
+
+                    const testData2 = {
+                        movesHash: hash
+                    }
+
+                    const types = {
+                        Test2: [ // This should match the struct name expected in the smart contract
+                            { name: "movesHash", type: "bytes32" },
+                        ]
+                    };
+                    
+                    const value = {
+                        movesHash: hash, // The hash you calculated
+                    };
+                    
+                    // Signing the data
+                    const signatureTest2 = await player._signTypedData(domain, types, value);
+                    
                     // this doesn't work
-                    await gaslessGame.verifyMoveTEST1(testData1, signatureTest1, player.address);
+                    await gaslessGame.verifyMoveTEST1(testData2, signatureTest2, player.address);
 
 	/* 				const messageData = {
 						gameAddress: addressZero,
