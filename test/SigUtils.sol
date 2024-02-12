@@ -58,7 +58,7 @@ contract SigUtils {
                 _move.gameAddress,
                 _move.gameNumber,
                 _move.expiration,
-                _move.moves
+                _move.movesHash
             )
         );
     }

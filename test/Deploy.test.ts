@@ -8,7 +8,6 @@ describe("ChessFish Game Verification Unit Tests", function () {
 	async function deploy() {
 		const [deployer, otherAccount] = await ethers.getSigners();
 
-		const addressZero = "0x0000000000000000000000000000000000000000";
 		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
 		const MoveVerification = await ethers.getContractFactory("MoveVerification");
@@ -26,7 +25,6 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
 		const pieceSVG = await PieceSVG.deploy();
-
 		const TokenSVG = await ethers.getContractFactory("TokenSVG");
 		const tokenSVG = await TokenSVG.deploy();
 
@@ -39,15 +37,16 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			tokenSVG.address
 		);
 
-		await pieceSVG.connect(deployer).initialize(chessNFT.address);
-		await tokenSVG.connect(deployer).initialize(chessNFT.address);
+		// Initializing NFT
+		await pieceSVG.initialize(chessNFT.address);
+		await tokenSVG.initialize(chessNFT.address);
 
-		// Initializing
+		// Initializing Contracts
 		await chessGame.initialize(
 			moveVerification.address,
 			gaslessGame.address,
 			tournament.address,
-			dividendSplitter,
+			tournament.address,
 			chessNFT.address
 		);
 
@@ -57,9 +56,7 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			pieceSymbols
 		);
 
-		const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
-		const initialWhite = "0x000704ff";
-		const initialBlack = "0x383f3cff";
+		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
 		return {
 			chessGame,
@@ -69,15 +66,12 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			chessNFT,
 			deployer,
 			otherAccount,
-			initalState,
-			initialWhite,
-			initialBlack,
 		};
 	}
 
 	describe("Functionality Tests", function () {
 		it("Should check deployement", async function () {
-			const { chessGame, moveVerification, gaslessGame, tournament, chessNFT } = await loadFixture(
+			const { chessGame, moveVerification, } = await loadFixture(
 				deploy
 			);
 

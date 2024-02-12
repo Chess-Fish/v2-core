@@ -131,29 +131,63 @@ contract GaslessGame is Initializable, EIP712 {
         return abi.encode(moveData);
     }
 
-    /*     function verifyDelegation(bytes memory rawSignedDelegation) external returns
-    (bool) {
-        SignedDelegation memory signedDelegation =
-            decodeSignedDelegation(rawSignedDelegation);
-        verifyDelegation(signedDelegation);
-    } */
-
     function verifyGameViewDelegatedSingle(
         bytes memory rawSignedDelegation,
-        bytes memory rawMoveData
+        bytes[1] memory rawMoveData
     )
         external
         view
+        returns (
+            address gameAddress,
+            uint8 outcome,
+            uint256 gameState,
+            uint16[] memory moves
+        )
     {
         SignedDelegation memory signedDelegation =
             decodeSignedDelegation(rawSignedDelegation);
         verifyDelegation(signedDelegation);
 
-        GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
+        GaslessMoveData memory moveData = decodeMoveData(rawMoveData[0]);
 
-        console.log(signedDelegation.delegation.delegatedAddress);
+        uint256 size = moveData.moves.length;
+        uint16[] memory moves0 = new uint16[](size - 1);
+        for (uint256 i = 0; i < size - 1; i++) {
+            moves0[i] = moveData.moves[i];
+        }
+
+        require(
+            moveData.move.movesHash == keccak256(abi.encode(moves0)), "Hash0 != moves"
+        );
 
         verifyMoveSigner(moveData, signedDelegation.delegation.delegatedAddress);
+
+        checkIfDelegatorIsPlayer(
+            signedDelegation.delegation.delegatorAddress, moveData.move.gameAddress
+        );
+
+        require(moveData.move.expiration >= block.timestamp, "move0 expired");
+
+        moves = moveData.moves;
+
+        if (gameAddress != address(0)) {
+            uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
+
+            if (onChainMoves.length > 0) {
+                uint16[] memory combinedMoves =
+                    new uint16[](onChainMoves.length + moves.length);
+                for (uint256 i = 0; i < onChainMoves.length; i++) {
+                    combinedMoves[i] = onChainMoves[i];
+                }
+                for (uint256 i = 0; i < moves.length; i++) {
+                    combinedMoves[i + onChainMoves.length] = moves[i];
+                }
+                moves = combinedMoves;
+            }
+        }
+
+        (outcome, gameState,,) = moveVerification.checkGameFromStart(moves);
+        return (gameAddress, outcome, gameState, moves);
     }
 
     function verifyGameViewDelegated(
@@ -180,17 +214,11 @@ contract GaslessGame is Initializable, EIP712 {
         GaslessMoveData memory moveData0 = decodeMoveData(rawMoveData[0]);
         GaslessMoveData memory moveData1 = decodeMoveData(rawMoveData[1]);
 
-        // console.logBytes32(keccak256(abi.encode(moves)));
-
         uint256 size = moveData1.moves.length;
         uint16[] memory moves0 = new uint16[](size - 1);
         for (uint256 i = 0; i < size - 1; i++) {
             moves0[i] = moveData1.moves[i];
         }
-
-        console.log("HASHES");
-        console.logBytes32(moveData0.move.movesHash);
-        console.logBytes32(keccak256(abi.encode(moves0)));
 
         require(
             moveData0.move.movesHash == keccak256(abi.encode(moves0)), "Hash0 != moves"
@@ -203,22 +231,20 @@ contract GaslessGame is Initializable, EIP712 {
         verifyMoveSigner(moveData0, signedDelegation0.delegation.delegatedAddress);
         verifyMoveSigner(moveData1, signedDelegation1.delegation.delegatedAddress);
 
-        checkIfAddressesArePlayers(
+        /*         checkIfAddressesArePlayers(
             signedDelegation0.delegation.delegatorAddress,
             signedDelegation1.delegation.delegatorAddress,
             gameAddress
-        );
+        ); */
 
         require(moveData0.move.expiration >= block.timestamp, "move0 expired");
         require(moveData1.move.expiration >= block.timestamp, "move1 expired");
 
-        // uint16[] memory moves = new uint16[](size);
         moves = moveData1.moves;
 
         if (gameAddress != address(0)) {
             uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
 
-            console.log("post");
             if (onChainMoves.length > 0) {
                 uint16[] memory combinedMoves =
                     new uint16[](onChainMoves.length + moves.length);
@@ -252,8 +278,6 @@ contract GaslessGame is Initializable, EIP712 {
         public
         view
     {
-        console.log("in verifyMoveSigner");
-
         bytes32 digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
@@ -265,11 +289,6 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
-
-        console.log("VERIFY SIG");
-        console.logBytes32(digest);
-        console.log(signer);
-        console.log(ECDSA.recover(digest, moveData.signature));
 
         require(
             ECDSA.recover(digest, moveData.signature) == signer, "140 invalid signature"
@@ -318,7 +337,7 @@ contract GaslessGame is Initializable, EIP712 {
     }
 
     /// @notice Check if delegators match players in gameAddress
-    function checkIfAddressesArePlayers(
+    function checkIfDelegatorsArePlayers(
         address delegator0,
         address delegator1,
         address gameAddress
@@ -334,22 +353,20 @@ contract GaslessGame is Initializable, EIP712 {
         }
     }
 
-    /// @notice Check delegations
-    function checkDelegations(
-        SignedDelegation memory signedDelegation0,
-        SignedDelegation memory signedDelegation1
+    /// @notice Check if delegator matches player in gameAddress
+    function checkIfDelegatorIsPlayer(
+        address delegator,
+        address gameAddress
     )
         internal
         view
     {
-        require(
-            signedDelegation0.delegation.gameAddress
-                == signedDelegation1.delegation.gameAddress,
-            "non matching addresses"
-        );
-
-        verifyDelegation(signedDelegation0);
-        verifyDelegation(signedDelegation1);
+        if (gameAddress == address(0)) {
+            return;
+        } else {
+            (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
+            require(delegator == player0 || delegator == player1, "not in match");
+        }
     }
 
     /// @dev typed signature verification

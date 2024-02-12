@@ -15,7 +15,9 @@ pragma solidity ^0.8.24;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
-import "./interfaces/interfaces.sol";
+import "./ChessGame.sol";
+
+import "forge-std/console.sol";
 
 /**
  * @title ChessFish Tournament Contract
@@ -75,11 +77,11 @@ contract Tournament {
     /// @dev uint tournamentID => address player => wins
     mapping(uint256 => mapping(address => uint256)) public tournamentWins;
 
-    address public immutable ChessGameAddress;
+    ChessGame public immutable chessGame;
     address public immutable PaymentSplitter;
 
     constructor(address _chessGame, address _paymentSplitter) {
-        ChessGameAddress = _chessGame;
+        chessGame = ChessGame(_chessGame);
         PaymentSplitter = _paymentSplitter;
     }
 
@@ -129,9 +131,8 @@ contract Tournament {
         uint256[] memory wins = new uint256[](players.length);
 
         for (uint256 i = 0; i < numberOfGamesInTournament;) {
-            (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
-                ChessGameAddress
-            ).getGameStatus(tournamentGameAddresses[tournamentID][i]);
+            (address player0, address player1, uint256 wins0, uint256 wins1) =
+                chessGame.getGameStatus(tournamentGameAddresses[tournamentID][i]);
 
             for (uint256 j = 0; j < players.length;) {
                 if (players[j] == player0) wins[j] += wins0;
@@ -404,8 +405,7 @@ contract Tournament {
             for (uint256 i = 0; i < specificPlayers.length;) {
                 address player0 = tournaments[tournamentNonce].joinedPlayers[i];
 
-                address gameAddress = IChessGame(ChessGameAddress)
-                    .createGameTournamentSingle(
+                address gameAddress = chessGame.createGameTournamentSingle(
                     player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
                 );
                 tournamentGameAddresses[tournamentNonce].push(gameAddress);
@@ -416,7 +416,7 @@ contract Tournament {
 
             tournaments[tournamentNonce].isInProgress = true;
             for (uint256 i = 0; i < tournamentGameAddresses[tournamentNonce].length;) {
-                IChessGame(ChessGameAddress).startGamesInTournament(
+                chessGame.startGamesInTournament(
                     tournamentGameAddresses[tournamentNonce][i]
                 );
                 unchecked {
@@ -468,7 +468,7 @@ contract Tournament {
         for (uint256 i = 0; i < tournaments[tournamentID].joinedPlayers.length;) {
             address player0 = tournaments[tournamentID].joinedPlayers[i];
 
-            address gameAddress = IChessGame(ChessGameAddress).createGameTournamentSingle(
+            address gameAddress = chessGame.createGameTournamentSingle(
                 player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
             );
             tournamentGameAddresses[tournamentID].push(gameAddress);
@@ -488,6 +488,10 @@ contract Tournament {
         require(tournaments[tournamentID].isInProgress == false, "already started");
         require(tournaments[tournamentID].joinedPlayers.length >= 3, "not enough players");
 
+        console.log("JOINED");
+        console.log(tournaments[tournamentID].joinedPlayers.length);
+        console.log(tournaments[tournamentID].numberOfPlayers);
+
         if (
             tournaments[tournamentID].joinedPlayers.length
                 != tournaments[tournamentID].numberOfPlayers
@@ -500,10 +504,9 @@ contract Tournament {
 
         tournaments[tournamentID].isInProgress = true;
         tournaments[tournamentID].startTime = block.timestamp;
+
         for (uint256 i = 0; i < tournamentGameAddresses[tournamentID].length;) {
-            IChessGame(ChessGameAddress).startGamesInTournament(
-                tournamentGameAddresses[tournamentID][i]
-            );
+            chessGame.startGamesInTournament(tournamentGameAddresses[tournamentID][i]);
             unchecked {
                 i++;
             }
@@ -603,9 +606,8 @@ contract Tournament {
         uint256 numberOfGamesInTournament = tournamentGameAddresses[tournamentID].length;
 
         for (uint256 i = 0; i < numberOfGamesInTournament;) {
-            (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
-                ChessGameAddress
-            ).getGameStatus(tournamentGameAddresses[tournamentID][i]);
+            (address player0, address player1, uint256 wins0, uint256 wins1) =
+                chessGame.getGameStatus(tournamentGameAddresses[tournamentID][i]);
             tournamentWins[tournamentID][player0] += wins0;
             tournamentWins[tournamentID][player1] += wins1;
             unchecked {

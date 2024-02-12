@@ -43,7 +43,7 @@ contract ChessFishNFT is ERC721 {
 
     address public deployer;
 
-    mapping(address => uint256) internal endTime;
+    mapping(address => uint256) internal endTimes;
 
     modifier onlyChessGame() {
         require(msg.sender == address(chessGame));
@@ -85,7 +85,7 @@ contract ChessFishNFT is ERC721 {
         _mint(player, tokenId);
         gameAddresses[tokenId] = gameAddress;
 
-        endTime[gameAddress] = block.timestamp;
+        endTimes[gameAddress] = block.timestamp;
 
         _tokenIdCounter += 1;
 
@@ -114,7 +114,7 @@ contract ChessFishNFT is ERC721 {
             place = 0;
         }
 
-        uint256 _endTime = endTime[gameAddresses[id]];
+        uint256 _endTime = endTimes[gameAddresses[id]];
 
         return generateBoardSVG(
             boardString,

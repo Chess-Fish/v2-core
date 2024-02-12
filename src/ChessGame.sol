@@ -377,29 +377,32 @@ contract ChessGame is Initializable, MoveHelper {
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
-    /*    function verifyGameUpdateState(
-        bytes[] memory message,
-        bytes[] memory signature
+    function verifyGameUpdateState(
+        bytes memory rawSignedDelegation,
+        bytes[1] memory rawMoveData
     )
         external
         returns (bool)
     {
-        (address gameAddress, uint256 outcome, uint16[] memory moves) =
-            gaslessGame.verifyGameView(message, signature);
+        (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
+            gaslessGame.verifyGameViewDelegatedSingle(rawSignedDelegation, rawMoveData);
 
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
 
         if (outcome != 0) {
-            updateGameState(gameAddress);
+            updateGameState(gameAddress, false, outcome);
             return true;
         }
-        if (outcome == 0) {
-            return updateGameStateInsufficientMaterial(gameAddress);
+        if (moves.length > 32) {
+            if (outcome == 0) {
+                return updateGameStateInsufficientMaterial(gameAddress, gameState);
+            }
         } else {
             return false;
         }
-    } */
+        return false;
+    }
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
@@ -438,7 +441,6 @@ contract ChessGame is Initializable, MoveHelper {
             );
             gameAddress = getgameAddress(gameParams);
         }
-
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
 
@@ -455,6 +457,7 @@ contract ChessGame is Initializable, MoveHelper {
         } else {
             return false;
         }
+        return false;
     }
 
     /* 
@@ -470,7 +473,7 @@ contract ChessGame is Initializable, MoveHelper {
     }
 
     /// @notice Starts tournament games
-    function startgamesInTournament(address gameAddress) external onlyTournament {
+    function startGamesInTournament(address gameAddress) external onlyTournament {
         gameData[gameAddress].timeLastMove = block.timestamp;
     }
 
