@@ -24,8 +24,8 @@ import "./interfaces/interfaces.sol";
  *
  * @notice This contract handles the functionality of creating Round Robbin style
  * tournaments as well as handling the payouts of ERC-20 tokens to tournament winners.
- * This contract creates wagers in the ChessWager smart contract and then reads the result
- * of the created wagers to calculate the number of wins for each user in the tournament.
+ * This contract creates games in the ChessGame smart contract and then reads the result
+ * of the created games to calculate the number of wins for each user in the tournament.
  */
 contract Tournament {
     using SafeERC20 for IERC20;
@@ -105,8 +105,8 @@ contract Tournament {
         return (tournaments[tournamentID].authedPlayers);
     }
 
-    /// @notice Returns wager addresses in tournament
-    function getTournamentWagerAddresses(uint256 tournamentID)
+    /// @notice Returns game addresses in tournament
+    function getTournamentGameAddresses(uint256 tournamentID)
         external
         view
         returns (address[] memory)
@@ -124,11 +124,11 @@ contract Tournament {
         returns (address[] memory, uint256[] memory)
     {
         address[] memory players = tournaments[tournamentID].joinedPlayers;
-        uint256 numberOfWagersInTournament = tournamentGameAddresses[tournamentID].length;
+        uint256 numberOfGamesInTournament = tournamentGameAddresses[tournamentID].length;
 
         uint256[] memory wins = new uint256[](players.length);
 
-        for (uint256 i = 0; i < numberOfWagersInTournament;) {
+        for (uint256 i = 0; i < numberOfGamesInTournament;) {
             (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
                 ChessGameAddress
             ).getGameStatus(tournamentGameAddresses[tournamentID][i]);
@@ -404,11 +404,11 @@ contract Tournament {
             for (uint256 i = 0; i < specificPlayers.length;) {
                 address player0 = tournaments[tournamentNonce].joinedPlayers[i];
 
-                address wagerAddress = IChessGame(ChessGameAddress)
+                address gameAddress = IChessGame(ChessGameAddress)
                     .createGameTournamentSingle(
                     player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
                 );
-                tournamentGameAddresses[tournamentNonce].push(wagerAddress);
+                tournamentGameAddresses[tournamentNonce].push(gameAddress);
                 unchecked {
                     i++;
                 }
@@ -464,14 +464,14 @@ contract Tournament {
             IERC20(gameToken).safeTransferFrom(msg.sender, address(this), tokenAmount);
         }
 
-        // creating wager for msg.sender and each player already joined
+        // creating game for msg.sender and each player already joined
         for (uint256 i = 0; i < tournaments[tournamentID].joinedPlayers.length;) {
             address player0 = tournaments[tournamentID].joinedPlayers[i];
 
-            address wagerAddress = IChessGame(ChessGameAddress).createGameTournamentSingle(
+            address gameAddress = IChessGame(ChessGameAddress).createGameTournamentSingle(
                 player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
             );
-            tournamentGameAddresses[tournamentID].push(wagerAddress);
+            tournamentGameAddresses[tournamentID].push(gameAddress);
             unchecked {
                 i++;
             }
@@ -528,7 +528,7 @@ contract Tournament {
 
     /// @notice Handle payout of tournament
     /// @dev tallies, gets payout profile, sorts players by wins, handles payout
-    /// @dev one day must pass after end time for all games in GameWager contract
+    /// @dev one day must pass after end time for all games in ChessGame contract
     function payoutTournament(uint256 tournamentID) external {
         require(
             tournaments[tournamentID].timeLimit + 86_400
@@ -600,9 +600,9 @@ contract Tournament {
     {
         address[] memory players = tournaments[tournamentID].joinedPlayers;
 
-        uint256 numberOfWagersInTournament = tournamentGameAddresses[tournamentID].length;
+        uint256 numberOfGamesInTournament = tournamentGameAddresses[tournamentID].length;
 
-        for (uint256 i = 0; i < numberOfWagersInTournament;) {
+        for (uint256 i = 0; i < numberOfGamesInTournament;) {
             (address player0, address player1, uint256 wins0, uint256 wins1) = IChessGame(
                 ChessGameAddress
             ).getGameStatus(tournamentGameAddresses[tournamentID][i]);

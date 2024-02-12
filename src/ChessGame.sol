@@ -410,7 +410,7 @@ contract ChessGame is Initializable, MoveHelper {
         external
         returns (bool)
     {
-        (address gameAddress, uint8 outcome, uint16[] memory moves) =
+        (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
             gaslessGame.verifyGameViewDelegated(rawSignedDelegations, rawMoveData);
 
         // Play a gasless game off chain, submitting on chain
@@ -446,8 +446,12 @@ contract ChessGame is Initializable, MoveHelper {
             updateGameState(gameAddress, false, outcome);
             return true;
         }
-        if (outcome == 0) {
-            return updateGameStateInsufficientMaterial(gameAddress);
+        /// @dev Minimum number of moves to check for stalemate
+        /// www.chess.com/forum/view/general/smallest-number-of-moves-to-give-away-all-your-pieces
+        if (moves.length > 32) {
+            if (outcome == 0) {
+                return updateGameStateInsufficientMaterial(gameAddress, gameState);
+            }
         } else {
             return false;
         }
@@ -611,7 +615,7 @@ contract ChessGame is Initializable, MoveHelper {
         require(getPlayerMove(gameAddress) == msg.sender, "Not your turn");
         require(
             getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "Game ended"
+            "Game ended 614"
         );
         require(gameData[gameAddress].timeLastMove != 0, "Tournament not started yet");
 
@@ -754,7 +758,7 @@ contract ChessGame is Initializable, MoveHelper {
     function updateGameStateTime(address gameAddress) public returns (bool) {
         require(
             getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "game ended"
+            "Game ended 757"
         );
         require(
             gameData[gameAddress].timeLastMove != 0, "tournament match not started yet"
@@ -781,19 +785,18 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Update game state if insufficient material
     /// @dev set to public so that anyone can update
     /// @return wasUpdated returns true if status was updated
-    function updateGameStateInsufficientMaterial(address gameAddress)
+    function updateGameStateInsufficientMaterial(
+        address gameAddress,
+        uint256 gameState
+    )
         public
         returns (bool)
     {
+        /*         
         require(
-            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "game ended"
-        );
-
-        uint256 gameID = gameIDs[gameAddress].length;
-        uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
-
-        (, uint256 gameState,,) = moveVerification.checkGameFromStart(moves);
+        getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
+            "Game ended 790"
+        ); */
 
         bool isInsufficientMaterial =
             moveVerification.isStalemateViaInsufficientMaterial(gameState);
@@ -831,16 +834,15 @@ contract ChessGame is Initializable, MoveHelper {
         private
         returns (bool)
     {
-        require(
-            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "game ended"
-        );
-
         uint256 gameID = gameIDs[gameAddress].length;
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
 
         // fails on invalid move
         if (checkMoves) {
+            require(
+                getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
+                "Game ended 837"
+            );
             (outcome,,,) = moveVerification.checkGameFromStart(moves);
         }
 

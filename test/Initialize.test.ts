@@ -13,8 +13,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
 
-		const ChessWager = await ethers.getContractFactory("ChessGame");
-		const chessGame = await ChessWager.deploy();
+		const ChessGame = await ethers.getContractFactory("ChessGame");
+		const chessGame = await ChessGame.deploy();
 
 		await chessGame.initialize(
 			await moveVerification.getAddress(),

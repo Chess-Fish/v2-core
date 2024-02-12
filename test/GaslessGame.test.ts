@@ -1,7 +1,7 @@
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
 import { expect, version } from "chai";
 import { ethers } from "hardhat";
-const abi = new ethers.utils.AbiCoder;
+const abi = new ethers.utils.AbiCoder();
 
 import {
 	generateRandomHash,
@@ -10,10 +10,9 @@ import {
 	pieceSymbols,
 } from "../scripts/constants";
 
-const { _TypedDataEncoder } = require('ethers/lib/utils');
+const { _TypedDataEncoder } = require("ethers/lib/utils");
 
-
-describe("ChessFish Wager Unit Tests", function () {
+describe("ChessFish Chess Game Unit Tests", function () {
 	async function deploy() {
 		const [signer0, signer1] = await ethers.getSigners();
 
@@ -66,10 +65,7 @@ describe("ChessFish Wager Unit Tests", function () {
 			pieceSymbols
 		);
 
-        await gaslessGame.initialize(
-            moveVerification.address,
-            chessGame.address
-        )
+		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
 		// typed signature data
 		const domain = {
@@ -87,14 +83,14 @@ describe("ChessFish Wager Unit Tests", function () {
 			],
 		};
 
-        const gaslessMoveTypes = {
-            GaslessMove: [
-                { name: "gameAddress", type: "address" },
-                { name: "gameNumber", type: "uint256" },
-                { name: "expiration", type: "uint256" },
-                { name: "movesHash", type: "bytes32" },
-            ],
-        };
+		const gaslessMoveTypes = {
+			GaslessMove: [
+				{ name: "gameAddress", type: "address" },
+				{ name: "gameNumber", type: "uint256" },
+				{ name: "expiration", type: "uint256" },
+				{ name: "movesHash", type: "bytes32" },
+			],
+		};
 
 		return {
 			signer0,
@@ -109,16 +105,6 @@ describe("ChessFish Wager Unit Tests", function () {
 			addressZero,
 		};
 	}
-
-    interface TypedDataField {
-        name: string;
-        type: string;
-    }
-    
-    interface TypedDataTypes {
-        [typeName: string]: TypedDataField[];
-    }
-    
 
 	describe("Gasless Game Verification Unit Tests", function () {
 		it("Should play game", async function () {
@@ -172,9 +158,6 @@ describe("ChessFish Wager Unit Tests", function () {
 
 			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
-			const timeNow = Date.now();
-			const timeStamp = Math.floor(timeNow / 1000) + 86400;
-
 			for (let game = 0; game < 1; game++) {
 				let messageArray: any[] = [];
 				let signatureArray: any[] = [];
@@ -187,30 +170,31 @@ describe("ChessFish Wager Unit Tests", function () {
 
 					hex_move_array.push(hex_move);
 
+					// Correctly pass the array as a single element within another array
+					const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
 
-                    // Correctly pass the array as a single element within another array
-                    const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
+					const moveData = {
+						gameAddress: addressZero,
+						gameNumber: 0,
+						expiration: Math.floor(Date.now() / 1000) + 3600,
+						movesHash: movesHash,
+					};
 
-                    const moveData = {
-                        gameAddress: addressZero,
-                        gameNumber: 0,
-                        expiration: Math.floor(Date.now() / 1000) + 3600,
-                        movesHash: movesHash
-                    }
+					// Signing the data
+					const signature = await player._signTypedData(domain, gaslessMoveTypes, moveData);
 
-
-                    // Signing the data
-                    const signature = await player._signTypedData(domain, gaslessMoveTypes, moveData);
-                  
-                    const gaslessMoveData = await gaslessGame.encodeMoveMessage(moveData, signature, hex_move_array);
+					const gaslessMoveData = await gaslessGame.encodeMoveMessage(
+						moveData,
+						signature,
+						hex_move_array
+					);
 
 					// await gaslessGame.verifyMoveSigner(gaslessMoveData, player.address);
 
 					signatureArray.push(signature);
-
 					messageArray.push(gaslessMoveData);
 				}
- 				const delegations = [signedDelegationData0, signedDelegationData1];
+				const delegations = [signedDelegationData0, signedDelegationData1];
 
 				const lastTwoMoves = messageArray.slice(-2);
 
@@ -221,11 +205,11 @@ describe("ChessFish Wager Unit Tests", function () {
 				console.log(delegatedSigner1.address);
 				console.log("____");
 
-                console.log("Hash");
-                const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
-                console.log(movesHash)
+				console.log("Hash");
+				const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
+				console.log(movesHash);
 
-                console.log("MOVES", hex_move_array);
+				console.log("MOVES", hex_move_array);
 				await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}

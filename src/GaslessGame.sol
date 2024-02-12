@@ -162,7 +162,12 @@ contract GaslessGame is Initializable, EIP712 {
     )
         external
         view
-        returns (address gameAddress, uint8 outcome, uint16[] memory)
+        returns (
+            address gameAddress,
+            uint8 outcome,
+            uint256 gameState,
+            uint16[] memory moves
+        )
     {
         SignedDelegation memory signedDelegation0 =
             decodeSignedDelegation(rawSignedDelegations[0]);
@@ -208,7 +213,7 @@ contract GaslessGame is Initializable, EIP712 {
         require(moveData1.move.expiration >= block.timestamp, "move1 expired");
 
         // uint16[] memory moves = new uint16[](size);
-        uint16[] memory moves = moveData1.moves;
+        moves = moveData1.moves;
 
         if (gameAddress != address(0)) {
             uint16[] memory onChainMoves = chessGame.getLatestGameMoves(gameAddress);
@@ -227,8 +232,8 @@ contract GaslessGame is Initializable, EIP712 {
             }
         }
 
-        (outcome,,,) = moveVerification.checkGameFromStart(moves);
-        return (gameAddress, outcome, moves);
+        (outcome, gameState,,) = moveVerification.checkGameFromStart(moves);
+        return (gameAddress, outcome, gameState, moves);
     }
 
     function decodeMoveData(bytes memory moveData)
