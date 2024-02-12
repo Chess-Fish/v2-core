@@ -488,10 +488,6 @@ contract Tournament {
         require(tournaments[tournamentID].isInProgress == false, "already started");
         require(tournaments[tournamentID].joinedPlayers.length >= 3, "not enough players");
 
-        console.log("JOINED");
-        console.log(tournaments[tournamentID].joinedPlayers.length);
-        console.log(tournaments[tournamentID].numberOfPlayers);
-
         if (
             tournaments[tournamentID].joinedPlayers.length
                 != tournaments[tournamentID].numberOfPlayers
