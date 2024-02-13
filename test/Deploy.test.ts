@@ -71,9 +71,7 @@ describe("ChessFish Game Verification Unit Tests", function () {
 
 	describe("Functionality Tests", function () {
 		it("Should check deployement", async function () {
-			const { chessGame, moveVerification, } = await loadFixture(
-				deploy
-			);
+			const { chessGame, moveVerification } = await loadFixture(deploy);
 
 			const moveVerificationAddress = await chessGame.moveVerification();
 			expect(moveVerificationAddress).to.equal(moveVerification.address);

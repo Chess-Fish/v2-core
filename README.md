@@ -65,3 +65,4 @@ $ anvil --help
 $ cast --help
 ```
 # v2-core
+npx prettier --write '**/*.ts'

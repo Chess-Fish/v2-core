@@ -34,7 +34,7 @@ contract Tournament {
 
     struct TournamentParams {
         uint256 numberOfPlayers; // number of players in tournament
-        address[] authedPlayers; // authenticated players
+        address[] authedPlayers; // authorized players
         address[] joinedPlayers; // joined players
         bool isByInvite; // is tournament by invite only
         uint256 numberOfGames; // number of games per match
@@ -382,8 +382,14 @@ contract Tournament {
 
         // Use the provided specific players
         tournament.authedPlayers = specificPlayers;
-        tournament.isByInvite = true;
 
+        // if token amount is zero then everyone is already joined
+        if (gameToken == address(0)) {
+            tournament.joinedPlayers = specificPlayers;
+        }
+
+        // order this
+        tournament.isByInvite = true;
         tournament.numberOfPlayers = specificPlayers.length;
         tournament.gameToken = gameToken;
         tournament.tokenAmount = tokenAmount;
@@ -400,27 +406,30 @@ contract Tournament {
             IERC20(gameToken).safeTransferFrom(msg.sender, address(this), tokenAmount);
         } else {
             require(tokenAmount == 0, "not zero");
-            tournament.joinedPlayers = specificPlayers;
 
-            for (uint256 i = 0; i < specificPlayers.length;) {
-                address player0 = tournaments[tournamentNonce].joinedPlayers[i];
+            for (uint256 i = 0; i < specificPlayers.length; i++) {
+                for (uint256 j = i + 1; j < specificPlayers.length; j++) {
+                    address player0 = specificPlayers[i];
+                    address player1 = specificPlayers[j];
 
-                address gameAddress = chessGame.createGameTournamentSingle(
-                    player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
-                );
-                tournamentGameAddresses[tournamentNonce].push(gameAddress);
-                unchecked {
-                    i++;
+                    address gameAddress = chessGame.createGameTournamentSingle(
+                        player0, player1, gameToken, tokenAmount, numberOfGames, timeLimit
+                    );
+                    tournamentGameAddresses[tournamentNonce].push(gameAddress);
                 }
             }
 
-            tournaments[tournamentNonce].isInProgress = true;
-            for (uint256 i = 0; i < tournamentGameAddresses[tournamentNonce].length;) {
-                chessGame.startGamesInTournament(
-                    tournamentGameAddresses[tournamentNonce][i]
-                );
-                unchecked {
-                    i++;
+            // If game token is 0, then start tournament automatically
+            if (gameToken == address(0)) {
+                tournaments[tournamentNonce].isInProgress = true;
+                for (uint256 i = 0; i < tournamentGameAddresses[tournamentNonce].length;)
+                {
+                    chessGame.startGamesInTournament(
+                        tournamentGameAddresses[tournamentNonce][i]
+                    );
+                    unchecked {
+                        i++;
+                    }
                 }
             }
         }
