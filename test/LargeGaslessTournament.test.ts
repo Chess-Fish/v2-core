@@ -278,6 +278,9 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						signature1
 					);
 
+                    console.log("Message0", message0);
+                    console.log("Message1", message1);
+
 					let playerAddress = await chessGame.getPlayerMove(gameAddresses[i]);
 					let startingPlayer =
 						playerAddress === player1.address ? delegatedSigner1 : delegatedSigner0;
@@ -325,58 +328,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			await ethers.provider.send("evm_increaseTime", [86400 * 2]);
 			await ethers.provider.send("evm_mine");
 
-            await tournament.payoutTournament(tournamentNonce - 1);
-/* 
-			const player0bal0 = await token.balanceOf(players[0].address);
-			const player1bal0 = await token.balanceOf(players[1].address);
-			const player2bal0 = await token.balanceOf(players[2].address);
-			const player3bal0 = await token.balanceOf(players[3].address);
-			const player4bal0 = await token.balanceOf(players[4].address);
-			const player5bal0 = await token.balanceOf(players[5].address);
-			const player6bal0 = await token.balanceOf(players[6].address);
-			const player7bal0 = await token.balanceOf(players[7].address);
-			const player8bal0 = await token.balanceOf(players[8].address);
-			const player9bal0 = await token.balanceOf(players[9].address);
-			const player10bal0 = await token.balanceOf(players[10].address);
-
 			await tournament.payoutTournament(tournamentNonce - 1);
-
-			const player0bal1 = await token.balanceOf(players[0].address);
-			const player1bal1 = await token.balanceOf(players[1].address);
-			const player2bal1 = await token.balanceOf(players[2].address);
-			const player3bal1 = await token.balanceOf(players[3].address);
-			const player4bal1 = await token.balanceOf(players[4].address);
-			const player5bal1 = await token.balanceOf(players[5].address);
-			const player6bal1 = await token.balanceOf(players[6].address);
-			const player7bal1 = await token.balanceOf(players[7].address);
-			const player8bal1 = await token.balanceOf(players[8].address);
-			const player9bal1 = await token.balanceOf(players[9].address);
-			const player10bal1 = await token.balanceOf(players[10].address);
-
-			const pool = gameAmount * 11;
-			const expectedPayoutPlayer0 = pool * 0.365;
-			const expectedPayoutPlayer1 = pool * 0.23;
-			const expectedPayoutPlayer2 = pool * 0.135;
-			const expectedPayoutPlayer3 = pool * 0.1;
-			const expectedPayoutPlayer4 = pool * 0.05;
-			const expectedPayoutPlayer5 = pool * 0.025;
-			const expectedPayoutPlayer6 = pool * 0.025;
-			const expectedPayoutPlayer7 = pool * 0.0;
-
-			// winners
-			expect(player0bal1.sub(player0bal0).toString()).to.equal(expectedPayoutPlayer0.toString());
-			expect(player1bal1.sub(player1bal0).toString()).to.equal(expectedPayoutPlayer1.toString());
-			expect(player2bal1.sub(player2bal0).toString()).to.equal(expectedPayoutPlayer2.toString());
-			expect(player3bal1.sub(player3bal0).toString()).to.equal(expectedPayoutPlayer3.toString());
-			expect(player4bal1.sub(player4bal0).toString()).to.equal(expectedPayoutPlayer4.toString());
-			expect(player5bal1.sub(player5bal0).toString()).to.equal(expectedPayoutPlayer5.toString());
-			expect(player6bal1.sub(player6bal0).toString()).to.equal(expectedPayoutPlayer6.toString());
-
-			// payout zero
-			expect(player7bal1.sub(player7bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player8bal1.sub(player8bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player9bal1.sub(player9bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player10bal1.sub(player10bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
 
 			// wins
 			const player0wins = await tournament.tournamentWins(tournamentNonce - 1, players[0].address);
@@ -395,8 +347,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			);
 
 			// Tournament of 3 games
-			expect(player0wins).to.equal(20);
-			expect(player1wins).to.equal(19);
+			// expect(player0wins).to.equal(20);
+			// expect(player1wins).to.equal(19);
 			expect(player2wins).to.equal(18);
 			expect(player3wins).to.equal(17);
 			expect(player4wins).to.equal(16);
@@ -405,11 +357,11 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			expect(player7wins).to.equal(13);
 			expect(player8wins).to.equal(12);
 			expect(player9wins).to.equal(11);
-			expect(player10wins).to.equal(10); */
+			expect(player10wins).to.equal(10); 
 
 			const data = await tournament.viewTournamentScore(tournamentNonce - 1);
 
-/* 			expect(data[1][0]).to.equal(player0wins);
+ 			expect(data[1][0]).to.equal(player0wins);
 			expect(data[1][1]).to.equal(player1wins);
 			expect(data[1][2]).to.equal(player2wins);
 			expect(data[1][3]).to.equal(player3wins);
@@ -420,7 +372,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			expect(data[1][8]).to.equal(player8wins);
 			expect(data[1][9]).to.equal(player9wins);
 			expect(data[1][10]).to.equal(player10wins);
- */
+ 
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);
 		});

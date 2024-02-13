@@ -534,40 +534,41 @@ contract Tournament {
 
         tallyWins(tournamentID);
 
-        tournaments[tournamentID].isComplete = true;
-        uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
-        uint256[] memory payoutProfile;
-
-        /// @dev handling different payout profiles
-        if (numberOfPlayers == 3) {
-            payoutProfile = new uint256[](3);
-            for (uint256 i = 0; i < 3;) {
-                payoutProfile[i] = payoutProfile3[i];
-                unchecked {
-                    i++;
-                }
-            }
-        } else if (numberOfPlayers > 3 && numberOfPlayers <= 9) {
-            payoutProfile = new uint256[](4);
-            for (uint256 i = 0; i < 4;) {
-                payoutProfile[i] = payoutProfile4_9[i];
-                unchecked {
-                    i++;
-                }
-            }
-        } else if (numberOfPlayers > 9 && numberOfPlayers <= 25) {
-            payoutProfile = new uint256[](7);
-            for (uint256 i = 0; i < 7;) {
-                payoutProfile[i] = payoutProfile10_25[i];
-                unchecked {
-                    i++;
-                }
-            }
-        }
-        address[] memory playersSorted = getPlayersSortedByWins(tournamentID);
         address payoutToken = tournaments[tournamentID].gameToken;
+        tournaments[tournamentID].isComplete = true;
 
         if (payoutToken != address(0)) {
+            uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
+            uint256[] memory payoutProfile;
+
+            /// @dev handling different payout profiles
+            if (numberOfPlayers == 3) {
+                payoutProfile = new uint256[](3);
+                for (uint256 i = 0; i < 3;) {
+                    payoutProfile[i] = payoutProfile3[i];
+                    unchecked {
+                        i++;
+                    }
+                }
+            } else if (numberOfPlayers > 3 && numberOfPlayers <= 9) {
+                payoutProfile = new uint256[](4);
+                for (uint256 i = 0; i < 4;) {
+                    payoutProfile[i] = payoutProfile4_9[i];
+                    unchecked {
+                        i++;
+                    }
+                }
+            } else if (numberOfPlayers > 9 && numberOfPlayers <= 25) {
+                payoutProfile = new uint256[](7);
+                for (uint256 i = 0; i < 7;) {
+                    payoutProfile[i] = payoutProfile10_25[i];
+                    unchecked {
+                        i++;
+                    }
+                }
+            }
+            address[] memory playersSorted = getPlayersSortedByWins(tournamentID);
+
             uint256 poolSize = tournaments[tournamentID].joinedPlayers.length
                 * tournaments[tournamentID].tokenAmount + tournaments[tournamentID].prizePool;
             uint256 poolRemaining = poolSize;
@@ -603,6 +604,9 @@ contract Tournament {
                 chessGame.getGameStatus(tournamentGameAddresses[tournamentID][i]);
             tournamentWins[tournamentID][player0] += wins0;
             tournamentWins[tournamentID][player1] += wins1;
+
+            console.log("tally", wins0, wins1);
+
             unchecked {
                 i++;
             }
