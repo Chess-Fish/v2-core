@@ -220,7 +220,10 @@ contract GaslessGame is Initializable, EIP712 {
             moves0[i] = moveData1.moves[i];
         }
         gameAddress = moveData0.move.gameAddress;
-        require(moveData0.move.gameAddress == moveData1.move.gameAddress, "gameAddress mismatch");
+        require(
+            moveData0.move.gameAddress == moveData1.move.gameAddress,
+            "gameAddress mismatch"
+        );
         require(
             moveData0.move.movesHash == keccak256(abi.encode(moves0)), "Hash0 != moves"
         );
@@ -351,7 +354,11 @@ contract GaslessGame is Initializable, EIP712 {
             return;
         } else {
             (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
-            require((delegator0 == player0 && delegator1 == player1) || (delegator1 == player0 && delegator0 == player1), "players don't match");
+            require(
+                (delegator0 == player0 && delegator1 == player1)
+                    || (delegator1 == player0 && delegator0 == player1),
+                "players don't match"
+            );
         }
     }
 

@@ -487,7 +487,7 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 gameAmount,
         uint256 numberOfGames,
         uint256 timeLimit,
-        uint tournamentID
+        uint256 tournamentID
     )
         external
         onlyTournament
