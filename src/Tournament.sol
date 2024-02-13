@@ -604,9 +604,6 @@ contract Tournament {
                 chessGame.getGameStatus(tournamentGameAddresses[tournamentID][i]);
             tournamentWins[tournamentID][player0] += wins0;
             tournamentWins[tournamentID][player1] += wins1;
-
-            console.log("tally", wins0, wins1);
-
             unchecked {
                 i++;
             }

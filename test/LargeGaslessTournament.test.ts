@@ -278,8 +278,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						signature1
 					);
 
-                    console.log("Message0", message0);
-                    console.log("Message1", message1);
 
 					let playerAddress = await chessGame.getPlayerMove(gameAddresses[i]);
 					let startingPlayer =
@@ -347,8 +345,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			);
 
 			// Tournament of 3 games
-			// expect(player0wins).to.equal(20);
-			// expect(player1wins).to.equal(19);
+		    expect(player0wins).to.equal(20);
+			expect(player1wins).to.equal(19);
 			expect(player2wins).to.equal(18);
 			expect(player3wins).to.equal(17);
 			expect(player4wins).to.equal(16);

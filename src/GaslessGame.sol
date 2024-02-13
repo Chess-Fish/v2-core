@@ -351,12 +351,7 @@ contract GaslessGame is Initializable, EIP712 {
             return;
         } else {
             (address player0, address player1) = chessGame.getGamePlayers(gameAddress);
-            console.log("players");
-            console.log(player0, player1);
-            console.log("delegators");
-            console.log(delegator0, delegator1);
-            console.log(delegator0 == player0 && delegator1 == player1);
-            require(delegator0 == player0 && delegator1 == player1, "players don't match");
+            require((delegator0 == player0 && delegator1 == player1) || (delegator1 == player0 && delegator0 == player1), "players don't match");
         }
     }
 
