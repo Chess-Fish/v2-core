@@ -231,11 +231,13 @@ contract GaslessGame is Initializable, EIP712 {
         verifyMoveSigner(moveData0, signedDelegation0.delegation.delegatedAddress);
         verifyMoveSigner(moveData1, signedDelegation1.delegation.delegatedAddress);
 
-        /*         checkIfAddressesArePlayers(
-            signedDelegation0.delegation.delegatorAddress,
-            signedDelegation1.delegation.delegatorAddress,
-            gameAddress
-        ); */
+        if (gameAddress != address(0)) {
+            checkIfDelegatorsArePlayers(
+                signedDelegation0.delegation.delegatorAddress,
+                signedDelegation1.delegation.delegatorAddress,
+                gameAddress
+            );
+        }
 
         require(moveData0.move.expiration >= block.timestamp, "move0 expired");
         require(moveData1.move.expiration >= block.timestamp, "move1 expired");

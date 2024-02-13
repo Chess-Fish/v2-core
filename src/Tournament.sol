@@ -538,8 +538,6 @@ contract Tournament {
         uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
         uint256[] memory payoutProfile;
 
-        console.log("541");
-
         /// @dev handling different payout profiles
         if (numberOfPlayers == 3) {
             payoutProfile = new uint256[](3);
@@ -566,8 +564,6 @@ contract Tournament {
                 }
             }
         }
-        console.log("569");
-
         address[] memory playersSorted = getPlayersSortedByWins(tournamentID);
         address payoutToken = tournaments[tournamentID].gameToken;
 
