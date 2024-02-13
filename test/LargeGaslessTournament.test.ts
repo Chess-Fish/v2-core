@@ -343,23 +343,25 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 				players[10].address
 			);
 
-/* 			// Tournament of 3 games
-		    expect(player0wins).to.equal(20);
-			expect(player1wins).to.equal(19);
-			expect(player2wins).to.equal(18);
-			expect(player3wins).to.equal(17);
-			expect(player4wins).to.equal(16);
-			expect(player5wins).to.equal(15);
-			expect(player6wins).to.equal(14);
-			expect(player7wins).to.equal(13);
-			expect(player8wins).to.equal(12);
-			expect(player9wins).to.equal(11);
-			expect(player10wins).to.equal(10);  */
+ 			// Tournament of 3 games
+		    expect(player0wins).to.equal(10);
+			expect(player1wins).to.equal(9);
+			expect(player2wins).to.equal(8);
+			expect(player3wins).to.equal(7);
+			expect(player4wins).to.equal(6);
+			expect(player5wins).to.equal(5);
+			expect(player6wins).to.equal(4);
+			expect(player7wins).to.equal(3);
+			expect(player8wins).to.equal(2);
+			expect(player9wins).to.equal(1);
+			expect(player10wins).to.equal(0);
 
 			const data = await tournament.viewTournamentScore(tournamentNonce - 1);
 
-            let sum = data[1].reduce((acc, currentValue) => acc + Number(currentValue.value), 0);
-
+            let sum = 0;
+            for (let i = 0; i < data[1].length; i++) {
+                sum += Number(data[1][i]);
+            }
             expect(sum).to.equal(gameAddresses.length * numberOfGames);
 
  			expect(data[1][0]).to.equal(player0wins);
