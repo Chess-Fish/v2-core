@@ -838,8 +838,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/Tournament.sol": {
-      "lastModificationDate": 1707824579552,
-      "contentHash": "fa7fa6bbb53c24ed46fe8d84775b7edf",
+      "lastModificationDate": 1707825204982,
+      "contentHash": "0549b0ffe577f4ebd5b3b87eef563542",
       "sourceName": "src/Tournament.sol",
       "solcConfig": {
         "version": "0.8.24",
