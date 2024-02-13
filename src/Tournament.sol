@@ -42,7 +42,7 @@ contract Tournament {
         uint256 tokenAmount; // token amount
         uint256 prizePool; // size of prize pool
         bool isInProgress; // is tournament in progress
-        uint256 creationTime;
+        uint256 creationTime; // unix timestamp creation time
         uint256 startTime; // unix timestamp start time
         uint256 timeLimit; // timeLimit for tournament
         bool isComplete; // is tournament complete
@@ -162,13 +162,6 @@ contract Tournament {
         view
         returns (uint256 rank)
     {
-        // Check if tournament is finished
-        require(
-            tournaments[tournamentID].timeLimit
-                < block.timestamp - tournaments[tournamentID].startTime,
-            "Tournament not finished yet"
-        );
-
         address[] memory players = tournaments[tournamentID].joinedPlayers;
         PlayerWins[] memory playerWinsArray = new PlayerWins[](players.length);
 
@@ -220,12 +213,6 @@ contract Tournament {
         view
         returns (address[] memory)
     {
-        require(
-            tournaments[tournamentID].timeLimit
-                < block.timestamp - tournaments[tournamentID].startTime,
-            "Tournament not finished yet"
-        );
-
         address[] memory players = tournaments[tournamentID].joinedPlayers;
         PlayerWins[] memory playerWinsArray = new PlayerWins[](players.length);
 
@@ -551,6 +538,8 @@ contract Tournament {
         uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
         uint256[] memory payoutProfile;
 
+        console.log("541");
+
         /// @dev handling different payout profiles
         if (numberOfPlayers == 3) {
             payoutProfile = new uint256[](3);
@@ -577,28 +566,31 @@ contract Tournament {
                 }
             }
         }
+        console.log("569");
 
         address[] memory playersSorted = getPlayersSortedByWins(tournamentID);
         address payoutToken = tournaments[tournamentID].gameToken;
 
-        uint256 poolSize = tournaments[tournamentID].joinedPlayers.length
-            * tournaments[tournamentID].tokenAmount + tournaments[tournamentID].prizePool;
-        uint256 poolRemaining = poolSize;
+        if (payoutToken != address(0)) {
+            uint256 poolSize = tournaments[tournamentID].joinedPlayers.length
+                * tournaments[tournamentID].tokenAmount + tournaments[tournamentID].prizePool;
+            uint256 poolRemaining = poolSize;
 
-        assert(poolSize >= IERC20(payoutToken).balanceOf(address(this)));
+            require(poolSize >= IERC20(payoutToken).balanceOf(address(this)), "NL");
 
-        for (uint16 i = 0; i < payoutProfile.length;) {
-            uint256 payout = (poolSize * payoutProfile[i]) / 10_000;
+            for (uint16 i = 0; i < payoutProfile.length;) {
+                uint256 payout = (poolSize * payoutProfile[i]) / 10_000;
 
-            if (payout > 0) {
-                IERC20(payoutToken).safeTransfer(playersSorted[i], payout);
-                poolRemaining -= payout;
+                if (payout > 0) {
+                    IERC20(payoutToken).safeTransfer(playersSorted[i], payout);
+                    poolRemaining -= payout;
+                }
+                unchecked {
+                    i++;
+                }
             }
-            unchecked {
-                i++;
-            }
+            IERC20(payoutToken).safeTransfer(PaymentSplitter, poolRemaining);
         }
-        IERC20(payoutToken).transfer(PaymentSplitter, poolRemaining);
     }
 
     /// @dev Used to calculate wins, saving score to storage.
