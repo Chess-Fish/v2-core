@@ -486,7 +486,8 @@ contract ChessGame is Initializable, MoveHelper {
         address gameToken,
         uint256 gameAmount,
         uint256 numberOfGames,
-        uint256 timeLimit
+        uint256 timeLimit,
+        uint tournamentID
     )
         external
         onlyTournament
@@ -517,6 +518,8 @@ contract ChessGame is Initializable, MoveHelper {
 
         userGames[player0].push(gameAddress);
         userGames[player1].push(gameAddress);
+
+        tournamentGames[gameAddress] = tournamentID;
 
         // update global state
         allGames.push(gameAddress);

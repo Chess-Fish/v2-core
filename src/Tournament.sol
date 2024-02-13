@@ -400,7 +400,7 @@ contract Tournament {
                     address player1 = specificPlayers[j];
 
                     address gameAddress = chessGame.createGameTournamentSingle(
-                        player0, player1, gameToken, tokenAmount, numberOfGames, timeLimit
+                        player0, player1, gameToken, tokenAmount, numberOfGames, timeLimit, tournamentNonce
                     );
                     tournamentGameAddresses[tournamentNonce].push(gameAddress);
                 }
@@ -465,7 +465,7 @@ contract Tournament {
             address player0 = tournaments[tournamentID].joinedPlayers[i];
 
             address gameAddress = chessGame.createGameTournamentSingle(
-                player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit
+                player0, msg.sender, gameToken, tokenAmount, numberOfGames, timeLimit, tournamentID
             );
             tournamentGameAddresses[tournamentID].push(gameAddress);
             unchecked {
