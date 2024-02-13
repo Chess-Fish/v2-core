@@ -77,14 +77,32 @@ contract Tournament {
     /// @dev uint tournamentID => address player => wins
     mapping(uint256 => mapping(address => uint256)) public tournamentWins;
 
-    ChessGame public immutable chessGame;
-    address public immutable PaymentSplitter;
+    address deployer;
+    ChessGame public chessGame;
+    address public PaymentSplitter;
+    address public  ChessFishNFT;
 
-    constructor(address _chessGame, address _paymentSplitter) {
-        chessGame = ChessGame(_chessGame);
-        PaymentSplitter = _paymentSplitter;
+    constructor() {
+        deployer=msg.sender;
     }
 
+    modifier onlyDeployer() {
+        require(deployer == msg.sender);
+        _;
+    }
+
+    bool isSet;
+    modifier notInitialized() {
+        require(isSet == false);
+        isSet = true;
+        _;
+    }
+
+    function initialize (address _chessGame, address _paymentSplitter, address _nft) public onlyDeployer notInitialized {
+        chessGame = ChessGame(_chessGame);
+        PaymentSplitter = _paymentSplitter;
+        ChessFishNFT = _nft;
+    }
     /* 
     //// VIEW FUNCTIONS ////
     */
@@ -549,6 +567,14 @@ contract Tournament {
         address payoutToken = tournaments[tournamentID].gameToken;
         tournaments[tournamentID].isComplete = true;
 
+        // @dev put in separate function?
+        address[] memory gameAddresses = tournamentGameAddresses[tournamentID];
+        for (uint i = 0; i < gameAddresses.length; i++) {
+            (address player0, address player1, uint wins0, uint wins1) = chessGame.getGameStatus(gameAddresses[i]);
+            address winner = wins0 > wins1 ? player0 : player1;
+            IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddresses[i]);
+        }
+
         if (payoutToken != address(0)) {
             uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
             uint256[] memory payoutProfile;
@@ -594,6 +620,7 @@ contract Tournament {
                     IERC20(payoutToken).safeTransfer(playersSorted[i], payout);
                     poolRemaining -= payout;
                 }
+
                 unchecked {
                     i++;
                 }

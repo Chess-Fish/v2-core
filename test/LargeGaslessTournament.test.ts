@@ -39,7 +39,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 		const gaslessGame = await GaslessGame.deploy();
 
 		const Tournament = await ethers.getContractFactory("Tournament");
-		const tournament = await Tournament.deploy(chessGame.address, dividendSplitter);
+		const tournament = await Tournament.deploy();
 
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
@@ -59,6 +59,9 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 		// Initializing NFT
 		await pieceSVG.initialize(chessNFT.address);
 		await tokenSVG.initialize(chessNFT.address);
+
+        // Initializing Tournament
+        await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
 
 		// Initializing Contracts
 		await chessGame.initialize(
