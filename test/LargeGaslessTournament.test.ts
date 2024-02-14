@@ -60,8 +60,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 		await pieceSVG.initialize(chessNFT.address);
 		await tokenSVG.initialize(chessNFT.address);
 
-        // Initializing Tournament
-        await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
+		// Initializing Tournament
+		await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
 
 		// Initializing Contracts
 		await chessGame.initialize(
@@ -240,7 +240,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 					let player0 = await ethers.getSigner(data.player0);
 					let player1 = await ethers.getSigner(data.player1);
 
-                    // Deterministic wallet & delegation 1
+					// Deterministic wallet & delegation 1
 					const seed0 = {
 						gameAddress: gameAddresses[i],
 					};
@@ -254,8 +254,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						gameAddress: gameAddresses[i],
 					};
 					const signature0 = await player0._signTypedData(domain, delegationTypes, message0);
-                    
-                    // Deterministic wallet & delegation 2
+
+					// Deterministic wallet & delegation 2
 					const seed1 = {
 						gameAddress: gameAddresses[i],
 					};
@@ -270,7 +270,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 					};
 					const signature1 = await player1._signTypedData(domain, delegationTypes, message1);
 
-                    // Delegation Data
+					// Delegation Data
 					const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(
 						message0,
 						signature0
@@ -279,7 +279,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						message1,
 						signature1
 					);
-
 
 					let playerAddress = await chessGame.getPlayerMove(gameAddresses[i]);
 					let startingPlayer =
@@ -291,7 +290,10 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						if (k % 2 == 0) {
 							player = startingPlayer; // First move of the game by starting player
 						} else {
-							player = startingPlayer.address === delegatedSigner1.address ? delegatedSigner0 : delegatedSigner1; // Alternate for subsequent moves using address for comparison
+							player =
+								startingPlayer.address === delegatedSigner1.address
+									? delegatedSigner0
+									: delegatedSigner1; // Alternate for subsequent moves using address for comparison
 						}
 						console.log(`Playing game ${i} of ${gameAddresses.length}`);
 
@@ -346,8 +348,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 				players[10].address
 			);
 
- 			// Tournament of 3 games
-		    expect(player0wins).to.equal(10);
+			// Tournament of 3 games
+			expect(player0wins).to.equal(10);
 			expect(player1wins).to.equal(9);
 			expect(player2wins).to.equal(8);
 			expect(player3wins).to.equal(7);
@@ -361,13 +363,13 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 
 			const data = await tournament.viewTournamentScore(tournamentNonce - 1);
 
-            let sum = 0;
-            for (let i = 0; i < data[1].length; i++) {
-                sum += Number(data[1][i]);
-            }
-            expect(sum).to.equal(gameAddresses.length * numberOfGames);
+			let sum = 0;
+			for (let i = 0; i < data[1].length; i++) {
+				sum += Number(data[1][i]);
+			}
+			expect(sum).to.equal(gameAddresses.length * numberOfGames);
 
- 			expect(data[1][0]).to.equal(player0wins);
+			expect(data[1][0]).to.equal(player0wins);
 			expect(data[1][1]).to.equal(player1wins);
 			expect(data[1][2]).to.equal(player2wins);
 			expect(data[1][3]).to.equal(player3wins);
@@ -378,7 +380,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			expect(data[1][8]).to.equal(player8wins);
 			expect(data[1][9]).to.equal(player9wins);
 			expect(data[1][10]).to.equal(player10wins);
- 
+
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);
 		});

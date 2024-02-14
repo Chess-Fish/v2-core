@@ -80,10 +80,10 @@ contract Tournament {
     address deployer;
     ChessGame public chessGame;
     address public PaymentSplitter;
-    address public  ChessFishNFT;
+    address public ChessFishNFT;
 
     constructor() {
-        deployer=msg.sender;
+        deployer = msg.sender;
     }
 
     modifier onlyDeployer() {
@@ -92,13 +92,22 @@ contract Tournament {
     }
 
     bool isSet;
+
     modifier notInitialized() {
         require(isSet == false);
         isSet = true;
         _;
     }
 
-    function initialize (address _chessGame, address _paymentSplitter, address _nft) public onlyDeployer notInitialized {
+    function initialize(
+        address _chessGame,
+        address _paymentSplitter,
+        address _nft
+    )
+        public
+        onlyDeployer
+        notInitialized
+    {
         chessGame = ChessGame(_chessGame);
         PaymentSplitter = _paymentSplitter;
         ChessFishNFT = _nft;
@@ -569,8 +578,9 @@ contract Tournament {
 
         // @dev put in separate function?
         address[] memory gameAddresses = tournamentGameAddresses[tournamentID];
-        for (uint i = 0; i < gameAddresses.length; i++) {
-            (address player0, address player1, uint wins0, uint wins1) = chessGame.getGameStatus(gameAddresses[i]);
+        for (uint256 i = 0; i < gameAddresses.length; i++) {
+            (address player0, address player1, uint256 wins0, uint256 wins1) =
+                chessGame.getGameStatus(gameAddresses[i]);
             address winner = wins0 > wins1 ? player0 : player1;
             IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddresses[i]);
         }

@@ -40,7 +40,7 @@ describe("ChessFish NFT Unit Tests", function () {
 		const gaslessGame = await GaslessGame.deploy();
 
 		const Tournament = await ethers.getContractFactory("Tournament");
-		const tournament = await Tournament.deploy(await chessGame.getAddress(), addressZero);
+		const tournament = await Tournament.deploy();
 
 		// NFT
 		const PieceSVG = await ethers.getContractFactory("PieceSVG");
@@ -51,30 +51,34 @@ describe("ChessFish NFT Unit Tests", function () {
 
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
-			await chessGame.getAddress(),
-			await moveVerification.getAddress(),
-			await tournament.getAddress(),
-			await pieceSVG.getAddress(),
-			await tokenSVG.getAddress()
+			chessGame.address,
+			moveVerification.address,
+			tournament.address,
+			pieceSVG.address,
+			tokenSVG.address
 		);
 
-		await pieceSVG.connect(deployer).initialize(await chessNFT.getAddress());
-		await tokenSVG.connect(deployer).initialize(await chessNFT.getAddress());
+		await pieceSVG.initialize(chessNFT.address);
+		await tokenSVG.initialize(chessNFT.address);
 
 		// Initializing
 		await chessGame.initialize(
-			await moveVerification.getAddress(),
-			await gaslessGame.getAddress(),
-			await tournament.getAddress(),
-			await tournament.getAddress(),
-			await chessNFT.getAddress()
+			moveVerification.address,
+			gaslessGame.address,
+			tournament.address,
+			tournament.address,
+			chessNFT.address
 		);
+
+		await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
 
 		await chessGame.initCoordinatesAndSymbols(
 			coordinates_array,
 			bitCoordinates_array,
 			pieceSymbols
 		);
+
+		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
 		const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
 		const initialWhite = "0x000704ff";
@@ -102,10 +106,10 @@ describe("ChessFish NFT Unit Tests", function () {
 				deploy
 			);
 
-			expect(await chessGame.getAddress()).to.equal(await chessNFT.chessGame());
-			expect(await moveVerification.getAddress()).to.equal(await chessNFT.moveVerification());
-			expect(await pieceSVG.getAddress()).to.equal(await chessNFT.pieceSVG());
-			expect(await tokenSVG.getAddress()).to.equal(await chessNFT.tokenSVG());
+			expect(chessGame.address).to.equal(await chessNFT.chessGame());
+			expect(moveVerification.address).to.equal(await chessNFT.moveVerification());
+			expect(pieceSVG.address).to.equal(await chessNFT.pieceSVG());
+			expect(tokenSVG.address).to.equal(await chessNFT.tokenSVG());
 
 			// const svgURI = await chessNFT.tokenURI(0);
 

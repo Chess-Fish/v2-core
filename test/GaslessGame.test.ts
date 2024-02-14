@@ -38,8 +38,6 @@ describe("ChessFish Chess Game Unit Tests", function () {
 		const TokenSVG = await ethers.getContractFactory("TokenSVG");
 		const tokenSVG = await TokenSVG.deploy();
 
-        
-
 		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
 		const chessNFT = await ChessFishNFT.deploy(
 			chessGame.address,
@@ -61,7 +59,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			chessNFT.address
 		);
 
-        await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
+		await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
 
 		await chessGame.initCoordinatesAndSymbols(
 			coordinates_array,
