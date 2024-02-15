@@ -192,8 +192,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 
 			let playerAddresses = players.map((player) => player.address);
 
-			// console.log(playerAddresses);
-
 			let tx = await tournament
 				.connect(players[0])
 				.createTournamentWithSpecificPlayers(
@@ -208,19 +206,8 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 
 			const tournamentNonce = await tournament.tournamentNonce();
 
-			/* 			await Promise.all(
-				playersSansPlayer0.map(async (player) => {
-					return await tournament.connect(player).joinTournament(tournamentNonce - 1);
-				})
-			); */
-
 			const playerAddressesContract = await tournament.getTournamentPlayers(tournamentNonce - 1);
 			expect(playerAddressesContract.length).to.equal(11);
-
-			// await ethers.provider.send("evm_increaseTime", [86400]);
-			// await ethers.provider.send("evm_mine");
-
-			// await tournament.startTournament(tournamentNonce - 1);
 
 			console.log("TOURNAMENT STARTED");
 
@@ -233,7 +220,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			for (let i = 0; i < gameAddresses.length; i++) {
 				for (let j = 0; j < numberOfGames; j++) {
 					let messageArray: any[] = [];
-					// let signatureArray: any[] = [];
 
 					let data = await chessGame.gameData(gameAddresses[i]);
 
