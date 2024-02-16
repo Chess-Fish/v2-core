@@ -45,8 +45,8 @@ contract ChessFishNFT is ERC721 {
 
     mapping(address => uint256) internal endTimes;
 
-    modifier onlyChessGame() {
-        require(msg.sender == address(chessGame));
+    modifier onlyAuthed() {
+        require(msg.sender == address(chessGame) || msg.sender == address(tournament));
         _;
     }
 
@@ -78,9 +78,12 @@ contract ChessFishNFT is ERC721 {
         address gameAddress
     )
         external
-        onlyChessGame
+        onlyAuthed
         returns (uint256)
     {
+        console.log("Minting");
+        console.log(gameAddress);
+
         uint256 tokenId = _tokenIdCounter;
         _mint(player, tokenId);
         gameAddresses[tokenId] = gameAddress;
@@ -93,17 +96,35 @@ contract ChessFishNFT is ERC721 {
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
+        console.log("In Token URI");
+
         ChessGame.GameData memory gameData = chessGame.getGameData(gameAddresses[id]);
-        uint256 gameID = gameData.numberOfGames;
+        uint256 gameID = gameData.numberOfGames - 1;
+
+        console.log(gameData.isTournament);
 
         uint16[] memory gameMoves =
             chessGame.getGameMoves(gameAddresses[id], gameID).moves;
 
+        for (uint i =0; i < gameMoves.length; i++) {
+            console.log(gameMoves[i]);
+        }
+
         (, uint256 gameState,,) = moveVerification.checkGameFromStart(gameMoves);
+
+        console.log("gameState", gameState);
 
         string[64] memory boardStringArray = chessGame.getBoard(gameState);
 
+        console.log("Board");
+        for (uint i = 0; i < boardStringArray.length; i++) {
+            console.log(boardStringArray[i]);
+        }
+
         string memory boardString = arrayToString(boardStringArray);
+
+        console.log("BOARD", boardString);
+
 
         uint256 place;
         if (gameData.isTournament) {

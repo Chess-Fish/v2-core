@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 /// @dev Test Token with large supply
 
 contract Token is ERC20 {
-    uint256 constant _initial_supply = 10 ** 50 * (10 ** 18);
+    uint256 constant _initial_supply = 50e6 * (10e18);
 
     uint256 public value;
 
