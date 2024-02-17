@@ -267,7 +267,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			const signedDelegationData1 = await gaslessGame.encodeSignedDelegation(message1, signature1);
 
 			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
-			
+
 			let messageArray: any[] = [];
 			let signatureArray: any[] = [];
 			const hex_move_array: number[] = [];
@@ -304,11 +304,11 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					signatureArray.push(signature);
 					messageArray.push(gaslessMoveData);
 
-					console.log('len', messageArray.length);
+					console.log("len", messageArray.length);
 				}
 				const delegations = [signedDelegationData0, signedDelegationData1];
 
-				const secondTolastTwoMoves = messageArray.slice(-3, -1);;
+				const secondTolastTwoMoves = messageArray.slice(-3, -1);
 
 				console.log("signers");
 				console.log(signer0.address);
@@ -317,12 +317,12 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				console.log(delegatedSigner1.address);
 				console.log("____");
 
-				console.log("MOVES", hex_move_array.slice(-3,-1));
+				console.log("MOVES", hex_move_array.slice(-3, -1));
 				await gaslessGame.verifyGameViewDelegated(delegations, secondTolastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, secondTolastTwoMoves);
 			}
 
-			console.log('len', messageArray.length);
+			console.log("len", messageArray.length);
 
 			const lastMove = messageArray[messageArray.length - 1];
 
@@ -330,6 +330,5 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData0, lastMove);
 		});
-		
 	});
 });
