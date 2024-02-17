@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ChessGame.sol": {
-      "lastModificationDate": 1707861668800,
+      "lastModificationDate": 1708164190062,
       "contentHash": "709156e31d7b5873e34710abc2066e63",
       "sourceName": "src/ChessGame.sol",
       "solcConfig": {
@@ -90,7 +90,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/GaslessGame.sol": {
-      "lastModificationDate": 1707861668792,
+      "lastModificationDate": 1708164190050,
       "contentHash": "7ea3b19e3d4458c8b4763a45725f113b",
       "sourceName": "src/GaslessGame.sol",
       "solcConfig": {
@@ -139,8 +139,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveHelper.sol": {
-      "lastModificationDate": 1707749525553,
-      "contentHash": "950ff7079ac428184816cfbd1ea57279",
+      "lastModificationDate": 1708164193840,
+      "contentHash": "fe0b1574db2051bcb42f02591cd9bceb",
       "sourceName": "src/MoveHelper.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -171,7 +171,8 @@
         }
       },
       "imports": [
-        "./MoveVerification.sol"
+        "./MoveVerification.sol",
+        "forge-std/console.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -838,7 +839,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/Tournament.sol": {
-      "lastModificationDate": 1708013090215,
+      "lastModificationDate": 1708164190054,
       "contentHash": "9f9c1c21db370cafb1d1690841ab015c",
       "sourceName": "src/Tournament.sol",
       "solcConfig": {
@@ -1306,7 +1307,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/PieceSVG.sol": {
-      "lastModificationDate": 1707861668792,
+      "lastModificationDate": 1708164190050,
       "contentHash": "794dc88f031a14b74303dfd72d2ce443",
       "sourceName": "src/ERC721/PieceSVG.sol",
       "solcConfig": {
@@ -1351,7 +1352,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/Init.sol": {
-      "lastModificationDate": 1707861668791,
+      "lastModificationDate": 1708164190047,
       "contentHash": "d2702e669bf43a9b7767f6e62f195810",
       "sourceName": "src/ERC721/Init.sol",
       "solcConfig": {
@@ -1434,7 +1435,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/TokenSVG.sol": {
-      "lastModificationDate": 1707861668791,
+      "lastModificationDate": 1708164190047,
       "contentHash": "87fa0d5508ce914c25bf97ee9263e8be",
       "sourceName": "src/ERC721/TokenSVG.sol",
       "solcConfig": {
@@ -1478,8 +1479,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1708076295139,
-      "contentHash": "a27b8f810a3971b4b48ed5d463d7bd1f",
+      "lastModificationDate": 1708164190053,
+      "contentHash": "27314ced794548f950fcd043fc01a3fa",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",

@@ -14,6 +14,7 @@ pragma solidity ^0.8.24;
 
 import { MoveVerification } from "./MoveVerification.sol";
 
+import "forge-std/console.sol";
 /**
  * @title ChessFish MoveHelper Contract
  * @author ChessFish
@@ -22,6 +23,7 @@ import { MoveVerification } from "./MoveVerification.sol";
  * @dev This contract handles move conversion functionality to the
  * MoveVerification contract as well as setting board coordinates.
  */
+
 contract MoveHelper {
     // @dev uint pieces => letter pieces
     mapping(uint8 => string) pieces;
@@ -58,9 +60,31 @@ contract MoveHelper {
             coordinates[coordinate[uint256(i)]] = value[uint256(i)];
             squareToCoordinate[value[uint256(i)]] = coordinate[uint256(i)];
         }
+        /* 		
+        pieces[0] = ".";
 
-        for (uint256 i = 0; i < 13; i++) {
-            pieces[uint8(i)] = pieceSymbols[i];
+        // white pieces
+        pieces[1] = "P";
+        pieces[2] = "B";
+        pieces[3] = "N";
+        pieces[4] = "R";
+        pieces[5] = "Q";
+        pieces[6] = "K";
+
+        // black pieces
+        pieces[9] = "p";
+        pieces[10] = "b";
+        pieces[11] = "n";
+        pieces[12] = "r";
+        pieces[13] = "q";
+        pieces[14] = "k";
+        */
+        for (uint8 i = 0; i < 13; i++) {
+            if (i >= 7) {
+                pieces[i + 2] = pieceSymbols[i];
+            } else {
+                pieces[i] = pieceSymbols[i];
+            }
         }
     }
 

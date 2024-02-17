@@ -106,7 +106,7 @@ contract ChessFishNFT is ERC721 {
         uint16[] memory gameMoves =
             chessGame.getGameMoves(gameAddresses[id], gameID).moves;
 
-        for (uint i =0; i < gameMoves.length; i++) {
+        for (uint256 i = 0; i < gameMoves.length; i++) {
             console.log(gameMoves[i]);
         }
 
@@ -117,14 +117,13 @@ contract ChessFishNFT is ERC721 {
         string[64] memory boardStringArray = chessGame.getBoard(gameState);
 
         console.log("Board");
-        for (uint i = 0; i < boardStringArray.length; i++) {
+        for (uint256 i = 0; i < boardStringArray.length; i++) {
             console.log(boardStringArray[i]);
         }
 
         string memory boardString = arrayToString(boardStringArray);
 
         console.log("BOARD", boardString);
-
 
         uint256 place;
         if (gameData.isTournament) {
