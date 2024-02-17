@@ -188,11 +188,7 @@ contract ChessGame is Initializable, MoveHelper {
         return gameMoves[gameAddress][gameIDs[gameAddress].length].moves;
     }
 
-    function getNumberOfGamesPlayed(address gameAddress)
-        internal
-        view
-        returns (uint256)
-    {
+    function getNumberOfGamesPlayed(address gameAddress) private view returns (uint256) {
         return gameIDs[gameAddress].length + 1;
     }
 
@@ -333,7 +329,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Returns chainId
     /// @dev used for ensuring unique hash independent of chain
     /// @return chainId
-    function getChainId() internal view returns (uint256) {
+    function getChainId() private view returns (uint256) {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -344,7 +340,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Generates unique hash for a game game
     /// @dev using keccak256 to generate a hash which is converted to an address
     /// @return gameAddress
-    function getgameAddress(GameData memory game) internal view returns (address) {
+    function getgameAddress(GameData memory game) private view returns (address) {
         require(game.player0 != game.player1, "players must be different");
         require(game.numberOfGames % 2 == 1, "number of games must be odd");
 
@@ -544,7 +540,6 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 numberOfGames
     )
         external
-        payable
         returns (address gameAddress)
     {
         GameData memory game = GameData(

@@ -43,7 +43,7 @@ contract ChessFishNFT is ERC721 {
 
     address public deployer;
 
-    mapping(address => uint256) internal endTimes;
+    mapping(address => uint256) private endTimes;
 
     modifier onlyAuthed() {
         require(msg.sender == address(chessGame) || msg.sender == address(tournament));
@@ -268,7 +268,7 @@ contract ChessFishNFT is ERC721 {
         bool isTournament,
         uint256 place
     )
-        internal
+        private
         view
         returns (bytes memory)
     {
@@ -350,7 +350,7 @@ contract ChessFishNFT is ERC721 {
         return svg;
     }
 
-    function getPlaceSVG(uint256 place) internal pure returns (string memory) {
+    function getPlaceSVG(uint256 place) private pure returns (string memory) {
         if (place > 3) {
             return "&#x1f9a5;";
         } else if (place == 1) {
@@ -387,7 +387,7 @@ contract ChessFishNFT is ERC721 {
     }
 
     // Helper function to convert bytes to a hexadecimal string
-    function toHexString(bytes memory data) internal pure returns (string memory) {
+    function toHexString(bytes memory data) private pure returns (string memory) {
         bytes memory hexNum = "0123456789ABCDEF";
         bytes memory result = new bytes(2 * data.length);
 
@@ -422,7 +422,7 @@ contract ChessFishNFT is ERC721 {
         return string(bstr);
     }
 
-    function toAsciiString(address x) internal pure returns (string memory) {
+    function toAsciiString(address x) private pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; i++) {
             bytes1 b = bytes1(uint8(uint256(uint160(x)) / (2 ** (8 * (19 - i)))));
@@ -434,7 +434,7 @@ contract ChessFishNFT is ERC721 {
         return string(s);
     }
 
-    function char(bytes1 b) internal pure returns (bytes1 c) {
+    function char(bytes1 b) private pure returns (bytes1 c) {
         if (uint8(b) < 10) return bytes1(uint8(b) + 0x30);
         else return bytes1(uint8(b) + 0x57);
     }
@@ -453,7 +453,7 @@ contract ChessFishNFT is ERC721 {
     uint256 constant DOW_SUN = 7;
 
     function timestampToDateTimeString(uint256 timestamp)
-        internal
+        private
         pure
         returns (string memory)
     {
@@ -487,7 +487,7 @@ contract ChessFishNFT is ERC721 {
         uint256 value,
         uint256 length
     )
-        internal
+        private
         pure
         returns (string memory)
     {
@@ -512,7 +512,7 @@ contract ChessFishNFT is ERC721 {
         return string(padded);
     }
 
-    function _toString(uint256 value) internal pure returns (string memory) {
+    function _toString(uint256 value) private pure returns (string memory) {
         // Converts a uint256 to a string
         if (value == 0) {
             return "0";
@@ -533,7 +533,7 @@ contract ChessFishNFT is ERC721 {
     }
 
     function timestampToDateTime(uint256 timestamp)
-        internal
+        private
         pure
         returns (
             uint256 year,
@@ -553,7 +553,7 @@ contract ChessFishNFT is ERC721 {
     }
 
     function _daysToDate(uint256 _days)
-        internal
+        private
         pure
         returns (uint256 year, uint256 month, uint256 day)
     {
@@ -575,7 +575,7 @@ contract ChessFishNFT is ERC721 {
         day = uint256(_day);
     }
 
-    function isLeapYear(uint256 year) internal pure returns (bool) {
+    function isLeapYear(uint256 year) private pure returns (bool) {
         if (year % 4 != 0) {
             return false;
         } else if (year % 100 != 0) {

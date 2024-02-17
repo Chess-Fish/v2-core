@@ -72,7 +72,7 @@ contract Tournament {
     mapping(uint256 => TournamentParams) public tournaments;
 
     /// @dev uint tournament nonce => address[] gameIDs
-    mapping(uint256 => address[]) internal tournamentGameAddresses;
+    mapping(uint256 => address[]) private tournamentGameAddresses;
 
     /// @dev uint tournamentID => address player => wins
     mapping(uint256 => mapping(address => uint256)) public tournamentWins;
@@ -289,7 +289,7 @@ contract Tournament {
         uint256 tournamentID,
         address player
     )
-        internal
+        private
         view
         returns (bool)
     {
@@ -308,7 +308,7 @@ contract Tournament {
         uint256 tournamentID,
         address player
     )
-        internal
+        private
         view
         returns (bool)
     {
@@ -669,7 +669,7 @@ contract Tournament {
         return (players, wins);
     }
 
-    /// @dev internal func that withdraws player from tournament if they exit
+    /// @dev private func that withdraws player from tournament if they exit
     function removePlayerFromPlayers(uint256 tournamentID, address player) private {
         bool isInPlayers = false;
         uint256 i = 0;

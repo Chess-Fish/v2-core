@@ -139,6 +139,10 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 			const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(message0, signature0);
 
+			// Testing individual delegation
+			// Internal
+			// await gaslessGame.verifyDelegation([message0 ,signature0]);
+
 			// ON THE FRONT END user 1
 			// 1) Generate random public private key pair
 			const entropy1 = generateRandomHash();

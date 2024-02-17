@@ -109,7 +109,7 @@ contract GaslessGame is Initializable, EIP712 {
         address _moveVerification,
         address _chessGame
     )
-        public
+        external
         initializer
     {
         moveVerification = MoveVerification(_moveVerification);
@@ -262,7 +262,7 @@ contract GaslessGame is Initializable, EIP712 {
     }
 
     function decodeMoveData(bytes memory moveData)
-        internal
+        private
         pure
         returns (GaslessMoveData memory)
     {
@@ -274,7 +274,7 @@ contract GaslessGame is Initializable, EIP712 {
         GaslessMoveData memory moveData,
         address signer
     )
-        public
+        private
         view
     {
         bytes32 digest = _hashTypedDataV4(
@@ -340,7 +340,7 @@ contract GaslessGame is Initializable, EIP712 {
         address delegator1,
         address gameAddress
     )
-        internal
+        private
         view
     {
         if (gameAddress == address(0)) {
@@ -360,7 +360,7 @@ contract GaslessGame is Initializable, EIP712 {
         address delegator,
         address gameAddress
     )
-        internal
+        private
         view
     {
         if (gameAddress == address(0)) {
@@ -372,7 +372,7 @@ contract GaslessGame is Initializable, EIP712 {
     }
 
     /// @dev typed signature verification
-    function verifyDelegation(SignedDelegation memory signedDelegation) internal view {
+    function verifyDelegation(SignedDelegation memory signedDelegation) private view {
         bytes32 digest = _hashTypedDataV4(
             keccak256(
                 abi.encode(
