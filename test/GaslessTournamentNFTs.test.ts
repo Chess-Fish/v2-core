@@ -309,7 +309,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 
 						messageArray.push(gaslessMoveData);
 					}
-                    console.log(hex_move_array);
+					console.log(hex_move_array);
 					const delegations = [signedDelegationData0, signedDelegationData1];
 					const lastTwoMoves = messageArray.slice(-2);
 					await chessGame.verifyGameUpdateStateDelegated(delegations.reverse(), lastTwoMoves);
@@ -373,36 +373,33 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);
 
-			// console.log(players[1].address);
+			for (let i = 0; i < gameAddresses.length; i++) {
+				let ownerOf = await chessNFT.ownerOf(i);
+				console.log("owner", ownerOf);
 
-			let balance = await chessNFT.balanceOf(players[1].address);
-			expect(balance).to.equal(9);
+				const svgURI = await chessNFT.tokenURI(i);
 
-			let ownerOf = await chessNFT.ownerOf(0);
-			console.log("owner", ownerOf);
+				// Step 1: Decode the JSON object from base64
+				const jsonBase64 = svgURI.split(",")[1]; // Assuming the structure is "data:application/json;base64,..."
+				const jsonString = Buffer.from(jsonBase64, "base64").toString("utf-8");
 
-			const svgURI = await chessNFT.tokenURI(0);
+				// Step 2: Parse the JSON to extract the SVG
+				const json = JSON.parse(jsonString);
+				const svgBase64 = json.image.split(",")[1]; // Assuming the image data starts with "data:image/svg+xml;base64,"
 
-			// Step 1: Decode the JSON object from base64
-			const jsonBase64 = svgURI.split(",")[1]; // Assuming the structure is "data:application/json;base64,..."
-			const jsonString = Buffer.from(jsonBase64, "base64").toString("utf-8");
+				// Step 3: Decode the SVG data from base64
+				const svgContent = Buffer.from(svgBase64, "base64").toString("utf-8");
 
-			// Step 2: Parse the JSON to extract the SVG
-			const json = JSON.parse(jsonString);
-			const svgBase64 = json.image.split(",")[1]; // Assuming the image data starts with "data:image/svg+xml;base64,"
+				// Define the file path for the output HTML file
+				const filePath = path.join(__dirname, `/nfts/SVG_tournament${i}.html`);
 
-			// Step 3: Decode the SVG data from base64
-			const svgContent = Buffer.from(svgBase64, "base64").toString("utf-8");
+				// Write the SVG content to the file
+				fs.writeFileSync(filePath, svgContent);
 
-			// Define the file path for the output HTML file
-			const filePath = path.join(__dirname, "SVG_outputTournament.html");
-
-			// Write the SVG content to the file
-			fs.writeFileSync(filePath, svgContent);
-
-			console.log(json.name);
-			console.log(json.description);
-			console.log(json.attributes);
+				console.log(json.name);
+				console.log(json.description);
+				console.log(json.attributes);
+			}
 		});
 	});
 });

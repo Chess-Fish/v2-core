@@ -88,7 +88,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 			// moves to checkmate: https://lichess.org/study/WSdWU9JC/HKJztW6i
 
 			// let gameState = "92128449317020355091629252608629158979248243942770410860708258515263854891572";
-			let gameState = "92127013753780222654360604150668269002455902644110213085750839854476319674932";
+			let gameState =
+				"92127013753780222654360604150668269002455902644110213085750839854476319674932";
 
 			let data = await chessGame.getBoard(gameState);
 
@@ -352,7 +353,9 @@ describe("ChessFish Game Verification Unit Tests", function () {
 
 			let outcome = await moveVerification.checkGameFromStart(hex_moves);
 
-			expect(outcome[1]).to.equal("92127013753780222654360604150668269002455902644110213085750839854476319674932");
+			expect(outcome[1]).to.equal(
+				"92127013753780222654360604150668269002455902644110213085750839854476319674932"
+			);
 			// expect(outcome[0]).to.equal(2);
 		});
 

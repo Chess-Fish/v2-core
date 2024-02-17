@@ -22,8 +22,6 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./MoveVerification.sol";
 import "./ChessGame.sol";
 
-import "forge-std/console.sol";
-
 /**
  * @title ChessFish GaslessGame Contract
  * @author ChessFish
@@ -133,7 +131,7 @@ contract GaslessGame is Initializable, EIP712 {
 
     function verifyGameViewDelegatedSingle(
         bytes memory rawSignedDelegation,
-        bytes[1] memory rawMoveData
+        bytes memory rawMoveData
     )
         external
         view
@@ -148,16 +146,11 @@ contract GaslessGame is Initializable, EIP712 {
             decodeSignedDelegation(rawSignedDelegation);
         verifyDelegation(signedDelegation);
 
-        GaslessMoveData memory moveData = decodeMoveData(rawMoveData[0]);
-
-        uint256 size = moveData.moves.length;
-        uint16[] memory moves0 = new uint16[](size - 1);
-        for (uint256 i = 0; i < size - 1; i++) {
-            moves0[i] = moveData.moves[i];
-        }
+        GaslessMoveData memory moveData = decodeMoveData(rawMoveData);
 
         require(
-            moveData.move.movesHash == keccak256(abi.encode(moves0)), "Hash0 != moves"
+            moveData.move.movesHash == keccak256(abi.encode(moveData.moves)),
+            "Hash1 != moves"
         );
 
         verifyMoveSigner(moveData, signedDelegation.delegation.delegatedAddress);
@@ -296,7 +289,7 @@ contract GaslessGame is Initializable, EIP712 {
             )
         );
         require(
-            ECDSA.recover(digest, moveData.signature) == signer, "140 invalid signature"
+            ECDSA.recover(digest, moveData.signature) == signer, "299 invalid signature"
         );
     }
 

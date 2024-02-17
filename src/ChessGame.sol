@@ -379,7 +379,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @return isEndGame
     function verifyGameUpdateState(
         bytes memory rawSignedDelegation,
-        bytes[1] memory rawMoveData
+        bytes memory rawMoveData
     )
         external
         returns (bool)

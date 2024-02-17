@@ -82,7 +82,8 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		it("Should print ascii board", async function () {
 			const { chessGame } = await loadFixture(deploy);
 
-			let gameState = "92127013753780222654360604150668269002455902644110213085750839854476319674932";
+			let gameState =
+				"92127013753780222654360604150668269002455902644110213085750839854476319674932";
 
 			let data = await chessGame.getBoard(gameState);
 
@@ -112,10 +113,9 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		});
 
 		it("Should get correct board after moves", async function () {
-			const { chessGame, moveVerification } =
-				await loadFixture(deploy);
+			const { chessGame, moveVerification } = await loadFixture(deploy);
 
-                const moves = ["f2f3", "e7e5", "g2g4", "d8h4"];
+			const moves = ["f2f3", "e7e5", "g2g4", "d8h4"];
 
 			let hex_moves = [];
 
@@ -132,7 +132,7 @@ describe("ChessFish Game Verification Unit Tests", function () {
 		it("Should print ascii board after each move", async function () {
 			const { chessGame, moveVerification } = await loadFixture(deploy);
 
-            const moves = ["f2f3", "e7e5", "g2g4", "d8h4"];
+			const moves = ["f2f3", "e7e5", "g2g4", "d8h4"];
 
 			let hex_moves = [];
 
@@ -140,33 +140,33 @@ describe("ChessFish Game Verification Unit Tests", function () {
 				let hex_move = await chessGame.moveToHex(moves[i]);
 				hex_moves.push(hex_move);
 
-                let outcome = await moveVerification.checkGameFromStart(hex_moves);
-                let data = await chessGame.getBoard(outcome[1]);
+				let outcome = await moveVerification.checkGameFromStart(hex_moves);
+				let data = await chessGame.getBoard(outcome[1]);
 
-                let result = Object.values(data);
-    
-                let pieces = result.reverse();
-    
-                let board = "   +------------------------+\n ";
-    
-                for (let i = 0; i < 64; i++) {
-                    if (i % 8 === 0) {
-                        let row_num = 8 - i / 8;
-                        board += String(row_num) + "  ";
-                    }
-    
-                    board += " " + pieces[i] + " ";
-    
-                    if ((i + 1) % 8 === 0) {
-                        board += "\n ";
-                    }
-                }
-    
-                board += "  +------------------------+\n";
-                board += "     a  b  c  d  e  f  g  h";
-    
-                // console.log(board);
-			}	
+				let result = Object.values(data);
+
+				let pieces = result.reverse();
+
+				let board = "   +------------------------+\n ";
+
+				for (let i = 0; i < 64; i++) {
+					if (i % 8 === 0) {
+						let row_num = 8 - i / 8;
+						board += String(row_num) + "  ";
+					}
+
+					board += " " + pieces[i] + " ";
+
+					if ((i + 1) % 8 === 0) {
+						board += "\n ";
+					}
+				}
+
+				board += "  +------------------------+\n";
+				board += "     a  b  c  d  e  f  g  h";
+
+				// console.log(board);
+			}
 		});
 	});
 });
