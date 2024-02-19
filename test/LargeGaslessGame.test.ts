@@ -229,7 +229,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					const moveData = {
 						gameAddress: addressZero,
 						gameNumber: 0,
-						expiration: Math.floor(Date.now() / 1000) + 3600,
+						expiration: Math.floor(Date.now() / 1000) + 86400*10,
 						movesHash: movesHash,
 					};
 
@@ -250,7 +250,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				const delegations = [signedDelegationData0, signedDelegationData1];
 
 				const lastTwoMoves = messageArray.slice(-2);
-
+/* 
 				console.log("signers");
 				console.log(signer0.address);
 				console.log(signer1.address);
@@ -258,11 +258,8 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				console.log(delegatedSigner1.address);
 				console.log("____");
 
-				console.log("Hash");
-				const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
-				console.log(movesHash);
+	 */
 
-				console.log("MOVES", hex_move_array);
 				await gaslessGame.verifyGameViewDelegated(delegations, lastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}

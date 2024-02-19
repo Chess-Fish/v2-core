@@ -81,9 +81,6 @@ contract ChessFishNFT is ERC721 {
         onlyAuthed
         returns (uint256)
     {
-        console.log("Minting");
-        console.log(gameAddress);
-
         uint256 tokenId = _tokenIdCounter;
         _mint(player, tokenId);
         gameAddresses[tokenId] = gameAddress;
@@ -96,12 +93,8 @@ contract ChessFishNFT is ERC721 {
     }
 
     function tokenURI(uint256 id) public view override returns (string memory) {
-        console.log("In Token URI");
-
         ChessGame.GameData memory gameData = chessGame.getGameData(gameAddresses[id]);
         uint256 gameID = gameData.numberOfGames - 1;
-
-        console.log(gameData.isTournament);
 
         uint16[] memory gameMoves =
             chessGame.getGameMoves(gameAddresses[id], gameID).moves;
@@ -112,18 +105,10 @@ contract ChessFishNFT is ERC721 {
 
         (, uint256 gameState,,) = moveVerification.checkGameFromStart(gameMoves);
 
-        console.log("gameState", gameState);
-
         string[64] memory boardStringArray = chessGame.getBoard(gameState);
 
-        console.log("Board");
-        for (uint256 i = 0; i < boardStringArray.length; i++) {
-            console.log(boardStringArray[i]);
-        }
 
         string memory boardString = arrayToString(boardStringArray);
-
-        console.log("BOARD", boardString);
 
         uint256 place;
         if (gameData.isTournament) {
@@ -150,9 +135,7 @@ contract ChessFishNFT is ERC721 {
     function arrayToString(string[64] memory array) public pure returns (string memory) {
         string memory result = "";
         for (uint256 i = 0; i < array.length; i++) {
-            // Append the current element
             result = string(abi.encodePacked(result, array[i]));
-            // Append a comma after the element unless it's the last one
             if (i < array.length - 1) {
                 result = string(abi.encodePacked(result, ","));
             }
@@ -378,7 +361,6 @@ contract ChessFishNFT is ERC721 {
             keccak256(abi.encodePacked(endTime, player0, player1, token))
         ) % 16_777_215;
 
-        // Convert the pseudo-random number to a hexadecimal string
         bytes memory b = new bytes(3);
         for (uint256 i = 0; i < 3; i++) {
             b[i] = bytes1(uint8(random / (2 ** (8 * (2 - i)))));
@@ -422,6 +404,7 @@ contract ChessFishNFT is ERC721 {
         return string(bstr);
     }
 
+    // Convert address to string
     function toAsciiString(address x) private pure returns (string memory) {
         bytes memory s = new bytes(40);
         for (uint256 i = 0; i < 20; i++) {
@@ -491,8 +474,6 @@ contract ChessFishNFT is ERC721 {
         pure
         returns (string memory)
     {
-        // Converts a uint256 to a string and pads with leading zeros if necessary to
-        // match the desired length
         string memory strValue = _toString(value);
         uint256 strLength = bytes(strValue).length;
 
@@ -513,7 +494,6 @@ contract ChessFishNFT is ERC721 {
     }
 
     function _toString(uint256 value) private pure returns (string memory) {
-        // Converts a uint256 to a string
         if (value == 0) {
             return "0";
         }

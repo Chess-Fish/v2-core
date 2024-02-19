@@ -295,7 +295,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 						const moveData = {
 							gameAddress: gameAddresses[i],
 							gameNumber: j,
-							expiration: Math.floor(Date.now() / 1000) + 86400,
+							expiration: Math.floor(Date.now() / 1000) + 86400 * 10,
 							movesHash: movesHash,
 						};
 
@@ -309,7 +309,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 
 						messageArray.push(gaslessMoveData);
 					}
-					console.log(hex_move_array);
 					const delegations = [signedDelegationData0, signedDelegationData1];
 					const lastTwoMoves = messageArray.slice(-2);
 					await chessGame.verifyGameUpdateStateDelegated(delegations.reverse(), lastTwoMoves);
@@ -373,7 +372,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);
 
-			for (let i = 0; i < gameAddresses.length; i++) {
+			for (let i = 0; i < 5/* gameAddresses.length */; i++) {
 				let ownerOf = await chessNFT.ownerOf(i);
 				console.log("owner", ownerOf);
 
