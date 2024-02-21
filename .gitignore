@@ -19,3 +19,5 @@ typechain-types
 
 hardhat_cache
 artifacts
+
+coverage

@@ -107,7 +107,6 @@ contract ChessFishNFT is ERC721 {
 
         string[64] memory boardStringArray = chessGame.getBoard(gameState);
 
-
         string memory boardString = arrayToString(boardStringArray);
 
         uint256 place;
@@ -131,6 +130,15 @@ contract ChessFishNFT is ERC721 {
             place
         );
     }
+    /* 
+    function viewBoard(
+        address gameAddress,
+        uint256 gameID
+    )
+        public
+        view
+        returns (string memory)
+    { } */
 
     function arrayToString(string[64] memory array) public pure returns (string memory) {
         string memory result = "";

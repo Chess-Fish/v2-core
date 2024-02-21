@@ -46,8 +46,8 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 timePlayer1;
         bool isTournament;
         bool isComplete;
-        bool hasBeenPaid;
     }
+    // bool hasBeenPaid;
 
     struct GameStatus {
         bool isPlayer0White;
@@ -89,6 +89,9 @@ contract ChessGame is Initializable, MoveHelper {
 
     /// @dev gameAddress => tournamentID
     mapping(address => uint256) public tournamentGames;
+
+    /// @dev gameAddress => hasBeenPaid
+    mapping(address => bool) public hasBeenPaid;
 
     /// @dev address[] games
     address[] public allGames;
@@ -432,10 +435,11 @@ contract ChessGame is Initializable, MoveHelper {
                 0, // timePlayer0
                 0, // timePlayer1
                 false, // isTournament
-                true, // isComplete
-                true // hasBeenPaid
+                true // isComplete
+                    // true // hasBeenPaid
             );
             gameAddress = getgameAddress(gameParams);
+            hasBeenPaid[gameAddress] = true;
         }
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
@@ -502,8 +506,8 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer0
             0, // timePlayer1
             true, // isTournament
-            false, // isComplete
-            false // hasBeenPaid
+            false // isComplete
+                // false // hasBeenPaid
         );
         gameAddress = getgameAddress(game);
 
@@ -554,8 +558,8 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer0
             0, // timePlayer1
             false, // isTournament
-            false, // isComplete
-            false // hasBeenPaid
+            false // isComplete
+                // false // hasBeenPaid
         );
 
         if (gameToken != address(0)) {
@@ -668,9 +672,9 @@ contract ChessGame is Initializable, MoveHelper {
             gameData[gameAddress].isTournament == false,
             "tournament payment handled by tournament contract"
         );
-        require(gameData[gameAddress].hasBeenPaid == false, "already paid");
+        require(hasBeenPaid[gameAddress] == false, "already paid");
 
-        gameData[gameAddress].hasBeenPaid = true;
+        hasBeenPaid[gameAddress] = true;
 
         address winner;
 
@@ -712,12 +716,12 @@ contract ChessGame is Initializable, MoveHelper {
         return true;
     }
 
-    /// @notice mint tournament winner NFT
+    /*     /// @notice mint tournament winner NFT
     function mintWinnerNFT(address gameAddress) external {
         require(gameData[gameAddress].isComplete == true, "game not finished");
-        require(gameData[gameAddress].hasBeenPaid == false, "already paid");
+        require(hasBeenPaid[gameAddress] == false, "already paid");
 
-        gameData[gameAddress].hasBeenPaid == true;
+        hasBeenPaid[gameAddress] = true;
 
         (address player0, address player1, uint256 wins0, uint256 wins1) =
             getGameStatus(gameAddress);
@@ -731,7 +735,7 @@ contract ChessGame is Initializable, MoveHelper {
 
         IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
     }
-
+    */
     /// @notice Cancel game
     /// @dev cancel game only if other player has not yet accepted
     /// @dev && only if msg.sender is one of the players

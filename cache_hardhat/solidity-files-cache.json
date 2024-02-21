@@ -2,20 +2,20 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ChessGame.sol": {
-      "lastModificationDate": 1708180429862,
-      "contentHash": "ce64136dd4c1da55b3f52fc9a8bbd359",
+      "lastModificationDate": 1708511338670,
+      "contentHash": "b6c29de4b37637a659d89049fa7e395d",
       "sourceName": "src/ChessGame.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -50,20 +50,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/interfaces/interfaces.sol": {
-      "lastModificationDate": 1708180429852,
+      "lastModificationDate": 1708511338655,
       "contentHash": "7b7aa37e8357f86caf01589305ecd675",
       "sourceName": "src/interfaces/interfaces.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -91,65 +91,21 @@
         "IChessGame"
       ]
     },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveHelper.sol": {
-      "lastModificationDate": 1708180429852,
-      "contentHash": "fe0b1574db2051bcb42f02591cd9bceb",
-      "sourceName": "src/MoveHelper.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none",
-            "useLiteralContent": false
-          },
-          "optimizer": {
-            "enabled": false,
-            "runs": 20000
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "./MoveVerification.sol",
-        "forge-std/console.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.24"
-      ],
-      "artifacts": [
-        "MoveHelper"
-      ]
-    },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/GaslessGame.sol": {
-      "lastModificationDate": 1708180429854,
+      "lastModificationDate": 1708511338658,
       "contentHash": "3fbf650a66b3c1a87854028a9c73ffe3",
       "sourceName": "src/GaslessGame.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -184,21 +140,21 @@
         "GaslessGame"
       ]
     },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
-      "lastModificationDate": 1707402315633,
-      "contentHash": "5517c8678c18eb1a8ba58810e7ca39ca",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveHelper.sol": {
+      "lastModificationDate": 1708511338656,
+      "contentHash": "fe0b1574db2051bcb42f02591cd9bceb",
+      "sourceName": "src/MoveHelper.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -217,12 +173,15 @@
           }
         }
       },
-      "imports": [],
+      "imports": [
+        "./MoveVerification.sol",
+        "forge-std/console.sol"
+      ],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8.24"
       ],
       "artifacts": [
-        "IERC20"
+        "MoveHelper"
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/proxy/utils/Initializable.sol": {
@@ -232,14 +191,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -266,6 +225,47 @@
         "Initializable"
       ]
     },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/token/ERC20/IERC20.sol": {
+      "lastModificationDate": 1707402315633,
+      "contentHash": "5517c8678c18eb1a8ba58810e7ca39ca",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": false,
+          "metadata": {
+            "bytecodeHash": "none",
+            "useLiteralContent": false
+          },
+          "optimizer": {
+            "enabled": false,
+            "runs": 100
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol": {
       "lastModificationDate": 1707402315637,
       "contentHash": "697fd27924863e77c17dace2179018b2",
@@ -273,14 +273,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -312,20 +312,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/MoveVerification.sol": {
-      "lastModificationDate": 1708180429891,
+      "lastModificationDate": 1708511338699,
       "contentHash": "d548ba443fc7bd4523056659cd99da79",
       "sourceName": "src/MoveVerification.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -354,88 +354,6 @@
         "MoveVerification"
       ]
     },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/lib/forge-std/src/console.sol": {
-      "lastModificationDate": 1707119024468,
-      "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
-      "sourceName": "forge-std/console.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none",
-            "useLiteralContent": false
-          },
-          "optimizer": {
-            "enabled": false,
-            "runs": 20000
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        ">=0.4.22 <0.9.0"
-      ],
-      "artifacts": [
-        "console"
-      ]
-    },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
-      "lastModificationDate": 1707402315636,
-      "contentHash": "718fa8ba0ff269c92e364c1429d9de57",
-      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none",
-            "useLiteralContent": false
-          },
-          "optimizer": {
-            "enabled": false,
-            "runs": 20000
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Math"
-      ]
-    },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/utils/cryptography/ECDSA.sol": {
       "lastModificationDate": 1707402315625,
       "contentHash": "b96e0d7a3c2b185342c7d083d765b61f",
@@ -443,14 +361,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -484,14 +402,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -522,6 +440,47 @@
         "EIP712"
       ]
     },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/utils/math/Math.sol": {
+      "lastModificationDate": 1707402315636,
+      "contentHash": "718fa8ba0ff269c92e364c1429d9de57",
+      "sourceName": "@openzeppelin/contracts/utils/math/Math.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": false,
+          "metadata": {
+            "bytecodeHash": "none",
+            "useLiteralContent": false
+          },
+          "optimizer": {
+            "enabled": false,
+            "runs": 100
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.20"
+      ],
+      "artifacts": [
+        "Math"
+      ]
+    },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/node_modules/.pnpm/@openzeppelin+contracts@5.0.1/node_modules/@openzeppelin/contracts/utils/ShortStrings.sol": {
       "lastModificationDate": 1707402315637,
       "contentHash": "1b71929454f558e486d1f4f2471f29d4",
@@ -529,14 +488,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -572,14 +531,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -613,14 +572,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -656,14 +615,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -697,14 +656,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -741,14 +700,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -782,14 +741,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -823,14 +782,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -857,21 +816,62 @@
         "IERC20Permit"
       ]
     },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/Tournament.sol": {
-      "lastModificationDate": 1708180429857,
-      "contentHash": "df28308f3ea6bed3aa96c58ebebe9a85",
-      "sourceName": "src/Tournament.sol",
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/lib/forge-std/src/console.sol": {
+      "lastModificationDate": 1707119024468,
+      "contentHash": "100b8a33b917da1147740d7ab8b0ded3",
+      "sourceName": "forge-std/console.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        ">=0.4.22 <0.9.0"
+      ],
+      "artifacts": [
+        "console"
+      ]
+    },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/Tournament.sol": {
+      "lastModificationDate": 1708511338662,
+      "contentHash": "df28308f3ea6bed3aa96c58ebebe9a85",
+      "sourceName": "src/Tournament.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": false,
+          "metadata": {
+            "bytecodeHash": "none",
+            "useLiteralContent": false
+          },
+          "optimizer": {
+            "enabled": false,
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -910,14 +910,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -956,14 +956,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -997,14 +997,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1040,14 +1040,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1083,14 +1083,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1132,14 +1132,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1175,14 +1175,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1218,14 +1218,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1259,14 +1259,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1302,14 +1302,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1337,20 +1337,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/PieceSVG.sol": {
-      "lastModificationDate": 1708180429855,
-      "contentHash": "794dc88f031a14b74303dfd72d2ce443",
+      "lastModificationDate": 1708511338658,
+      "contentHash": "d1d29151824eb8db73ee00a73e3936bf",
       "sourceName": "src/ERC721/PieceSVG.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1383,20 +1383,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/Init.sol": {
-      "lastModificationDate": 1708180429852,
+      "lastModificationDate": 1708511338655,
       "contentHash": "d2702e669bf43a9b7767f6e62f195810",
       "sourceName": "src/ERC721/Init.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1433,14 +1433,14 @@
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1468,20 +1468,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/TokenSVG.sol": {
-      "lastModificationDate": 1708180429852,
+      "lastModificationDate": 1708511338655,
       "contentHash": "87fa0d5508ce914c25bf97ee9263e8be",
       "sourceName": "src/ERC721/TokenSVG.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1513,20 +1513,20 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1708320147579,
-      "contentHash": "1248d6018d11bc83d02a2596f9d05e0d",
+      "lastModificationDate": 1708511338660,
+      "contentHash": "3b46e4fd0cc3af5d2039be7c83689fe6",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
-          "viaIR": true,
+          "viaIR": false,
           "metadata": {
             "bytecodeHash": "none",
             "useLiteralContent": false
           },
           "optimizer": {
             "enabled": false,
-            "runs": 20000
+            "runs": 100
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1561,49 +1561,6 @@
       ],
       "artifacts": [
         "ChessFishNFT"
-      ]
-    },
-    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/test/token.sol": {
-      "lastModificationDate": 1708180429851,
-      "contentHash": "a229537f2d18b57663b7a3ad058f9521",
-      "sourceName": "src/test/token.sol",
-      "solcConfig": {
-        "version": "0.8.24",
-        "settings": {
-          "viaIR": true,
-          "metadata": {
-            "bytecodeHash": "none",
-            "useLiteralContent": false
-          },
-          "optimizer": {
-            "enabled": false,
-            "runs": 20000
-          },
-          "evmVersion": "paris",
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.0"
-      ],
-      "artifacts": [
-        "Token"
       ]
     }
   }
