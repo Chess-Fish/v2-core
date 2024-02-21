@@ -15,7 +15,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -63,7 +63,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -105,7 +105,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -154,7 +154,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -198,7 +198,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -239,7 +239,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -280,7 +280,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -325,7 +325,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -368,7 +368,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -409,7 +409,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -454,7 +454,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -495,7 +495,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -538,7 +538,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -579,7 +579,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -622,7 +622,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -663,7 +663,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -707,7 +707,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -748,7 +748,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -789,7 +789,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -830,7 +830,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -871,7 +871,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -917,7 +917,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -963,7 +963,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1004,7 +1004,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1047,7 +1047,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1090,7 +1090,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1139,7 +1139,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1182,7 +1182,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1225,7 +1225,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1266,7 +1266,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1309,7 +1309,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1337,8 +1337,8 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/PieceSVG.sol": {
-      "lastModificationDate": 1708511338658,
-      "contentHash": "d1d29151824eb8db73ee00a73e3936bf",
+      "lastModificationDate": 1708511977039,
+      "contentHash": "aaeaab0e322efce0fc948156834fdf39",
       "sourceName": "src/ERC721/PieceSVG.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -1350,7 +1350,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1372,8 +1372,7 @@
       "imports": [
         "@openzeppelin/contracts/utils/Strings.sol",
         "@openzeppelin/contracts/utils/Base64.sol",
-        "./Init.sol",
-        "forge-std/console.sol"
+        "./Init.sol"
       ],
       "versionPragmas": [
         "^0.8.24"
@@ -1396,7 +1395,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1440,7 +1439,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1481,7 +1480,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1513,7 +1512,7 @@
       ]
     },
     "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/ERC721/ChessFishNFT.sol": {
-      "lastModificationDate": 1708511338660,
+      "lastModificationDate": 1708511989588,
       "contentHash": "3b46e4fd0cc3af5d2039be7c83689fe6",
       "sourceName": "src/ERC721/ChessFishNFT.sol",
       "solcConfig": {
@@ -1526,7 +1525,7 @@
           },
           "optimizer": {
             "enabled": false,
-            "runs": 100
+            "runs": 200
           },
           "evmVersion": "paris",
           "outputSelection": {
@@ -1561,6 +1560,49 @@
       ],
       "artifacts": [
         "ChessFishNFT"
+      ]
+    },
+    "/Users/riemann/Desktop/chess_fish/organization/v2-core/src/test/token.sol": {
+      "lastModificationDate": 1708511950181,
+      "contentHash": "a229537f2d18b57663b7a3ad058f9521",
+      "sourceName": "src/test/token.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "viaIR": false,
+          "metadata": {
+            "bytecodeHash": "none",
+            "useLiteralContent": false
+          },
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "evmVersion": "paris",
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "@openzeppelin/contracts/token/ERC20/ERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "Token"
       ]
     }
   }

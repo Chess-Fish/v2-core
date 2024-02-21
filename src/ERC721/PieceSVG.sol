@@ -20,8 +20,6 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 import "./Init.sol";
 
-import "forge-std/console.sol";
-
 contract PieceSVG is Init {
     function getPieceSymbol(
         bytes1 piece,

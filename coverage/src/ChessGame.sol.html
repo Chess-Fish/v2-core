@@ -22,22 +22,22 @@
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
         <span class="quiet">Statements</span>
-        <span class='fraction'>0/187</span>
+        <span class='fraction'>0/181</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
         <span class="quiet">Branches</span>
-        <span class='fraction'>0/120</span>
+        <span class='fraction'>0/114</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
         <span class="quiet">Functions</span>
-        <span class='fraction'>0/34</span>
+        <span class='fraction'>0/33</span>
       </div>
       <div class='fl pad1y space-right2'>
         <span class="strong">0% </span>
         <span class="quiet">Lines</span>
-        <span class='fraction'>0/255</span>
+        <span class='fraction'>0/247</span>
       </div>
     </div>
   </div>
@@ -957,7 +957,11 @@
 912
 913
 914
-915</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+915
+916
+917
+918
+919</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1065,6 +1069,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1395,6 +1402,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
@@ -1673,22 +1681,22 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1919,8 +1927,8 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 timePlayer1;
         bool isTournament;
         bool isComplete;
-        bool hasBeenPaid;
     }
+    // bool hasBeenPaid;
 &nbsp;
     struct GameStatus {
         bool isPlayer0White;
@@ -1962,6 +1970,9 @@ contract ChessGame is Initializable, MoveHelper {
 &nbsp;
     /// @dev gameAddress =&gt; tournamentID
     mapping(address =&gt; uint256) public tournamentGames;
+&nbsp;
+    /// @dev gameAddress =&gt; hasBeenPaid
+    mapping(address =&gt; bool) public hasBeenPaid;
 &nbsp;
     /// @dev address[] games
     address[] public allGames;
@@ -2305,10 +2316,11 @@ contract ChessGame is Initializable, MoveHelper {
                 0, // timePlayer0
                 0, // timePlayer1
                 false, // isTournament
-                true, // isComplete
-                true // hasBeenPaid
+                true // isComplete
+                    // true // hasBeenPaid
             );
             gameAddress = getgameAddress(gameParams);
+            hasBeenPaid[gameAddress] = true;
         }
 <span class="cstat-no" title="statement not covered" >        uint256 gameID = gameIDs[gameAddress].length;</span>
         gameMoves[gameAddress][gameID].moves = moves;
@@ -2375,8 +2387,8 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer0
             0, // timePlayer1
             true, // isTournament
-            false, // isComplete
-            false // hasBeenPaid
+            false // isComplete
+                // false // hasBeenPaid
         );
         gameAddress = getgameAddress(game);
 &nbsp;
@@ -2427,8 +2439,8 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer0
             0, // timePlayer1
             false, // isTournament
-            false, // isComplete
-            false // hasBeenPaid
+            false // isComplete
+                // false // hasBeenPaid
         );
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        if (gameToken != address(0)) {</span>
@@ -2541,9 +2553,9 @@ contract ChessGame is Initializable, MoveHelper {
             gameData[gameAddress].isTournament == false,
             "tournament payment handled by tournament contract"
         );
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].hasBeenPaid == false, "already paid")</span>;
+<span class="cstat-no" title="statement not covered" >        require(hasBeenPaid[gameAddress] == false, "already paid")</span>;
 &nbsp;
-        gameData[gameAddress].hasBeenPaid = true;
+        hasBeenPaid[gameAddress] = true;
 &nbsp;
 <span class="cstat-no" title="statement not covered" >        address winner;</span>
 &nbsp;
@@ -2585,26 +2597,26 @@ contract ChessGame is Initializable, MoveHelper {
 <span class="cstat-no" title="statement not covered" >        return true;</span>
     }
 &nbsp;
-    /// @notice mint tournament winner NFT
-<span class="fstat-no" title="function not covered" >    function mintWinnerNFT(address gameAddress) external {</span>
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].isComplete == true, "game not finished")</span>;
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].hasBeenPaid == false, "already paid")</span>;
+    /*     /// @notice mint tournament winner NFT
+    function mintWinnerNFT(address gameAddress) external {
+        require(gameData[gameAddress].isComplete == true, "game not finished");
+        require(hasBeenPaid[gameAddress] == false, "already paid");
 &nbsp;
-        gameData[gameAddress].hasBeenPaid == true;
+        hasBeenPaid[gameAddress] = true;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        (address player0, address player1, uint256 wins0, uint256 wins1) =</span>
+        (address player0, address player1, uint256 wins0, uint256 wins1) =
             getGameStatus(gameAddress);
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        address winner;</span>
-<span class="cstat-no" title="statement not covered" >        if (wins0 &gt; wins1) {</span>
+        address winner;
+        if (wins0 &gt; wins1) {
             winner = player0;
         } else {
             winner = player1;
         }
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress)</span>;
+        IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
     }
-&nbsp;
+    */
     /// @notice Cancel game
     /// @dev cancel game only if other player has not yet accepted
     /// @dev &amp;&amp; only if msg.sender is one of the players
@@ -2791,7 +2803,7 @@ contract ChessGame is Initializable, MoveHelper {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Mon Feb 19 2024 11:41:06 GMT+0300 (Moscow Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Feb 21 2024 13:30:27 GMT+0300 (Moscow Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>
