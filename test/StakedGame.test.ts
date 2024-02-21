@@ -19,6 +19,9 @@ describe("ChessFish Chess Game Unit Tests", function () {
 		const addressZero = "0x0000000000000000000000000000000000000000";
 		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
+        const ERC20_token = await ethers.getContractFactory("Token");
+		const token = await ERC20_token.deploy();
+
 		const MoveVerification = await ethers.getContractFactory("MoveVerification");
 		const moveVerification = await MoveVerification.deploy();
 
@@ -69,6 +72,9 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
+        const amount = ethers.utils.parseEther("100");
+		await token.transfer(signer1.address, amount);
+
 		// typed signature data
 		const domain = {
 			chainId: 1, // replace with the chain ID on frontend
@@ -101,6 +107,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			gaslessGame,
 			dividendSplitter,
 			chessNFT,
+            token,
 			domain,
 			delegationTypes,
 			gaslessMoveTypes,
@@ -108,24 +115,39 @@ describe("ChessFish Chess Game Unit Tests", function () {
 		};
 	}
 
-	describe("Gasless Game Verification Unit Tests", function () {
+	describe("Gasless Staked Game Verification Unit Tests", function () {
 		it("Should play game", async function () {
 			const {
 				signer0,
 				signer1,
 				chessGame,
 				gaslessGame,
+                token,
 				domain,
 				delegationTypes,
 				gaslessMoveTypes,
 				addressZero,
 			} = await loadFixture(deploy);
 
+
+            let player1 = signer1.address;
+			let gameToken = token.address;
+			let gameAmount = ethers.utils.parseEther("1.0");
+			let timeLimit = 86400;
+			let numberOfGames = 3;
+
+			await token.approve(chessGame.address, gameAmount);
+
+			let tx = await chessGame.connect(signer0).createChessGame(player1, gameToken, gameAmount, timeLimit, numberOfGames);
+			await tx.wait();
+
+            let gameAddress = await chessGame.userGames(signer0.address, 0);
+
 			const entropy0 = generateRandomHash();
 			const delegatedSigner0 = ethers.Wallet.createRandom(entropy0);
 
 			// 2) create deletation and hash it
-			const delegationData0 = [signer0.address, delegatedSigner0.address, addressZero];
+			const delegationData0 = [signer0.address, delegatedSigner0.address, gameAddress];
 
 			// 3 Sign Typed Data V4
 			const message0 = {
@@ -149,7 +171,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			const delegatedSigner1 = ethers.Wallet.createRandom(entropy1);
 
 			// 2) create deletation and hash it
-			const delegationData1 = [signer1.address, delegatedSigner1.address, addressZero];
+			const delegationData1 = [signer1.address, delegatedSigner1.address, gameAddress];
 
 			// 3 Sign Typed Data V4
 			const message1 = {
@@ -180,7 +202,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
 
 					const moveData = {
-						gameAddress: addressZero,
+						gameAddress: gameAddress,
 						gameNumber: 0,
 						expiration: Math.floor(Date.now() / 1000) + 86400*10,
 						movesHash: movesHash,
@@ -194,6 +216,8 @@ describe("ChessFish Chess Game Unit Tests", function () {
 						signature,
 						hex_move_array
 					);
+
+					// await gaslessGame.verifyMoveSigner(gaslessMoveData, player.address);
 
 					signatureArray.push(signature);
 					messageArray.push(gaslessMoveData);
@@ -206,106 +230,5 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
 		});
-
-		it("Should play game", async function () {
-			const {
-				signer0,
-				signer1,
-				chessGame,
-				gaslessGame,
-				domain,
-				delegationTypes,
-				gaslessMoveTypes,
-				addressZero,
-			} = await loadFixture(deploy);
-
-			const entropy0 = generateRandomHash();
-			const delegatedSigner0 = ethers.Wallet.createRandom(entropy0);
-
-			// 2) create deletation and hash it
-			const delegationData0 = [signer0.address, delegatedSigner0.address, addressZero];
-
-			// 3 Sign Typed Data V4
-			const message0 = {
-				delegatorAddress: delegationData0[0],
-				delegatedAddress: delegationData0[1],
-				gameAddress: delegationData0[2],
-			};
-
-			// Sign the data
-			const signature0 = await signer0._signTypedData(domain, delegationTypes, message0);
-
-			const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(message0, signature0);
-
-			// ON THE FRONT END user 1
-			// 1) Generate random public private key pair
-			const entropy1 = generateRandomHash();
-			const delegatedSigner1 = ethers.Wallet.createRandom(entropy1);
-
-			// 2) create deletation and hash it
-			const delegationData1 = [signer1.address, delegatedSigner1.address, addressZero];
-
-			// 3 Sign Typed Data V4
-			const message1 = {
-				delegatorAddress: delegationData1[0],
-				delegatedAddress: delegationData1[1],
-				gameAddress: delegationData1[2],
-			};
-
-			const signature1 = await signer1._signTypedData(domain, delegationTypes, message1);
-
-			const signedDelegationData1 = await gaslessGame.encodeSignedDelegation(message1, signature1);
-
-			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
-
-			let messageArray: any[] = [];
-			let signatureArray: any[] = [];
-			const hex_move_array: number[] = [];
-
-			for (let game = 0; game < 1; game++) {
-				for (let i = 0; i < moves.length; i++) {
-					const player = i % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
-
-					const hex_move = await chessGame.moveToHex(moves[i]);
-
-					hex_move_array.push(hex_move);
-
-					// Correctly pass the array as a single element within another array
-					const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [hex_move_array]));
-
-					const moveData = {
-						gameAddress: addressZero,
-						gameNumber: 0,
-						expiration: Math.floor(Date.now() / 1000) + 86400*10,
-						movesHash: movesHash,
-					};
-
-					// Signing the data
-					const signature = await player._signTypedData(domain, gaslessMoveTypes, moveData);
-
-					const gaslessMoveData = await gaslessGame.encodeMoveMessage(
-						moveData,
-						signature,
-						hex_move_array
-					);
-
-					console.log(hex_move_array);
-
-					signatureArray.push(signature);
-					messageArray.push(gaslessMoveData);
-
-					console.log("len", messageArray.length);
-				}
-				const delegations = [signedDelegationData0, signedDelegationData1];
-
-				const secondTolastTwoMoves = messageArray.slice(-3, -1);
-
-				await gaslessGame.verifyGameViewDelegated(delegations, secondTolastTwoMoves);
-				await chessGame.verifyGameUpdateStateDelegated(delegations, secondTolastTwoMoves);
-			}
-			const lastMove = messageArray[messageArray.length - 1];
-			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData0, lastMove);
-			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData0, lastMove);
-		});
-	});
+    });
 });

@@ -20,6 +20,8 @@ import "./interfaces/interfaces.sol";
 import "./MoveHelper.sol";
 import "./GaslessGame.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ChessFish GameData Contract
  * @author ChessFish
@@ -47,7 +49,6 @@ contract ChessGame is Initializable, MoveHelper {
         bool isTournament;
         bool isComplete;
     }
-    // bool hasBeenPaid;
 
     struct GameStatus {
         bool isPlayer0White;
@@ -118,10 +119,7 @@ contract ChessGame is Initializable, MoveHelper {
         address _tournamentHandler,
         address _dividendSplitter,
         address _chessFishNFT
-    )
-        public
-        initializer
-    {
+    ) public initializer {
         moveVerification = MoveVerification(_moveVerification);
         gaslessGame = GaslessGame(_gaslessGame);
 
@@ -135,20 +133,12 @@ contract ChessGame is Initializable, MoveHelper {
     */
 
     event createGameDataEvent(
-        address gameAddress,
-        address gameToken,
-        uint256 tokenAmount,
-        uint256 timeLimit,
-        uint256 numberOfGames
+        address gameAddress, address gameToken, uint256 tokenAmount, uint256 timeLimit, uint256 numberOfGames
     );
     event acceptGameEvent(address gameAddress, address userAddress);
     event playMoveEvent(address gameAddress, uint16 move);
     event payoutGameEvent(
-        address gameAddress,
-        address winner,
-        address gameToken,
-        uint256 tokenAmount,
-        uint256 protocolFee
+        address gameAddress, address winner, address gameToken, uint256 tokenAmount, uint256 protocolFee
     );
     event cancelGameEvent(address gameAddress, address userAddress);
 
@@ -172,22 +162,11 @@ contract ChessGame is Initializable, MoveHelper {
         return gameIDs[gameAddress].length;
     }
 
-    function getGameMoves(
-        address gameAddress,
-        uint256 gameID
-    )
-        external
-        view
-        returns (GameMoves memory)
-    {
+    function getGameMoves(address gameAddress, uint256 gameID) external view returns (GameMoves memory) {
         return gameMoves[gameAddress][gameID];
     }
 
-    function getLatestGameMoves(address gameAddress)
-        external
-        view
-        returns (uint16[] memory)
-    {
+    function getLatestGameMoves(address gameAddress) external view returns (uint16[] memory) {
         return gameMoves[gameAddress][gameIDs[gameAddress].length].moves;
     }
 
@@ -199,11 +178,7 @@ contract ChessGame is Initializable, MoveHelper {
         return gameData[gameAddress];
     }
 
-    function getGamePlayers(address gameAddress)
-        external
-        view
-        returns (address, address)
-    {
+    function getGamePlayers(address gameAddress) external view returns (address, address) {
         return (gameData[gameAddress].player0, gameData[gameAddress].player1);
     }
 
@@ -215,11 +190,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @return player1 The address of the second player in the game.
     /// @return winsPlayer0 The number of wins recorded for player0.
     /// @return winsPlayer1 The number of wins recorded for player1.
-    function getGameStatus(address gameAddress)
-        public
-        view
-        returns (address, address, uint256, uint256)
-    {
+    function getGameStatus(address gameAddress) public view returns (address, address, uint256, uint256) {
         return (
             gameData[gameAddress].player0,
             gameData[gameAddress].player1,
@@ -233,11 +204,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// underflow revert
     /// @return timeRemainingPlayer0
     /// @return timeRemainingPlayer1
-    function checkTimeRemaining(address gameAddress)
-        public
-        view
-        returns (int256, int256)
-    {
+    function checkTimeRemaining(address gameAddress) public view returns (int256, int256) {
         address player0 = gameData[gameAddress].player0;
 
         uint256 player0Time = gameData[gameAddress].timePlayer0;
@@ -290,14 +257,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @param gameAddress address of the game
     /// @param player address player
     /// @return isPlayerWhite
-    function isPlayerWhite(
-        address gameAddress,
-        address player
-    )
-        public
-        view
-        returns (bool)
-    {
+    function isPlayerWhite(address gameAddress, address player) public view returns (bool) {
         if (gameData[gameAddress].player0 == player) {
             return gameStatus[gameAddress].isPlayer0White;
         } else {
@@ -311,11 +271,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @return gameState
     /// @return player0State
     /// @return player1State
-    function getGameBoardState(address gameAddress)
-        public
-        view
-        returns (uint8, uint256, uint32, uint32)
-    {
+    function getGameBoardState(address gameAddress) public view returns (uint8, uint256, uint32, uint32) {
         uint256 gameID = gameIDs[gameAddress].length;
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
 
@@ -376,10 +332,7 @@ contract ChessGame is Initializable, MoveHelper {
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
-    function verifyGameUpdateStateDelegatedSingle(
-        bytes memory rawSignedDelegation,
-        bytes memory rawMoveData
-    )
+    function verifyGameUpdateStateDelegatedSingle(bytes memory rawSignedDelegation, bytes memory rawMoveData)
         external
         returns (bool)
     {
@@ -388,6 +341,8 @@ contract ChessGame is Initializable, MoveHelper {
 
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
+
+        // add a require here?
 
         if (outcome != 0) {
             updateGameState(gameAddress, false, outcome);
@@ -405,15 +360,14 @@ contract ChessGame is Initializable, MoveHelper {
 
     /// @notice Verifies game moves and updates the state of the game
     /// @return isEndGame
-    function verifyGameUpdateStateDelegated(
-        bytes[2] memory rawSignedDelegations,
-        bytes[2] memory rawMoveData
-    )
+    function verifyGameUpdateStateDelegated(bytes[2] memory rawSignedDelegations, bytes[2] memory rawMoveData)
         external
         returns (bool)
     {
         (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
             gaslessGame.verifyGameViewDelegated(rawSignedDelegations, rawMoveData);
+
+        console.log("here", gameAddress);
 
         // Play a gasless game off chain, submitting on chain
         if (gameAddress == address(0)) {
@@ -436,7 +390,6 @@ contract ChessGame is Initializable, MoveHelper {
                 0, // timePlayer1
                 false, // isTournament
                 true // isComplete
-                    // true // hasBeenPaid
             );
             gameAddress = getgameAddress(gameParams);
             hasBeenPaid[gameAddress] = true;
@@ -488,11 +441,7 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 numberOfGames,
         uint256 timeLimit,
         uint256 tournamentID
-    )
-        external
-        onlyTournament
-        returns (address gameAddress)
-    {
+    ) external onlyTournament returns (address gameAddress) {
         GameData memory game = GameData(
             player0,
             player1,
@@ -507,7 +456,6 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer1
             true, // isTournament
             false // isComplete
-                // false // hasBeenPaid
         );
         gameAddress = getgameAddress(game);
 
@@ -524,9 +472,7 @@ contract ChessGame is Initializable, MoveHelper {
         // update global state
         allGames.push(gameAddress);
 
-        emit createGameDataEvent(
-            gameAddress, gameToken, gameAmount, timeLimit, numberOfGames
-        );
+        emit createGameDataEvent(gameAddress, gameToken, gameAmount, timeLimit, numberOfGames);
 
         return gameAddress;
     }
@@ -542,10 +488,7 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 gameAmount,
         uint256 timeLimit,
         uint256 numberOfGames
-    )
-        external
-        returns (address gameAddress)
-    {
+    ) external returns (address gameAddress) {
         GameData memory game = GameData(
             msg.sender, // player0
             player1,
@@ -559,7 +502,6 @@ contract ChessGame is Initializable, MoveHelper {
             0, // timePlayer1
             false, // isTournament
             false // isComplete
-                // false // hasBeenPaid
         );
 
         if (gameToken != address(0)) {
@@ -583,9 +525,7 @@ contract ChessGame is Initializable, MoveHelper {
         // update global state
         allGames.push(gameAddress);
 
-        emit createGameDataEvent(
-            gameAddress, gameToken, gameAmount, timeLimit, numberOfGames
-        );
+        emit createGameDataEvent(gameAddress, gameToken, gameAmount, timeLimit, numberOfGames);
 
         return gameAddress;
     }
@@ -618,10 +558,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @return bool true if endGame, adds extra game if stalemate
     function playMove(address gameAddress, uint16 move) external returns (bool) {
         require(getPlayerMove(gameAddress) == msg.sender, "Not your turn");
-        require(
-            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "Game ended 614"
-        );
+        require(getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames, "Game ended 614");
         require(gameData[gameAddress].timeLastMove != 0, "Tournament not started yet");
 
         /// @dev checking if time ran out
@@ -663,15 +600,10 @@ contract ChessGame is Initializable, MoveHelper {
     /// @dev smallest game amount is 18 wei before fees => 0
     function payoutGame(address gameAddress) external returns (bool) {
         require(
-            gameData[gameAddress].player0 == msg.sender
-                || gameData[gameAddress].player1 == msg.sender,
-            "not listed"
+            gameData[gameAddress].player0 == msg.sender || gameData[gameAddress].player1 == msg.sender, "not listed"
         );
         require(gameData[gameAddress].isComplete == true, "game not finished");
-        require(
-            gameData[gameAddress].isTournament == false,
-            "tournament payment handled by tournament contract"
-        );
+        require(gameData[gameAddress].isTournament == false, "tournament payment handled by tournament contract");
         require(hasBeenPaid[gameAddress] == false, "already paid");
 
         hasBeenPaid[gameAddress] = true;
@@ -716,35 +648,13 @@ contract ChessGame is Initializable, MoveHelper {
         return true;
     }
 
-    /*     /// @notice mint tournament winner NFT
-    function mintWinnerNFT(address gameAddress) external {
-        require(gameData[gameAddress].isComplete == true, "game not finished");
-        require(hasBeenPaid[gameAddress] == false, "already paid");
-
-        hasBeenPaid[gameAddress] = true;
-
-        (address player0, address player1, uint256 wins0, uint256 wins1) =
-            getGameStatus(gameAddress);
-
-        address winner;
-        if (wins0 > wins1) {
-            winner = player0;
-        } else {
-            winner = player1;
-        }
-
-        IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
-    }
-    */
     /// @notice Cancel game
     /// @dev cancel game only if other player has not yet accepted
     /// @dev && only if msg.sender is one of the players
     function cancelGame(address gameAddress) external {
         require(gameData[gameAddress].hasPlayerAccepted == false, "in progress");
         require(gameData[gameAddress].player0 == msg.sender, "not listed");
-        require(
-            gameData[gameAddress].isTournament == false, "cannot cancel tournament game"
-        );
+        require(gameData[gameAddress].isTournament == false, "cannot cancel tournament game");
 
         address token = gameData[gameAddress].gameToken;
         uint256 gameAmount = gameData[gameAddress].tokenAmount;
@@ -761,18 +671,12 @@ contract ChessGame is Initializable, MoveHelper {
     /// @dev set to public so that anyone can update time if player disappears
     /// @return wasUpdated returns true if status was updated
     function updateGameStateTime(address gameAddress) public returns (bool) {
-        require(
-            getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-            "Game ended 757"
-        );
-        require(
-            gameData[gameAddress].timeLastMove != 0, "tournament match not started yet"
-        );
+        require(getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames, "Game ended 757");
+        require(gameData[gameAddress].timeLastMove != 0, "tournament match not started yet");
 
         (int256 timePlayer0, int256 timePlayer1) = checkTimeRemaining(gameAddress);
 
-        uint256 addedWins =
-            gameData[gameAddress].numberOfGames - getNumberOfGamesPlayed(gameAddress) + 1;
+        uint256 addedWins = gameData[gameAddress].numberOfGames - getNumberOfGamesPlayed(gameAddress) + 1;
 
         if (timePlayer0 < 0) {
             gameStatus[gameAddress].winsPlayer1 += addedWins;
@@ -790,27 +694,19 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Update game state if insufficient material
     /// @dev set to public so that anyone can update
     /// @return wasUpdated returns true if status was updated
-    function updateGameStateInsufficientMaterial(
-        address gameAddress,
-        uint256 gameState
-    )
-        public
-        returns (bool)
-    {
+    function updateGameStateInsufficientMaterial(address gameAddress, uint256 gameState) public returns (bool) {
         /*         
         require(
         getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
             "Game ended 790"
         ); */
 
-        bool isInsufficientMaterial =
-            moveVerification.isStalemateViaInsufficientMaterial(gameState);
+        bool isInsufficientMaterial = moveVerification.isStalemateViaInsufficientMaterial(gameState);
 
         if (isInsufficientMaterial) {
             gameStatus[gameAddress].winsPlayer0 += 1;
             gameStatus[gameAddress].winsPlayer1 += 1;
-            gameStatus[gameAddress].isPlayer0White =
-                !gameStatus[gameAddress].isPlayer0White;
+            gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
             gameData[gameAddress].numberOfGames += 1;
             return true;
@@ -823,31 +719,19 @@ contract ChessGame is Initializable, MoveHelper {
     /// @dev used to deposit prizes to game
     function depositToGame(address gameAddress, uint256 amount) external {
         require(!gameData[gameAddress].isComplete, "game completed");
-        IERC20(gameData[gameAddress].gameToken).safeTransferFrom(
-            msg.sender, address(this), amount
-        );
+        IERC20(gameData[gameAddress].gameToken).safeTransferFrom(msg.sender, address(this), amount);
         gamePrizes[gameAddress] += amount;
     }
 
     /// @notice Checks the moves of the game and updates state if neccessary
     /// @return isEndGame
-    function updateGameState(
-        address gameAddress,
-        bool checkMoves,
-        uint8 outcome
-    )
-        private
-        returns (bool)
-    {
+    function updateGameState(address gameAddress, bool checkMoves, uint8 outcome) private returns (bool) {
         uint256 gameID = gameIDs[gameAddress].length;
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
 
         // fails on invalid move
         if (checkMoves) {
-            require(
-                getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames,
-                "Game ended 837"
-            );
+            require(getNumberOfGamesPlayed(gameAddress) <= gameData[gameAddress].numberOfGames, "Game ended 837");
             (outcome,,,) = moveVerification.checkGameFromStart(moves);
         }
 
@@ -859,8 +743,7 @@ contract ChessGame is Initializable, MoveHelper {
         if (outcome == 1) {
             gameStatus[gameAddress].winsPlayer0 += 1;
             gameStatus[gameAddress].winsPlayer1 += 1;
-            gameStatus[gameAddress].isPlayer0White =
-                !gameStatus[gameAddress].isPlayer0White;
+            gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
             gameData[gameAddress].numberOfGames += 1;
             return true;
@@ -872,8 +755,7 @@ contract ChessGame is Initializable, MoveHelper {
             } else {
                 gameStatus[gameAddress].winsPlayer1 += 1;
             }
-            gameStatus[gameAddress].isPlayer0White =
-                !gameStatus[gameAddress].isPlayer0White;
+            gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
             if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
                 gameData[gameAddress].isComplete = true;
@@ -887,8 +769,7 @@ contract ChessGame is Initializable, MoveHelper {
             } else {
                 gameStatus[gameAddress].winsPlayer0 += 1;
             }
-            gameStatus[gameAddress].isPlayer0White =
-                !gameStatus[gameAddress].isPlayer0White;
+            gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
             if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
                 gameData[gameAddress].isComplete = true;
