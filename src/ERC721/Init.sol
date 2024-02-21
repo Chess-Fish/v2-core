@@ -14,7 +14,7 @@
 /// @author ChessFish
 /// @notice https://github.com/Chess-Fish
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 import { ChessGame } from "./../ChessGame.sol";
 

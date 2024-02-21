@@ -128,9 +128,8 @@ const config: HardhatUserConfig = {
 		enabled: true,
 	},
 	solidity: {
-		version: "0.8.24",
+		version: "0.8.23",
 		settings: {
-			viaIR: false,
 			metadata: {
 				// Not including the metadata hash
 				// https://github.com/paulrberg/hardhat-template/issues/31
@@ -139,7 +138,7 @@ const config: HardhatUserConfig = {
 			// Disable the optimizer when debugging
 			// https://hardhat.org/hardhat-network/#solidity-optimizer-support
 			optimizer: {
-				enabled: true,
+				enabled: false,
 				runs: 200,
 			},
 		},

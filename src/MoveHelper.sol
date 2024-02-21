@@ -10,11 +10,10 @@
                              
 */
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 import { MoveVerification } from "./MoveVerification.sol";
 
-import "forge-std/console.sol";
 /**
  * @title ChessFish MoveHelper Contract
  * @author ChessFish

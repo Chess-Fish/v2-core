@@ -324,6 +324,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			}
 			const lastMove = messageArray[messageArray.length - 1];
 			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData0, lastMove);
+			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData0, lastMove);
 		});
 	});
 });

@@ -14,7 +14,7 @@
 /// @author ChessFish
 /// @notice https://github.com/Chess-Fish
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.23;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -26,8 +26,6 @@ import { Tournament } from "./../Tournament.sol";
 
 import "./PieceSVG.sol";
 import "./TokenSVG.sol";
-
-import "forge-std/console.sol";
 
 contract ChessFishNFT is ERC721 {
     uint256 private _tokenIdCounter;
@@ -98,10 +96,6 @@ contract ChessFishNFT is ERC721 {
 
         uint16[] memory gameMoves =
             chessGame.getGameMoves(gameAddresses[id], gameID).moves;
-
-        for (uint256 i = 0; i < gameMoves.length; i++) {
-            console.log(gameMoves[i]);
-        }
 
         (, uint256 gameState,,) = moveVerification.checkGameFromStart(gameMoves);
 
