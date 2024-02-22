@@ -367,8 +367,6 @@ contract ChessGame is Initializable, MoveHelper {
         (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
             gaslessGame.verifyGameViewDelegated(rawSignedDelegations, rawMoveData);
 
-        console.log("here", gameAddress);
-
         // Play a gasless game off chain, submitting on chain
         if (gameAddress == address(0)) {
             // generate game address
@@ -728,6 +726,10 @@ contract ChessGame is Initializable, MoveHelper {
     function updateGameState(address gameAddress, bool checkMoves, uint8 outcome) private returns (bool) {
         uint256 gameID = gameIDs[gameAddress].length;
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
+
+        if (gameAddress != address(0)) {
+            require(gameData[gameAddress].hasPlayerAccepted, "player has not accepted");
+        }
 
         // fails on invalid move
         if (checkMoves) {

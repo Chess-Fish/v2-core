@@ -10,8 +10,8 @@ import { splitSignature } from "ethers/lib/utils";
 import { coordinates_array, bitCoordinates_array, pieceSymbols } from "../scripts/constants";
 
 describe("ChessFish Intensive MoveVerification Unit Tests", function () {
-    async function deploy() {
-        const [deployer, otherAccount] = await ethers.getSigners();
+	async function deploy() {
+		const [deployer, otherAccount] = await ethers.getSigners();
 
 		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
@@ -66,95 +66,93 @@ describe("ChessFish Intensive MoveVerification Unit Tests", function () {
 
 		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
+		const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
+		const initialWhite = "0x000704ff";
+		const initialBlack = "0x383f3cff";
 
-        const initalState = "0xcbaedabc99999999000000000000000000000000000000001111111143265234";
-        const initialWhite = "0x000704ff";
-        const initialBlack = "0x383f3cff";
+		return {
+			chessGame,
+			moveVerification,
+			gaslessGame,
+			chessNFT,
+			deployer,
+			otherAccount,
+			initalState,
+			initialWhite,
+			initialBlack,
+		};
+	}
 
-        return {
-            chessGame,
-            moveVerification,
-            gaslessGame,
-            chessNFT,
-            deployer,
-            otherAccount,
-            initalState,
-            initialWhite,
-            initialBlack,
-        };
-    }
+	describe("Functionality Tests", function () {
+		let games;
+		try {
+			const data = fs.readFileSync("test/test_data/output_moves.json", "utf8");
+			games = JSON.parse(data);
+		} catch (err) {
+			console.error("Error reading file:", err);
+			return;
+		}
 
-    describe("Functionality Tests", function () {
-        let games;
-        try {
-            const data = fs.readFileSync("test/test_data/output_moves.json", "utf8");
-            games = JSON.parse(data);
-        } catch (err) {
-            console.error("Error reading file:", err);
-            return;
-        }
-        
-        const maxTests = 10; // Maximum number of tests to run during code coverage
-        let count = 0; 
-    
-        games.forEach((game, index) => {
-            if (count < maxTests) { // Use maxTests to limit the number of tests
-                it(`Should get outcome from checkEndgame using algebraic chess notation for game ${
-                    index + 1
-                }`, async function () {
-                    const { chessGame, moveVerification } = await loadFixture(deploy);
-    
-                    const chessInstance = new Chess();
-    
-                    const moves = game.moves;
-    
-                    let hex_moves = [];
-    
-                    for (let i = 0; i < moves.length; i++) {
-                        let fromSquare = moves[i].substring(0, 2);
-                        let toSquare = moves[i].substring(2);
-    
-                        try {
-                            chessInstance.move({
-                                from: fromSquare,
-                                to: toSquare,
-                                promotion: "q",
-                            });
-                        } catch (error) {
-                            console.log(fromSquare + toSquare);
-                            console.log(error);
-                            break;
-                        }
-    
-                        let hex_move = await chessGame.moveToHex(moves[i]);
-                        hex_moves.push(hex_move);
-                    }
-    
-                    let outcome = await moveVerification.checkGameFromStart(hex_moves);
-    
-                    let winner;
-                    if (chessInstance.isCheckmate()) {
-                        winner = chessInstance.turn() === "w" ? 3 : 2;
-    
-                        let winnerColor = chessInstance.turn() === "w" ? "Black" : "White";
-                        console.log(`CHECKMATE ${winnerColor} won the game`);
-                    } else if (chessInstance.isStalemate()) {
-                        console.log("DRAW");
-                        winner = 1;
-                    } else {
-                        winner = 0;
-                    }
-    
-                    expect(outcome[0]).to.equal(winner);
-    
-                    chessInstance.reset();
-    
-                });
-            } else {
-                return;
-            }
-                    count++;
-        });
-    });
-    
+		const maxTests = 10; // Maximum number of tests to run during code coverage
+		let count = 0;
+
+		games.forEach((game, index) => {
+			if (count < maxTests) {
+				// Use maxTests to limit the number of tests
+				it(`Should get outcome from checkEndgame using algebraic chess notation for game ${
+					index + 1
+				}`, async function () {
+					const { chessGame, moveVerification } = await loadFixture(deploy);
+
+					const chessInstance = new Chess();
+
+					const moves = game.moves;
+
+					let hex_moves = [];
+
+					for (let i = 0; i < moves.length; i++) {
+						let fromSquare = moves[i].substring(0, 2);
+						let toSquare = moves[i].substring(2);
+
+						try {
+							chessInstance.move({
+								from: fromSquare,
+								to: toSquare,
+								promotion: "q",
+							});
+						} catch (error) {
+							console.log(fromSquare + toSquare);
+							console.log(error);
+							break;
+						}
+
+						let hex_move = await chessGame.moveToHex(moves[i]);
+						hex_moves.push(hex_move);
+					}
+
+					let outcome = await moveVerification.checkGameFromStart(hex_moves);
+
+					let winner;
+					if (chessInstance.isCheckmate()) {
+						winner = chessInstance.turn() === "w" ? 3 : 2;
+
+						let winnerColor = chessInstance.turn() === "w" ? "Black" : "White";
+						console.log(`CHECKMATE ${winnerColor} won the game`);
+					} else if (chessInstance.isStalemate()) {
+						console.log("DRAW");
+						winner = 1;
+					} else {
+						winner = 0;
+					}
+
+					expect(outcome[0]).to.equal(winner);
+
+					chessInstance.reset();
+				});
+			} else {
+				return;
+			}
+			count++;
+		});
+	});
 });

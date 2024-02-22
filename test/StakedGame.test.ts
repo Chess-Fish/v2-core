@@ -19,7 +19,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 		const addressZero = "0x0000000000000000000000000000000000000000";
 		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
 
-        const ERC20_token = await ethers.getContractFactory("Token");
+		const ERC20_token = await ethers.getContractFactory("Token");
 		const token = await ERC20_token.deploy();
 
 		const MoveVerification = await ethers.getContractFactory("MoveVerification");
@@ -72,7 +72,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 		await gaslessGame.initialize(moveVerification.address, chessGame.address);
 
-        const amount = ethers.utils.parseEther("100");
+		const amount = ethers.utils.parseEther("100");
 		await token.transfer(signer1.address, amount);
 
 		// typed signature data
@@ -107,7 +107,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			gaslessGame,
 			dividendSplitter,
 			chessNFT,
-            token,
+			token,
 			domain,
 			delegationTypes,
 			gaslessMoveTypes,
@@ -122,26 +122,27 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				signer1,
 				chessGame,
 				gaslessGame,
-                token,
+				token,
 				domain,
 				delegationTypes,
 				gaslessMoveTypes,
 				addressZero,
 			} = await loadFixture(deploy);
 
-
-            let player1 = signer1.address;
+			let player1 = signer1.address;
 			let gameToken = token.address;
-			let gameAmount = ethers.utils.parseEther("1.0");
+			let gameAmount = ethers.utils.parseEther("100.0");
 			let timeLimit = 86400;
 			let numberOfGames = 3;
 
 			await token.approve(chessGame.address, gameAmount);
 
-			let tx = await chessGame.connect(signer0).createChessGame(player1, gameToken, gameAmount, timeLimit, numberOfGames);
+			let tx = await chessGame
+				.connect(signer0)
+				.createChessGame(player1, gameToken, gameAmount, timeLimit, numberOfGames);
 			await tx.wait();
 
-            let gameAddress = await chessGame.userGames(signer0.address, 0);
+			let gameAddress = await chessGame.userGames(signer0.address, 0);
 
 			const entropy0 = generateRandomHash();
 			const delegatedSigner0 = ethers.Wallet.createRandom(entropy0);
@@ -184,9 +185,18 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 			const signedDelegationData1 = await gaslessGame.encodeSignedDelegation(message1, signature1);
 
+			let amount = await token.balanceOf(chessGame.address);
+			expect(amount).to.equal(gameAmount);
+
+			await token.connect(signer1).approve(chessGame.address, gameAmount);
+			await chessGame.connect(signer1).acceptGame(gameAddress);
+
+			let amount1 = await token.balanceOf(chessGame.address);
+			expect(amount1).to.equal(gameAmount.mul(2));
+
 			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
-			for (let game = 0; game < 1; game++) {
+			for (let game = 0; game < numberOfGames; game++) {
 				let messageArray: any[] = [];
 				let signatureArray: any[] = [];
 				const hex_move_array: number[] = [];
@@ -204,7 +214,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					const moveData = {
 						gameAddress: gameAddress,
 						gameNumber: 0,
-						expiration: Math.floor(Date.now() / 1000) + 86400*10,
+						expiration: Math.floor(Date.now() / 1000) + 86400 * 10,
 						movesHash: movesHash,
 					};
 
@@ -229,6 +239,32 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
 			}
+
+			const wins = await chessGame.gameStatus(gameAddress);
+
+			const winsPlayer0 = Number(wins.winsPlayer0);
+			const winsPlayer1 = Number(wins.winsPlayer1);
+
+			expect(winsPlayer0).to.equal(1);
+			expect(winsPlayer1).to.equal(2);
+
+			const gameData = await chessGame.gameData(gameAddress);
+			expect(gameData.isComplete).to.equal(true);
+			expect(gameData.tokenAmount).to.equal(gameAmount);
+
+			let hasBeenPaid = await chessGame.hasBeenPaid(gameAddress);
+			expect(hasBeenPaid).to.equal(false);
+
+			let bal0 = await token.balanceOf(signer1.address);
+
+			await chessGame.payoutGame(gameAddress);
+
+			hasBeenPaid = await chessGame.hasBeenPaid(gameAddress);
+			expect(hasBeenPaid).to.equal(true);
+
+			let bal1 = await token.balanceOf(signer1.address);
+
+			expect(bal1.sub(bal0)).to.equal(ethers.utils.parseEther("190"));
 		});
-    });
+	});
 });

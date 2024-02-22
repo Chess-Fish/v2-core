@@ -182,7 +182,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					const moveData = {
 						gameAddress: addressZero,
 						gameNumber: 0,
-						expiration: Math.floor(Date.now() / 1000) + 86400*10,
+						expiration: Math.floor(Date.now() / 1000) + 86400 * 10,
 						movesHash: movesHash,
 					};
 
@@ -276,7 +276,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 					const moveData = {
 						gameAddress: addressZero,
 						gameNumber: 0,
-						expiration: Math.floor(Date.now() / 1000) + 86400*10,
+						expiration: Math.floor(Date.now() / 1000) + 86400 * 10,
 						movesHash: movesHash,
 					};
 

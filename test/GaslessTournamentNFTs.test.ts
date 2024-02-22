@@ -372,7 +372,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);
 
-			for (let i = 0; i < 5/* gameAddresses.length */; i++) {
+			for (let i = 0; i < 5 /* gameAddresses.length */; i++) {
 				let ownerOf = await chessNFT.ownerOf(i);
 				console.log("owner", ownerOf);
 
