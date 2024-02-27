@@ -1,0 +1,198 @@
+import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
+import { expect } from "chai";
+import { ethers } from "hardhat";
+
+import {
+	generateRandomHash,
+	coordinates_array,
+	bitCoordinates_array,
+	pieceSymbols,
+} from "../scripts/constants";
+describe("ChessFish Wager Unit Tests", function () {
+	// We define a fixture to reuse the same setup in every test.
+	async function deploy() {
+		const [signer0, signer1] = await ethers.getSigners();
+
+		const addressZero = "0x0000000000000000000000000000000000000000";
+		const dividendSplitter = "0x973C170C3BC2E7E1B3867B3B29D57865efDDa59a";
+
+		const ERC20_token = await ethers.getContractFactory("Token");
+		const token = await ERC20_token.deploy();
+
+		const MoveVerification = await ethers.getContractFactory("MoveVerification");
+		const moveVerification = await MoveVerification.deploy();
+
+		const ChessGame = await ethers.getContractFactory("ChessGame");
+		const chessGame = await ChessGame.deploy();
+
+		const GaslessGame = await ethers.getContractFactory("GaslessGame");
+		const gaslessGame = await GaslessGame.deploy();
+
+		const Tournament = await ethers.getContractFactory("Tournament");
+		const tournament = await Tournament.deploy();
+
+		const PieceSVG = await ethers.getContractFactory("PieceSVG");
+		const pieceSVG = await PieceSVG.deploy();
+
+		const TokenSVG = await ethers.getContractFactory("TokenSVG");
+		const tokenSVG = await TokenSVG.deploy();
+
+		const ChessFishNFT = await ethers.getContractFactory("ChessFishNFT");
+		const chessNFT = await ChessFishNFT.deploy(
+			chessGame.address,
+			moveVerification.address,
+			tournament.address,
+			pieceSVG.address,
+			tokenSVG.address
+		);
+
+		await pieceSVG.initialize(chessNFT.address);
+		await tokenSVG.initialize(chessNFT.address);
+
+		// Initializing
+		await chessGame.initialize(
+			moveVerification.address,
+			gaslessGame.address,
+			tournament.address,
+			tournament.address,
+			chessNFT.address
+		);
+
+		await tournament.initialize(chessGame.address, dividendSplitter, chessNFT.address);
+
+		await chessGame.initCoordinatesAndSymbols(
+			coordinates_array,
+			bitCoordinates_array,
+			pieceSymbols
+		);
+
+		await gaslessGame.initialize(moveVerification.address, chessGame.address);
+
+		const amount = ethers.utils.parseEther("100");
+		await token.transfer(signer1.address, amount);
+
+		// typed signature data
+		const domain = {
+			chainId: 1, // replace with the chain ID on frontend
+			name: "ChessFish", // Contract Name
+			verifyingContract: gaslessGame.address, // for testing
+			version: "1", // version
+		};
+
+		const delegationTypes = {
+			Delegation: [
+				{ name: "delegatorAddress", type: "address" },
+				{ name: "delegatedAddress", type: "address" },
+				{ name: "gameAddress", type: "address" },
+			],
+		};
+
+		const gaslessMoveTypes = {
+			GaslessMove: [
+				{ name: "gameAddress", type: "address" },
+				{ name: "gameNumber", type: "uint256" },
+				{ name: "expiration", type: "uint256" },
+				{ name: "movesHash", type: "bytes32" },
+			],
+		};
+
+		return {
+			signer0,
+			signer1,
+			chessGame,
+			gaslessGame,
+			dividendSplitter,
+			chessNFT,
+			token,
+			domain,
+			delegationTypes,
+			gaslessMoveTypes,
+			addressZero,
+		};
+	}
+
+	describe("Gasless Game Verification Unit Tests - Partially Gasless", function () {
+		it("Should play game", async function () {
+			const { chess, gaslessGame, deployer, otherAccount, token, domain, types } = await loadFixture(deploy);
+
+			let player1 = otherAccount.address;
+			let wagerToken = token.address;
+			let wager = ethers.utils.parseEther("1.0");
+			let maxTimePerMove = 86400;
+			let numberOfGames = 3;
+
+			await token.approve(chess.address, wager);
+
+			let tx = await chess.connect(deployer).createGameWager(player1, wagerToken, wager, maxTimePerMove, numberOfGames);
+			await tx.wait();
+
+			let wagerAddress = await chess.userGames(deployer.address, 0);
+
+			const moves = ["f2f3", "e7e5", "g2g4", "d8h4"];
+
+			// approve chess contract
+			await token.connect(otherAccount).approve(chess.address, wager);
+
+			// accept wager terms
+			let tx1 = await chess.connect(otherAccount).acceptWager(wagerAddress);
+			await tx1.wait();
+
+			let messageArray: any[] = [];
+			let signatureArray: any[] = [];
+
+			const timeNow = Date.now();
+			const timeStamp = Math.floor(timeNow / 1000) + 86400 * 3; // plus three days
+
+			//// #### First two moves of game on chain #### ////
+			for (let i = 0; i < 2; i++) {
+				let player;
+				if (i % 2 != 1) {
+					player = otherAccount;
+				} else {
+					player = deployer;
+				}
+
+				let hex_move = await chess.moveToHex(moves[i]);
+				let tx = await chess.connect(player).playMove(wagerAddress, hex_move);
+			}
+
+			//// #### last two moves of game gasless #### ////
+			for (let i = 2; i <= 3; i++) {
+				let player;
+				if (i % 2 != 1) {
+					player = otherAccount;
+				} else {
+					player = deployer;
+				}
+
+				const hex_move = await chess.moveToHex(moves[i]);
+
+				const messageData = {
+					wagerAddress: wagerAddress,
+					gameNumber: 0, // 1 game only for this test
+					moveNumber: i,
+					move: hex_move,
+					expiration: timeStamp,
+				};
+				const message = await gaslessGame.encodeMoveMessage(messageData);
+				messageArray.push(message);
+
+				const signature = await player._signTypedData(domain, types, messageData);
+				signatureArray.push(signature);
+			}
+
+			await chess.verifyGameUpdateState(messageArray, signatureArray);
+
+			const wins = await chess.wagerStatus(wagerAddress);
+
+			const winsPlayer0 = Number(wins.winsPlayer0);
+			const winsPlayer1 = Number(wins.winsPlayer1);
+
+			expect(winsPlayer0).to.equal(1);
+			expect(winsPlayer1).to.equal(0);
+
+			const gameLength = await chess.getGameLength(wagerAddress);
+			console.log(gameLength);
+		});
+	});
+});
