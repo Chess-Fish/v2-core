@@ -113,7 +113,8 @@ describe("ChessFish Wager Unit Tests", function () {
 
 	describe("Gasless Game Verification Unit Tests - Partially Gasless", function () {
 		it("Should play game", async function () {
-			const { chess, gaslessGame, deployer, otherAccount, token, domain, types } = await loadFixture(deploy);
+			const { chess, gaslessGame, deployer, otherAccount, token, domain, types } =
+				await loadFixture(deploy);
 
 			let player1 = otherAccount.address;
 			let wagerToken = token.address;
@@ -123,7 +124,9 @@ describe("ChessFish Wager Unit Tests", function () {
 
 			await token.approve(chess.address, wager);
 
-			let tx = await chess.connect(deployer).createGameWager(player1, wagerToken, wager, maxTimePerMove, numberOfGames);
+			let tx = await chess
+				.connect(deployer)
+				.createGameWager(player1, wagerToken, wager, maxTimePerMove, numberOfGames);
 			await tx.wait();
 
 			let wagerAddress = await chess.userGames(deployer.address, 0);

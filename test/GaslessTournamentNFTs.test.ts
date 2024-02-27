@@ -373,9 +373,6 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 			expect(isComplete).to.equal(true);
 
 			for (let i = 0; i < 5 /* gameAddresses.length */; i++) {
-				let ownerOf = await chessNFT.ownerOf(i);
-				console.log("owner", ownerOf);
-
 				const svgURI = await chessNFT.tokenURI(i);
 
 				// Step 1: Decode the JSON object from base64

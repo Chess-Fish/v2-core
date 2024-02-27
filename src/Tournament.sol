@@ -125,6 +125,25 @@ contract Tournament {
         return (tournamentGameAddresses[tournamentID]);
     }
 
+    /// @notice Returns the game addresses for player and tournament ID
+    function getTournamentGamesPlayer(address player, uint256 tournamentID) public view returns (address[] memory) {
+        address[] memory tournamentGames = tournamentGameAddresses[tournamentID];
+        address[] memory playerGames = chessGame.getAllUserGames(player);
+        address[] memory tempGames = new address[](tournamentGames.length);
+        uint256 count = 0;
+
+        for (uint256 i = 0; i < tournamentGames.length; i++) {
+            for (uint256 j = 0; j < playerGames.length; j++) {
+                if (tournamentGames[i] == playerGames[j]) {
+                    tempGames[count] = tournamentGames[i];
+                    count++;
+                    break;
+                }
+            }
+        }
+        return tempGames;
+    }
+
     /// @notice Calculates score
     /// @dev designed as view only
     /// @dev returns addresses[] players
@@ -576,22 +595,41 @@ contract Tournament {
     /// @dev private func that withdraws player from tournament if they exit
     function removePlayerFromPlayers(uint256 tournamentID, address player) private {
         bool isInPlayers = false;
-        uint256 i = 0;
-        for (i; i < tournaments[tournamentID].joinedPlayers.length;) {
-            if (tournaments[tournamentID].joinedPlayers[i] == player) {
+        uint256 count = 0;
+        for (count; count < tournaments[tournamentID].joinedPlayers.length;) {
+            if (tournaments[tournamentID].joinedPlayers[count] == player) {
                 isInPlayers = true;
                 break;
             }
             unchecked {
-                i++;
+                count++;
             }
         }
 
         if (isInPlayers == true) {
-            assert(i < tournaments[tournamentID].joinedPlayers.length);
-            tournaments[tournamentID].joinedPlayers[i] =
+            assert(count < tournaments[tournamentID].joinedPlayers.length);
+            tournaments[tournamentID].joinedPlayers[count] =
                 tournaments[tournamentID].joinedPlayers[tournaments[tournamentID].joinedPlayers.length - 1];
             tournaments[tournamentID].joinedPlayers.pop();
+        }
+
+        // removing all instances of player games from tournament games
+        address[] memory playerGames = getTournamentGamesPlayer(player, tournamentID);
+        for (uint256 i = 0; i < tournamentGameAddresses[tournamentID].length;) {
+            for (uint256 j = 0; j < playerGames.length; j++) {
+                if (tournamentGameAddresses[tournamentID][i] == playerGames[j]) {
+                    tournamentGameAddresses[tournamentID][i] =
+                        tournamentGameAddresses[tournamentID][tournamentGameAddresses[tournamentID].length - 1];
+                    tournamentGameAddresses[tournamentID].pop();
+                    if (i > 0) {
+                        i--;
+                    }
+                    break; 
+                }
+            }
+            unchecked {
+                i++;
+            }
         }
     }
 

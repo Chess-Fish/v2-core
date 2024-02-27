@@ -1,68 +1,32 @@
-## Foundry
+<p align="center">
+   <img src="/public/4d_chess.jpeg" width="250">
+</p>
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+# ChessFish v2-Core
+[![Twitter](https://img.shields.io/twitter/url/https/twitter.com/cloudposse.svg?style=social&label=Follow%20%40evmchess)](https://twitter.com/evmchess)
 
-Foundry consists of:
+In-depth documentation on ChessFish located at [docs.chess.fish](http://docs.chess.fish)
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+### About
+ChessFish is a non-custodial chess wager smart contract and chess move verification algorithm implemented for the Ethereum Virtual Machine. ChessFish V1 offers the ability to play 1v1 chess or in tournaments up to 25 players while betting cryptocurrency on the outcome of the game. Users have the ability to specify different parameters for 1v1 wagers and tournaments. Users can set the ERC-20 token to wager, the number of games, and the time limit of the wager. Games can be played without paying for transaction fees by using ECDSA signatures.
 
-## Documentation
-
-https://book.getfoundry.sh/
-
-## Usage
-
-### Build
-
-```shell
-$ forge build
+### Run tests: 
+```
+npx hardhat test
 ```
 
-### Test
-
-```shell
-$ forge test
+### Linter
 ```
-
-### Format
-
-```shell
-$ forge fmt
-```
-
-### Gas Snapshots
-
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
-```
-# v2-core
+forge fmt
 npx prettier --write '**/*.ts'
+```
+
+### Test Coverage 
+```
+npx hardhat coverage
+```
+
+#### Docgen
+```
+npx hardhat docgen
+```
