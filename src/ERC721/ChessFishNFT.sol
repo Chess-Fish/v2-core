@@ -20,9 +20,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/utils/Base64.sol";
 
-import {MoveVerification} from "./../MoveVerification.sol";
-import {ChessGame} from "./../ChessGame.sol";
-import {Tournament} from "./../Tournament.sol";
+import { MoveVerification } from "./../MoveVerification.sol";
+import { ChessGame } from "./../ChessGame.sol";
+import { Tournament } from "./../Tournament.sol";
 
 import "./PieceSVG.sol";
 import "./TokenSVG.sol";
@@ -59,7 +59,9 @@ contract ChessFishNFT is ERC721 {
         address _tournament,
         address _pieceSVG,
         address _tokenSVG
-    ) ERC721("ChessFishNFT", "CFSH_NFT") {
+    )
+        ERC721("ChessFishNFT", "CFSH_NFT")
+    {
         deployer = msg.sender;
         chessGame = ChessGame(_chessGame);
         moveVerification = MoveVerification(_moveVerification);
@@ -69,7 +71,14 @@ contract ChessFishNFT is ERC721 {
         tokenSVG = TokenSVG(_tokenSVG);
     }
 
-    function awardWinner(address player, address gameAddress) external onlyAuthed returns (uint256) {
+    function awardWinner(
+        address player,
+        address gameAddress
+    )
+        external
+        onlyAuthed
+        returns (uint256)
+    {
         uint256 tokenId = _tokenIdCounter;
         _mint(player, tokenId);
         gameAddresses[tokenId] = gameAddress;
@@ -85,7 +94,8 @@ contract ChessFishNFT is ERC721 {
         ChessGame.GameData memory gameData = chessGame.getGameData(gameAddresses[id]);
         uint256 gameID = gameData.numberOfGames - 1;
 
-        uint16[] memory gameMoves = chessGame.getGameMoves(gameAddresses[id], gameID).moves;
+        uint16[] memory gameMoves =
+            chessGame.getGameMoves(gameAddresses[id], gameID).moves;
 
         (, uint256 gameState,,) = moveVerification.checkGameFromStart(gameMoves);
 
@@ -105,7 +115,13 @@ contract ChessFishNFT is ERC721 {
         uint256 _endTime = endTimes[gameAddresses[id]];
 
         return generateBoardSVG(
-            boardString, gameData.player0, gameData.player1, _endTime, gameData.gameToken, gameData.isTournament, place
+            boardString,
+            gameData.player0,
+            gameData.player1,
+            _endTime,
+            gameData.gameToken,
+            gameData.isTournament,
+            place
         );
     }
     /* 
@@ -141,7 +157,11 @@ contract ChessFishNFT is ERC721 {
         address token,
         bool isTournament,
         uint256 place
-    ) public view returns (string memory) {
+    )
+        public
+        view
+        returns (string memory)
+    {
         bytes memory boardBytes = bytes(boardString);
         // Double the size of the board and add extra space for the rectangle
         bytes memory svg = abi.encodePacked(
@@ -170,7 +190,14 @@ contract ChessFishNFT is ERC721 {
                 index++;
 
                 svg = abi.encodePacked(
-                    svg, '<rect x="', uint2str(x), '" y="', uint2str(y), '" class="square ', squareColor, '"/>'
+                    svg,
+                    '<rect x="',
+                    uint2str(x),
+                    '" y="',
+                    uint2str(y),
+                    '" class="square ',
+                    squareColor,
+                    '"/>'
                 );
 
                 if (piece != bytes1(0x20)) {
@@ -186,7 +213,8 @@ contract ChessFishNFT is ERC721 {
         // return string(abi.encodePacked("data:image/svg+xml;base64,",
         // Base64.encode(svg)));
 
-        bytes memory image = abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg));
+        bytes memory image =
+            abi.encodePacked("data:image/svg+xml;base64,", Base64.encode(svg));
 
         string memory json = string(
             abi.encodePacked(
@@ -209,7 +237,9 @@ contract ChessFishNFT is ERC721 {
         // Close the JSON structure
         json = string(abi.encodePacked(json, "}"));
 
-        string memory output = string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
+        string memory output = string(
+            abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json)))
+        );
 
         return output;
     }
@@ -222,7 +252,11 @@ contract ChessFishNFT is ERC721 {
         address token,
         bool isTournament,
         uint256 place
-    ) private view returns (bytes memory) {
+    )
+        private
+        view
+        returns (bytes memory)
+    {
         string memory dateString = timestampToDateTimeString(endTime);
 
         // Part 1: Initial SVG (if there's content before the black box, add it here)
@@ -315,12 +349,19 @@ contract ChessFishNFT is ERC721 {
         }
     }
 
-    function getHexColor(uint256 endTime, address player0, address player1, address token)
+    function getHexColor(
+        uint256 endTime,
+        address player0,
+        address player1,
+        address token
+    )
         public
         pure
         returns (string memory)
     {
-        uint256 random = uint256(keccak256(abi.encodePacked(endTime, player0, player1, token))) % 16_777_215;
+        uint256 random = uint256(
+            keccak256(abi.encodePacked(endTime, player0, player1, token))
+        ) % 16_777_215;
 
         bytes memory b = new bytes(3);
         for (uint256 i = 0; i < 3; i++) {
@@ -396,9 +437,19 @@ contract ChessFishNFT is ERC721 {
     uint256 constant DOW_SAT = 6;
     uint256 constant DOW_SUN = 7;
 
-    function timestampToDateTimeString(uint256 timestamp) private pure returns (string memory) {
-        (uint256 year, uint256 month, uint256 day, uint256 hour, uint256 minute, uint256 second) =
-            timestampToDateTime(timestamp);
+    function timestampToDateTimeString(uint256 timestamp)
+        private
+        pure
+        returns (string memory)
+    {
+        (
+            uint256 year,
+            uint256 month,
+            uint256 day,
+            uint256 hour,
+            uint256 minute,
+            uint256 second
+        ) = timestampToDateTime(timestamp);
 
         return string(
             abi.encodePacked(
@@ -417,7 +468,14 @@ contract ChessFishNFT is ERC721 {
         );
     }
 
-    function _zeroPad(uint256 value, uint256 length) private pure returns (string memory) {
+    function _zeroPad(
+        uint256 value,
+        uint256 length
+    )
+        private
+        pure
+        returns (string memory)
+    {
         string memory strValue = _toString(value);
         uint256 strLength = bytes(strValue).length;
 
@@ -459,7 +517,14 @@ contract ChessFishNFT is ERC721 {
     function timestampToDateTime(uint256 timestamp)
         private
         pure
-        returns (uint256 year, uint256 month, uint256 day, uint256 hour, uint256 minute, uint256 second)
+        returns (
+            uint256 year,
+            uint256 month,
+            uint256 day,
+            uint256 hour,
+            uint256 minute,
+            uint256 second
+        )
     {
         (year, month, day) = _daysToDate(timestamp / SECONDS_PER_DAY);
         uint256 secs = timestamp % SECONDS_PER_DAY;
@@ -469,7 +534,11 @@ contract ChessFishNFT is ERC721 {
         second = secs % SECONDS_PER_MINUTE;
     }
 
-    function _daysToDate(uint256 _days) private pure returns (uint256 year, uint256 month, uint256 day) {
+    function _daysToDate(uint256 _days)
+        private
+        pure
+        returns (uint256 year, uint256 month, uint256 day)
+    {
         int256 __days = int256(_days);
 
         int256 L = __days + 68_569 + OFFSET19700101;

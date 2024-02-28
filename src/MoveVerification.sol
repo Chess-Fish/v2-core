@@ -69,11 +69,14 @@ contract MoveVerification {
     uint8 constant white_win_outcome = 0x2;
     uint8 constant black_win_outcome = 0x3;
 
-    uint256 constant game_state_start = 0xcbaedabc99999999000000000000000000000000000000001111111143265234;
+    uint256 constant game_state_start =
+        0xcbaedabc99999999000000000000000000000000000000001111111143265234;
 
-    uint256 constant full_long_word_mask = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 constant full_long_word_mask =
+        0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
-    uint256 constant invalid_move_constant = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 constant invalid_move_constant =
+        0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     /**
      * @dev    Initial white state:
@@ -97,8 +100,14 @@ contract MoveVerification {
 
     // @dev chess game from start using hex moves
     // @dev returns outcome, gameState, player0State, player1State
-    function checkGameFromStart(uint16[] memory moves) public pure returns (uint8, uint256, uint32, uint32) {
-        return checkGame(game_state_start, initial_white_state, initial_black_state, false, moves);
+    function checkGameFromStart(uint16[] memory moves)
+        public
+        pure
+        returns (uint8, uint256, uint32, uint32)
+    {
+        return checkGame(
+            game_state_start, initial_white_state, initial_black_state, false, moves
+        );
     }
 
     /**
@@ -120,7 +129,16 @@ contract MoveVerification {
         uint32 startingOpponentState,
         bool startingTurnBlack,
         uint16[] memory moves
-    ) public pure returns (uint8 outcome, uint256 gameState, uint32 playerState, uint32 opponentState) {
+    )
+        public
+        pure
+        returns (
+            uint8 outcome,
+            uint256 gameState,
+            uint32 playerState,
+            uint32 opponentState
+        )
+    {
         gameState = startingGameState;
 
         playerState = startingPlayerState;
@@ -140,12 +158,15 @@ contract MoveVerification {
         } else if (moves[moves.length - 1] == resign_const) {
             // Assumes that signatures have been checked and moves are in
             // correct order
-            outcome = ((moves.length % 2) == 1) != currentTurnBlack ? black_win_outcome : white_win_outcome;
+            outcome = ((moves.length % 2) == 1) != currentTurnBlack
+                ? black_win_outcome
+                : white_win_outcome;
         } else {
             // Check entire game
             for (uint256 i = 0; i < moves.length;) {
-                (gameState, opponentState, playerState) =
-                    verifyExecuteMove(gameState, moves[i], playerState, opponentState, currentTurnBlack);
+                (gameState, opponentState, playerState) = verifyExecuteMove(
+                    gameState, moves[i], playerState, opponentState, currentTurnBlack
+                );
                 unchecked {
                     i++;
                 }
@@ -183,7 +204,11 @@ contract MoveVerification {
         uint32 playerState,
         uint32 opponentState,
         bool currentTurnBlack
-    ) public pure returns (uint256 newGameState, uint32 newPlayerState, uint32 newOpponentState) {
+    )
+        public
+        pure
+        returns (uint256 newGameState, uint32 newPlayerState, uint32 newOpponentState)
+    {
         // TODO: check resigns and other stuff first
         uint8 fromPos = (uint8)((move >> 6) & 0x3f);
         uint8 toPos = (uint8)(move & 0x3f);
@@ -201,14 +226,23 @@ contract MoveVerification {
 
         if (fromType == pawn_const) {
             (newGameState, newPlayerState) = verifyExecutePawnMove(
-                gameState, fromPos, toPos, (uint8)(move >> 12), currentTurnBlack, playerState, opponentState
+                gameState,
+                fromPos,
+                toPos,
+                (uint8)(move >> 12),
+                currentTurnBlack,
+                playerState,
+                opponentState
             );
         } else if (fromType == knight_const) {
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
         } else if (fromType == bishop_const) {
-            newGameState = verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
+            newGameState =
+                verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
         } else if (fromType == rook_const) {
-            newGameState = verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
+            newGameState =
+                verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
             // Reset playerState if necessary when one of the rooks move
 
             if (fromPos == (uint8)(playerState >> rook_king_side_move_bit)) {
@@ -217,10 +251,12 @@ contract MoveVerification {
                 newPlayerState = playerState | rook_queen_side_move_mask;
             }
         } else if (fromType == queen_const) {
-            newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+            newGameState =
+                verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
         } else if (fromType == king_const) {
-            (newGameState, newPlayerState) =
-                verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
+            (newGameState, newPlayerState) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
         } else {
             revert("inv move type");
         }
@@ -260,7 +296,11 @@ contract MoveVerification {
         bool currentTurnBlack,
         uint32 playerState,
         uint32 opponentState
-    ) public pure returns (uint256 newGameState, uint32 newPlayerState) {
+    )
+        public
+        pure
+        returns (uint256 newGameState, uint32 newPlayerState)
+    {
         newPlayerState = playerState;
         // require ((currentTurnBlack && (toPos < fromPos)) ||
         // (!currentTurnBlack && (fromPos < toPos)), "inv move");
@@ -277,14 +317,18 @@ contract MoveVerification {
                 return (invalid_move_constant, 0x0);
             }
             if (diff == 16) {
-                if ((currentTurnBlack && ((fromPos >> 3) != 0x6)) || (!currentTurnBlack && ((fromPos >> 3) != 0x1))) {
+                if (
+                    (currentTurnBlack && ((fromPos >> 3) != 0x6))
+                        || (!currentTurnBlack && ((fromPos >> 3) != 0x1))
+                ) {
                     return (invalid_move_constant, 0x0);
                 }
                 uint8 posToInBetween = toPos > fromPos ? fromPos + 8 : toPos + 8;
                 if (pieceAtPosition(gameState, posToInBetween) != 0) {
                     return (invalid_move_constant, 0x0);
                 }
-                newPlayerState = (newPlayerState & (~en_passant_const)) | (uint32)(posToInBetween);
+                newPlayerState =
+                    (newPlayerState & (~en_passant_const)) | (uint32)(posToInBetween);
             }
         } else if (diff == 7 || diff == 9) {
             if (getVerticalMovement(fromPos, toPos) != 1) {
@@ -292,7 +336,11 @@ contract MoveVerification {
             }
             if ((uint8)(opponentState & en_passant_const) != toPos) {
                 if (
-                    (pieceToPosition == 0) || (currentTurnBlack == ((pieceToPosition & color_const) == color_const)) // Must
+                    (pieceToPosition == 0)
+                        || (
+                            currentTurnBlack
+                                == ((pieceToPosition & color_const) == color_const)
+                        ) // Must
                         // be moving to occupied square // Must be different
                         // color
                 ) {
@@ -304,7 +352,10 @@ contract MoveVerification {
         }
 
         newGameState = commitMove(gameState, fromPos, toPos);
-        if ((currentTurnBlack && ((toPos >> 3) == 0x0)) || (!currentTurnBlack && ((toPos >> 3) == 0x7))) {
+        if (
+            (currentTurnBlack && ((toPos >> 3) == 0x0))
+                || (!currentTurnBlack && ((toPos >> 3) == 0x7))
+        ) {
             // @dev Handling Promotion:
             // Currently Promotion is set to autoqueen
             /*   
@@ -317,7 +368,9 @@ contract MoveVerification {
             moveExtra = queen_const;
 
             newGameState = setPosition(
-                zeroPosition(newGameState, toPos), toPos, currentTurnBlack ? moveExtra | color_const : moveExtra
+                zeroPosition(newGameState, toPos),
+                toPos,
+                currentTurnBlack ? moveExtra | color_const : moveExtra
             );
         }
 
@@ -334,7 +387,12 @@ contract MoveVerification {
      *     @param currentTurnBlack true if it's black turn
      *     @return newGameState the new game state after it's executed.
      */
-    function verifyExecuteKnightMove(uint256 gameState, uint8 fromPos, uint8 toPos, bool currentTurnBlack)
+    function verifyExecuteKnightMove(
+        uint256 gameState,
+        uint8 fromPos,
+        uint8 toPos,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (uint256)
@@ -367,7 +425,12 @@ contract MoveVerification {
      *     @param currentTurnBlack true if it's black turn
      *     @return newGameState the new game state after it's executed.
      */
-    function verifyExecuteBishopMove(uint256 gameState, uint8 fromPos, uint8 toPos, bool currentTurnBlack)
+    function verifyExecuteBishopMove(
+        uint256 gameState,
+        uint8 fromPos,
+        uint8 toPos,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (uint256)
@@ -400,7 +463,12 @@ contract MoveVerification {
      *     @param currentTurnBlack true if it's black turn
      *     @return newGameState the new game state after it's executed.
      */
-    function verifyExecuteRookMove(uint256 gameState, uint8 fromPos, uint8 toPos, bool currentTurnBlack)
+    function verifyExecuteRookMove(
+        uint256 gameState,
+        uint8 fromPos,
+        uint8 toPos,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (uint256)
@@ -415,7 +483,9 @@ contract MoveVerification {
         uint8 h = getHorizontalMovement(fromPos, toPos);
         uint8 v = getVerticalMovement(fromPos, toPos);
 
-        if (((h > 0) == (v > 0)) || (gameState & getInBetweenMask(fromPos, toPos)) != 0x00) {
+        if (
+            ((h > 0) == (v > 0)) || (gameState & getInBetweenMask(fromPos, toPos)) != 0x00
+        ) {
             return invalid_move_constant;
         }
 
@@ -432,7 +502,12 @@ contract MoveVerification {
      *     @param currentTurnBlack true if it's black turn
      *     @return newGameState the new game state after it's executed.
      */
-    function verifyExecuteQueenMove(uint256 gameState, uint8 fromPos, uint8 toPos, bool currentTurnBlack)
+    function verifyExecuteQueenMove(
+        uint256 gameState,
+        uint8 fromPos,
+        uint8 toPos,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (uint256)
@@ -445,7 +520,10 @@ contract MoveVerification {
         }
         uint8 h = getHorizontalMovement(fromPos, toPos);
         uint8 v = getVerticalMovement(fromPos, toPos);
-        if (((h != v) && (h != 0) && (v != 0)) || (gameState & getInBetweenMask(fromPos, toPos)) != 0x00) {
+        if (
+            ((h != v) && (h != 0) && (v != 0))
+                || (gameState & getInBetweenMask(fromPos, toPos)) != 0x00
+        ) {
             return invalid_move_constant;
         }
 
@@ -470,8 +548,13 @@ contract MoveVerification {
         uint8 toPos,
         bool currentTurnBlack,
         uint32 playerState
-    ) public pure returns (uint256 newGameState, uint32 newPlayerState) {
-        newPlayerState = ((playerState | king_move_mask) & king_pos_zero_mask) | ((uint32)(toPos) << king_pos_bit);
+    )
+        public
+        pure
+        returns (uint256 newGameState, uint32 newPlayerState)
+    {
+        newPlayerState = ((playerState | king_move_mask) & king_pos_zero_mask)
+            | ((uint32)(toPos) << king_pos_bit);
         uint8 pieceToPosition = pieceAtPosition(gameState, toPos);
 
         if (pieceToPosition > 0) {
@@ -493,19 +576,24 @@ contract MoveVerification {
                 // TODO: must we check king's 'from' position?
                 // Reasoning: castilngRookPosition resolves to an invalid toPos
                 // when the rook or the king have already moved.
-                uint8 castilngRookPosition = (uint8)(playerState >> rook_queen_side_move_bit);
+                uint8 castilngRookPosition =
+                    (uint8)(playerState >> rook_queen_side_move_bit);
                 if (castilngRookPosition + 2 == toPos) {
                     // Queen-side castling
                     // Spaces between king and rook original positions must be
                     // empty
-                    if ((getInBetweenMask(castilngRookPosition, fromPos) & gameState) == 0) {
+                    if (
+                        (getInBetweenMask(castilngRookPosition, fromPos) & gameState) == 0
+                    ) {
                         // Move King 1 space to the left and check for attacks
                         // (there must be none)
                         newGameState = commitMove(gameState, fromPos, fromPos - 1);
                         if (!pieceUnderAttack(newGameState, fromPos - 1)) {
                             return (
                                 commitMove(
-                                    commitMove(newGameState, fromPos - 1, toPos), castilngRookPosition, fromPos - 1
+                                    commitMove(newGameState, fromPos - 1, toPos),
+                                    castilngRookPosition,
+                                    fromPos - 1
                                     ),
                                 newPlayerState
                             );
@@ -517,14 +605,19 @@ contract MoveVerification {
                         // King-side castling
                         // Spaces between king and rook original positions must
                         // be empty
-                        if ((getInBetweenMask(castilngRookPosition, fromPos) & gameState) == 0) {
+                        if (
+                            (getInBetweenMask(castilngRookPosition, fromPos) & gameState)
+                                == 0
+                        ) {
                             // Move King 1 space to the left and check for
                             // attacks (there must be none)
                             newGameState = commitMove(gameState, fromPos, fromPos + 1);
                             if (!pieceUnderAttack(newGameState, fromPos + 1)) {
                                 return (
                                     commitMove(
-                                        commitMove(newGameState, fromPos + 1, toPos), castilngRookPosition, fromPos + 1
+                                        commitMove(newGameState, fromPos + 1, toPos),
+                                        castilngRookPosition,
+                                        fromPos + 1
                                         ),
                                     newPlayerState
                                 );
@@ -549,7 +642,12 @@ contract MoveVerification {
      *     @param currentTurnBlack True if it's black's turn, false otherwise.
      *     @return A boolean indicating whether the move is valid or not.
      */
-    function checkQueenValidMoves(uint256 gameState, uint8 fromPos, uint32 playerState, bool currentTurnBlack)
+    function checkQueenValidMoves(
+        uint256 gameState,
+        uint8 fromPos,
+        uint32 playerState,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (bool)
@@ -562,8 +660,12 @@ contract MoveVerification {
         unchecked {
             // Check left
             for (toPos = fromPos - 1; (toPos & 0x7) < (fromPos & 0x7); toPos--) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -573,8 +675,12 @@ contract MoveVerification {
 
             // Check right
             for (toPos = fromPos + 1; (toPos & 0x7) > (fromPos & 0x7); toPos++) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -584,8 +690,12 @@ contract MoveVerification {
 
             // Check up
             for (toPos = fromPos + 8; toPos < 0x40; toPos += 8) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -595,8 +705,12 @@ contract MoveVerification {
 
             // Check down
             for (toPos = fromPos - 8; toPos < fromPos; toPos -= 8) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -605,9 +719,17 @@ contract MoveVerification {
             }
 
             // Check up-right
-            for (toPos = fromPos + 9; (toPos < 0x40) && ((toPos & 0x7) > (fromPos & 0x7)); toPos += 9) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos + 9;
+                (toPos < 0x40) && ((toPos & 0x7) > (fromPos & 0x7));
+                toPos += 9
+            ) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -616,9 +738,17 @@ contract MoveVerification {
             }
 
             // Check up-left
-            for (toPos = fromPos + 7; (toPos < 0x40) && ((toPos & 0x7) < (fromPos & 0x7)); toPos += 7) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos + 7;
+                (toPos < 0x40) && ((toPos & 0x7) < (fromPos & 0x7));
+                toPos += 7
+            ) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -627,9 +757,17 @@ contract MoveVerification {
             }
 
             // Check down-right
-            for (toPos = fromPos - 7; (toPos < fromPos) && ((toPos & 0x7) > (fromPos & 0x7)); toPos -= 7) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos - 7;
+                (toPos < fromPos) && ((toPos & 0x7) > (fromPos & 0x7));
+                toPos -= 7
+            ) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -638,9 +776,17 @@ contract MoveVerification {
             }
 
             // Check down-left
-            for (toPos = fromPos - 9; (toPos < fromPos) && ((toPos & 0x7) < (fromPos & 0x7)); toPos -= 9) {
-                newGameState = verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos - 9;
+                (toPos < fromPos) && ((toPos & 0x7) < (fromPos & 0x7));
+                toPos -= 9
+            ) {
+                newGameState =
+                    verifyExecuteQueenMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -664,7 +810,12 @@ contract MoveVerification {
      *     @param currentTurnBlack True if it's black's turn, false otherwise.
      *     @return A boolean indicating whether the move is valid or not.
      */
-    function checkBishopValidMoves(uint256 gameState, uint8 fromPos, uint32 playerState, bool currentTurnBlack)
+    function checkBishopValidMoves(
+        uint256 gameState,
+        uint8 fromPos,
+        uint32 playerState,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (bool)
@@ -676,9 +827,17 @@ contract MoveVerification {
 
         unchecked {
             // Check up-right
-            for (toPos = fromPos + 9; (toPos < 0x40) && ((toPos & 0x7) > (fromPos & 0x7)); toPos += 9) {
-                newGameState = verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos + 9;
+                (toPos < 0x40) && ((toPos & 0x7) > (fromPos & 0x7));
+                toPos += 9
+            ) {
+                newGameState =
+                    verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -687,9 +846,17 @@ contract MoveVerification {
             }
 
             // Check up-left
-            for (toPos = fromPos + 7; (toPos < 0x40) && ((toPos & 0x7) < (fromPos & 0x7)); toPos += 7) {
-                newGameState = verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos + 7;
+                (toPos < 0x40) && ((toPos & 0x7) < (fromPos & 0x7));
+                toPos += 7
+            ) {
+                newGameState =
+                    verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -698,9 +865,17 @@ contract MoveVerification {
             }
 
             // Check down-right
-            for (toPos = fromPos - 7; (toPos < fromPos) && ((toPos & 0x7) > (fromPos & 0x7)); toPos -= 7) {
-                newGameState = verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos - 7;
+                (toPos < fromPos) && ((toPos & 0x7) > (fromPos & 0x7));
+                toPos -= 7
+            ) {
+                newGameState =
+                    verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -709,9 +884,17 @@ contract MoveVerification {
             }
 
             // Check down-left
-            for (toPos = fromPos - 9; (toPos < fromPos) && ((toPos & 0x7) < (fromPos & 0x7)); toPos -= 9) {
-                newGameState = verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            for (
+                toPos = fromPos - 9;
+                (toPos < fromPos) && ((toPos & 0x7) < (fromPos & 0x7));
+                toPos -= 9
+            ) {
+                newGameState =
+                    verifyExecuteBishopMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -735,7 +918,12 @@ contract MoveVerification {
      *     @param currentTurnBlack True if it's black's turn, false otherwise.
      *     @return A boolean indicating whether the move is valid or not.
      */
-    function checkRookValidMoves(uint256 gameState, uint8 fromPos, uint32 playerState, bool currentTurnBlack)
+    function checkRookValidMoves(
+        uint256 gameState,
+        uint8 fromPos,
+        uint32 playerState,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (bool)
@@ -748,8 +936,12 @@ contract MoveVerification {
         unchecked {
             // Check left
             for (toPos = fromPos - 1; (toPos & 0x7) < (fromPos & 0x7); toPos--) {
-                newGameState = verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -759,8 +951,12 @@ contract MoveVerification {
 
             // Check right
             for (toPos = fromPos + 1; (toPos & 0x7) > (fromPos & 0x7); toPos++) {
-                newGameState = verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -770,9 +966,13 @@ contract MoveVerification {
 
             // Check up
             for (toPos = fromPos + 8; toPos < 0x40; toPos += 8) {
-                newGameState = verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
+                newGameState =
+                    verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
 
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -782,8 +982,12 @@ contract MoveVerification {
 
             // Check down
             for (toPos = fromPos - 8; toPos < fromPos; toPos -= 8) {
-                newGameState = verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
-                if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+                newGameState =
+                    verifyExecuteRookMove(gameState, fromPos, toPos, currentTurnBlack);
+                if (
+                    (newGameState != invalid_move_constant)
+                        && (!pieceUnderAttack(newGameState, kingPos))
+                ) {
                     return true;
                 }
                 if (((gameState >> (toPos << piece_pos_shift_bit)) & 0xF) != 0) {
@@ -807,7 +1011,12 @@ contract MoveVerification {
      *     @param currentTurnBlack True if it's black's turn, false otherwise.
      *     @return A boolean indicating whether the move is valid or not.
      */
-    function checkKnightValidMoves(uint256 gameState, uint8 fromPos, uint32 playerState, bool currentTurnBlack)
+    function checkKnightValidMoves(
+        uint256 gameState,
+        uint8 fromPos,
+        uint32 playerState,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (bool)
@@ -819,50 +1028,82 @@ contract MoveVerification {
 
         unchecked {
             toPos = fromPos + 6;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 6;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 10;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 10;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 17;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 17;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 15;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 15;
-            newGameState = verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            newGameState =
+                verifyExecuteKnightMove(gameState, fromPos, toPos, currentTurnBlack);
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
         }
@@ -888,7 +1129,11 @@ contract MoveVerification {
         uint32 playerState,
         uint32 opponentState,
         bool currentTurnBlack
-    ) public pure returns (bool) {
+    )
+        public
+        pure
+        returns (bool)
+    {
         uint256 newGameState;
         uint8 toPos;
         uint8 moveExtra = queen_const; /* Since this is supposed to be endgame,
@@ -899,33 +1144,69 @@ contract MoveVerification {
         unchecked {
             toPos = currentTurnBlack ? fromPos - 7 : fromPos + 7;
             (newGameState,) = verifyExecutePawnMove(
-                gameState, fromPos, toPos, moveExtra, currentTurnBlack, playerState, opponentState
+                gameState,
+                fromPos,
+                toPos,
+                moveExtra,
+                currentTurnBlack,
+                playerState,
+                opponentState
             );
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = currentTurnBlack ? fromPos - 8 : fromPos + 8;
             (newGameState,) = verifyExecutePawnMove(
-                gameState, fromPos, toPos, moveExtra, currentTurnBlack, playerState, opponentState
+                gameState,
+                fromPos,
+                toPos,
+                moveExtra,
+                currentTurnBlack,
+                playerState,
+                opponentState
             );
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = currentTurnBlack ? fromPos - 9 : fromPos + 9;
             (newGameState,) = verifyExecutePawnMove(
-                gameState, fromPos, toPos, moveExtra, currentTurnBlack, playerState, opponentState
+                gameState,
+                fromPos,
+                toPos,
+                moveExtra,
+                currentTurnBlack,
+                playerState,
+                opponentState
             );
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
 
             toPos = currentTurnBlack ? fromPos - 16 : fromPos + 16;
             (newGameState,) = verifyExecutePawnMove(
-                gameState, fromPos, toPos, moveExtra, currentTurnBlack, playerState, opponentState
+                gameState,
+                fromPos,
+                toPos,
+                moveExtra,
+                currentTurnBlack,
+                playerState,
+                opponentState
             );
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, kingPos))) {
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, kingPos))
+            ) {
                 return true;
             }
         }
@@ -933,7 +1214,12 @@ contract MoveVerification {
         return false;
     }
 
-    function checkKingValidMoves(uint256 gameState, uint8 fromPos, uint32 playerState, bool currentTurnBlack)
+    function checkKingValidMoves(
+        uint256 gameState,
+        uint8 fromPos,
+        uint32 playerState,
+        bool currentTurnBlack
+    )
         public
         pure
         returns (bool)
@@ -943,50 +1229,90 @@ contract MoveVerification {
 
         unchecked {
             toPos = fromPos - 9;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 8;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 7;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos - 1;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 1;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 7;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 8;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
 
             toPos = fromPos + 9;
-            (newGameState,) = verifyExecuteKingMove(gameState, fromPos, toPos, currentTurnBlack, playerState);
-            if ((newGameState != invalid_move_constant) && (!pieceUnderAttack(newGameState, toPos))) {
+            (newGameState,) = verifyExecuteKingMove(
+                gameState, fromPos, toPos, currentTurnBlack, playerState
+            );
+            if (
+                (newGameState != invalid_move_constant)
+                    && (!pieceUnderAttack(newGameState, toPos))
+            ) {
                 return true;
             }
         }
@@ -1011,14 +1337,27 @@ contract MoveVerification {
         uint8 color,
         uint16 pBitOffset,
         uint16 bitSize
-    ) public pure returns (bool) {
+    )
+        public
+        pure
+        returns (bool)
+    {
         if (bitSize > piece_bit_size) {
             uint16 newBitSize = bitSize / 2;
             uint256 m = ~(full_long_word_mask << newBitSize);
             uint256 h = (gameState >> (pBitOffset + newBitSize)) & m;
 
             if (h != 0) {
-                if (searchPiece(gameState, playerState, opponentState, color, pBitOffset + newBitSize, newBitSize)) {
+                if (
+                    searchPiece(
+                        gameState,
+                        playerState,
+                        opponentState,
+                        color,
+                        pBitOffset + newBitSize,
+                        newBitSize
+                    )
+                ) {
                     return true;
                 }
             }
@@ -1026,7 +1365,16 @@ contract MoveVerification {
             uint256 l = (gameState >> pBitOffset) & m;
 
             if (l != 0) {
-                if (searchPiece(gameState, playerState, opponentState, color, pBitOffset, newBitSize)) {
+                if (
+                    searchPiece(
+                        gameState,
+                        playerState,
+                        opponentState,
+                        color,
+                        pBitOffset,
+                        newBitSize
+                    )
+                ) {
                     return true;
                 }
             }
@@ -1038,27 +1386,40 @@ contract MoveVerification {
                 bool currentTurnBlack = color != 0;
                 uint8 pieceType = piece & type_mask_const;
 
-                if ((pieceType == king_const) && checkKingValidMoves(gameState, pos, playerState, currentTurnBlack)) {
+                if (
+                    (pieceType == king_const)
+                        && checkKingValidMoves(gameState, pos, playerState, currentTurnBlack)
+                ) {
                     return true;
                 } else if (
                     (pieceType == pawn_const)
-                        && checkPawnValidMoves(gameState, pos, playerState, opponentState, currentTurnBlack)
+                        && checkPawnValidMoves(
+                            gameState, pos, playerState, opponentState, currentTurnBlack
+                        )
                 ) {
                     return true;
                 } else if (
-                    (pieceType == knight_const) && checkKnightValidMoves(gameState, pos, playerState, currentTurnBlack)
+                    (pieceType == knight_const)
+                        && checkKnightValidMoves(
+                            gameState, pos, playerState, currentTurnBlack
+                        )
                 ) {
                     return true;
                 } else if (
-                    (pieceType == rook_const) && checkRookValidMoves(gameState, pos, playerState, currentTurnBlack)
+                    (pieceType == rook_const)
+                        && checkRookValidMoves(gameState, pos, playerState, currentTurnBlack)
                 ) {
                     return true;
                 } else if (
-                    (pieceType == bishop_const) && checkBishopValidMoves(gameState, pos, playerState, currentTurnBlack)
+                    (pieceType == bishop_const)
+                        && checkBishopValidMoves(
+                            gameState, pos, playerState, currentTurnBlack
+                        )
                 ) {
                     return true;
                 } else if (
-                    (pieceType == queen_const) && checkQueenValidMoves(gameState, pos, playerState, currentTurnBlack)
+                    (pieceType == queen_const)
+                        && checkQueenValidMoves(gameState, pos, playerState, currentTurnBlack)
                 ) {
                     return true;
                 }
@@ -1077,12 +1438,24 @@ contract MoveVerification {
      *     @return outcome can be 0 for inconclusive/only check, 1 stalemate, 2
      * checkmate
      */
-    function checkEndgame(uint256 gameState, uint32 playerState, uint32 opponentState) public pure returns (uint8) {
-        uint8 kingPiece = (uint8)(gameState >> ((uint8)(playerState >> king_pos_bit) << piece_pos_shift_bit)) & 0xF;
+    function checkEndgame(
+        uint256 gameState,
+        uint32 playerState,
+        uint32 opponentState
+    )
+        public
+        pure
+        returns (uint8)
+    {
+        uint8 kingPiece = (uint8)(
+            gameState >> ((uint8)(playerState >> king_pos_bit) << piece_pos_shift_bit)
+        ) & 0xF;
 
         require((kingPiece & (~color_const)) == king_const, "934");
 
-        bool legalMoves = searchPiece(gameState, playerState, opponentState, color_const & kingPiece, 0, 256);
+        bool legalMoves = searchPiece(
+            gameState, playerState, opponentState, color_const & kingPiece, 0, 256
+        );
 
         // If the player is in check but also
         if (checkForCheck(gameState, playerState)) {
@@ -1161,8 +1534,17 @@ contract MoveVerification {
      *     @param toPos The ending position to which the movement is measured.
      *     @return The horizontal movement between the two positions.
      */
-    function getHorizontalMovement(uint8 fromPos, uint8 toPos) public pure returns (uint8) {
-        return (uint8)(Math.max(fromPos & 0x7, toPos & 0x7) - Math.min(fromPos & 0x7, toPos & 0x7));
+    function getHorizontalMovement(
+        uint8 fromPos,
+        uint8 toPos
+    )
+        public
+        pure
+        returns (uint8)
+    {
+        return (uint8)(
+            Math.max(fromPos & 0x7, toPos & 0x7) - Math.min(fromPos & 0x7, toPos & 0x7)
+        );
     }
 
     /**
@@ -1173,8 +1555,17 @@ contract MoveVerification {
      *     @param toPos The ending position to which the movement is measured.
      *     @return The vertical movement between the two positions.
      */
-    function getVerticalMovement(uint8 fromPos, uint8 toPos) public pure returns (uint8) {
-        return (uint8)(Math.max(fromPos >> 3, toPos >> 3) - Math.min(fromPos >> 3, toPos >> 3));
+    function getVerticalMovement(
+        uint8 fromPos,
+        uint8 toPos
+    )
+        public
+        pure
+        returns (uint8)
+    {
+        return (uint8)(
+            Math.max(fromPos >> 3, toPos >> 3) - Math.min(fromPos >> 3, toPos >> 3)
+        );
     }
 
     /**
@@ -1186,10 +1577,19 @@ contract MoveVerification {
      *     @return A boolean indicating whether the king is under attack (check)
      * or not.
      */
-    function checkForCheck(uint256 gameState, uint32 playerState) public pure returns (bool) {
+    function checkForCheck(
+        uint256 gameState,
+        uint32 playerState
+    )
+        public
+        pure
+        returns (bool)
+    {
         uint8 kingsPosition = (uint8)(playerState >> king_pos_bit);
 
-        require(king_const == (pieceAtPosition(gameState, kingsPosition) & 0x7), "NOT KING");
+        require(
+            king_const == (pieceAtPosition(gameState, kingsPosition) & 0x7), "NOT KING"
+        );
 
         return pieceUnderAttack(gameState, kingsPosition);
     }
@@ -1211,12 +1611,18 @@ contract MoveVerification {
 
         unchecked {
             uint8 currPiece = (uint8)(gameState >> (pos * piece_bit_size)) & 0xf;
-            uint8 enemyPawn = pawn_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
-            uint8 enemyBishop = bishop_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
-            uint8 enemyKnight = knight_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
-            uint8 enemyRook = rook_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
-            uint8 enemyQueen = queen_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
-            uint8 enemyKing = king_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyPawn =
+                pawn_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyBishop =
+                bishop_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyKnight =
+                knight_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyRook =
+                rook_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyQueen =
+                queen_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
+            uint8 enemyKing =
+                king_const | ((currPiece & color_const) > 0 ? 0x0 : color_const);
 
             currPiece = 0x0;
 
@@ -1228,7 +1634,10 @@ contract MoveVerification {
             while (currPos < 0x40) {
                 currPiece = (uint8)(gameState >> (currPos * piece_bit_size)) & 0xf;
                 if (currPiece > 0) {
-                    if (currPiece == enemyRook || currPiece == enemyQueen || (firstSq && (currPiece == enemyKing))) {
+                    if (
+                        currPiece == enemyRook || currPiece == enemyQueen
+                            || (firstSq && (currPiece == enemyKing))
+                    ) {
                         return true;
                     }
                     break;
@@ -1243,7 +1652,10 @@ contract MoveVerification {
             while (currPos < pos) {
                 currPiece = (uint8)(gameState >> (currPos * piece_bit_size)) & 0xf;
                 if (currPiece > 0) {
-                    if (currPiece == enemyRook || currPiece == enemyQueen || (firstSq && (currPiece == enemyKing))) {
+                    if (
+                        currPiece == enemyRook || currPiece == enemyQueen
+                            || (firstSq && (currPiece == enemyKing))
+                    ) {
                         return true;
                     }
                     break;
@@ -1258,7 +1670,10 @@ contract MoveVerification {
             while ((pos >> 3) == (currPos >> 3)) {
                 currPiece = (uint8)(gameState >> (currPos * piece_bit_size)) & 0xf;
                 if (currPiece > 0) {
-                    if (currPiece == enemyRook || currPiece == enemyQueen || (firstSq && (currPiece == enemyKing))) {
+                    if (
+                        currPiece == enemyRook || currPiece == enemyQueen
+                            || (firstSq && (currPiece == enemyKing))
+                    ) {
                         return true;
                     }
                     break;
@@ -1273,7 +1688,10 @@ contract MoveVerification {
             while ((pos >> 3) == (currPos >> 3)) {
                 currPiece = (uint8)(gameState >> (currPos * piece_bit_size)) & 0xf;
                 if (currPiece > 0) {
-                    if (currPiece == enemyRook || currPiece == enemyQueen || (firstSq && (currPiece == enemyKing))) {
+                    if (
+                        currPiece == enemyRook || currPiece == enemyQueen
+                            || (firstSq && (currPiece == enemyKing))
+                    ) {
                         return true;
                     }
                     break;
@@ -1294,7 +1712,10 @@ contract MoveVerification {
                                 firstSq
                                     && (
                                         (currPiece == enemyKing)
-                                            || ((currPiece == enemyPawn) && ((enemyPawn & color_const) == color_const))
+                                            || (
+                                                (currPiece == enemyPawn)
+                                                    && ((enemyPawn & color_const) == color_const)
+                                            )
                                     )
                             )
                     ) return true;
@@ -1316,7 +1737,10 @@ contract MoveVerification {
                                 firstSq
                                     && (
                                         (currPiece == enemyKing)
-                                            || ((currPiece == enemyPawn) && ((enemyPawn & color_const) == color_const))
+                                            || (
+                                                (currPiece == enemyPawn)
+                                                    && ((enemyPawn & color_const) == color_const)
+                                            )
                                     )
                             )
                     ) return true;
@@ -1338,7 +1762,10 @@ contract MoveVerification {
                                 firstSq
                                     && (
                                         (currPiece == enemyKing)
-                                            || ((currPiece == enemyPawn) && ((enemyPawn & color_const) == 0x0))
+                                            || (
+                                                (currPiece == enemyPawn)
+                                                    && ((enemyPawn & color_const) == 0x0)
+                                            )
                                     )
                             )
                     ) return true;
@@ -1360,7 +1787,10 @@ contract MoveVerification {
                                 firstSq
                                     && (
                                         (currPiece == enemyKing)
-                                            || ((currPiece == enemyPawn) && ((enemyPawn & color_const) == 0x0))
+                                            || (
+                                                (currPiece == enemyPawn)
+                                                    && ((enemyPawn & color_const) == 0x0)
+                                            )
                                     )
                             )
                     ) return true;
@@ -1375,52 +1805,76 @@ contract MoveVerification {
             currPos = pos + 17;
             if (
                 (currPos < 0x40) && ((currPos & 0x7) > (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
             // 1 left 2 up
             currPos = pos + 15;
             if (
                 (currPos < 0x40) && ((currPos & 0x7) < (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
             // 2 right 1 up
             currPos = pos + 10;
             if (
                 (currPos < 0x40) && ((currPos & 0x7) > (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
             // 2 left 1 up
             currPos = pos + 6;
             if (
                 (currPos < 0x40) && ((currPos & 0x7) < (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
 
             // 1 left 2 down
             currPos = pos - 17;
             if (
                 (currPos < pos) && ((currPos & 0x7) < (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
 
             // 2 left 1 down
             currPos = pos - 10;
             if (
                 (currPos < pos) && ((currPos & 0x7) < (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
 
             // 1 right 2 down
             currPos = pos - 15;
             if (
                 (currPos < pos) && ((currPos & 0x7) > (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
             // 2 right 1 down
             currPos = pos - 6;
             if (
                 (currPos < pos) && ((currPos & 0x7) > (pos & 0x7))
-                    && (((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf) == enemyKnight)
+                    && (
+                        ((uint8)(gameState >> (currPos * piece_bit_size)) & 0xf)
+                            == enemyKnight
+                    )
             ) return true;
         }
 
@@ -1432,7 +1886,11 @@ contract MoveVerification {
      *     @param gameState current game state
      *     @return isInsufficient returns true if insufficient material
      */
-    function isStalemateViaInsufficientMaterial(uint256 gameState) public pure returns (bool) {
+    function isStalemateViaInsufficientMaterial(uint256 gameState)
+        public
+        pure
+        returns (bool)
+    {
         uint8 whiteKingCount = 0;
         uint8 blackKingCount = 0;
         uint8 otherPiecesCount = 0;
@@ -1450,7 +1908,10 @@ contract MoveVerification {
                 }
             } else if (pieceType != empty_const) {
                 otherPiecesCount++;
-                if (otherPiecesCount > 1 || (pieceType != knight_const && pieceType != bishop_const)) {
+                if (
+                    otherPiecesCount > 1
+                        || (pieceType != knight_const && pieceType != bishop_const)
+                ) {
                     return false;
                 }
             }
@@ -1470,7 +1931,15 @@ contract MoveVerification {
      *     @param toPos is the position to move a piece to.
      *     @return newGameState
      */
-    function commitMove(uint256 gameState, uint8 fromPos, uint8 toPos) public pure returns (uint256) {
+    function commitMove(
+        uint256 gameState,
+        uint8 fromPos,
+        uint8 toPos
+    )
+        public
+        pure
+        returns (uint256)
+    {
         uint8 bitpos = fromPos * piece_bit_size;
         uint8 piece = (uint8)((gameState >> bitpos) & 0xF);
         uint256 newGameState = gameState & ~(0xF << bitpos);
@@ -1501,7 +1970,15 @@ contract MoveVerification {
      *     @param piece to set, including color
      *     @return newGameState
      */
-    function setPosition(uint256 gameState, uint8 pos, uint8 piece) public pure returns (uint256 newGameState) {
+    function setPosition(
+        uint256 gameState,
+        uint8 pos,
+        uint8 piece
+    )
+        public
+        pure
+        returns (uint256 newGameState)
+    {
         uint8 bitpos;
 
         unchecked {

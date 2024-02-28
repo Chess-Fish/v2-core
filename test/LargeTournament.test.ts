@@ -264,7 +264,8 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			let data = await tournament.tournaments(tournamentNonce - 1);
 			let prizePool = data.prizePool.toString();
 
-			console.log(prizePool)
+			console.log("prize pool", prizePool)
+			console.log("game amount", gameAmount.toString())
 
 			const pool = gameAmount * 11 + prizePool;
 			const expectedPayoutPlayer0 = pool * 0.365;

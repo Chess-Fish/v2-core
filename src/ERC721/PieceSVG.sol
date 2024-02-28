@@ -21,7 +21,15 @@ import "@openzeppelin/contracts/utils/Base64.sol";
 import "./Init.sol";
 
 contract PieceSVG is Init {
-    function getPieceSymbol(bytes1 piece, uint256 x, uint256 y) external view returns (bytes memory) {
+    function getPieceSymbol(
+        bytes1 piece,
+        uint256 x,
+        uint256 y
+    )
+        external
+        view
+        returns (bytes memory)
+    {
         // Black Pawn
         if (piece == "p") {
             return abi.encodePacked(
@@ -89,8 +97,8 @@ contract PieceSVG is Init {
                 '<path d="M 34,14 L 31,17 L 14,17 L 11,14" />'
                 '<path d="M 31,17 L 31,29.5 L 14,29.5 L 14,17" style="strokeL-linecap: butt; stroke-linejoin: miter" />'
                 '<path d="M 31,29.5 L 32.5,32 L 12.5,32 L 14,29.5" />'
-                '<path d="M 11,14 L 34,14" style="fill: none; stroke: #000000; stroke-linejoin: miter" />' "</g>"
-                "</svg>"
+                '<path d="M 11,14 L 34,14" style="fill: none; stroke: #000000; stroke-linejoin: miter" />'
+                "</g>" "</svg>"
             );
         }
         // Black Knight

@@ -12,7 +12,7 @@
 
 pragma solidity ^0.8.23;
 
-import {MoveVerification} from "./MoveVerification.sol";
+import { MoveVerification } from "./MoveVerification.sol";
 
 /**
  * @title ChessFish MoveHelper Contract
@@ -50,7 +50,10 @@ contract MoveHelper {
         string[64] calldata coordinate,
         uint256[64] calldata value,
         string[13] calldata pieceSymbols
-    ) external OnlyDeployer {
+    )
+        external
+        OnlyDeployer
+    {
         for (int256 i = 0; i < 64; i++) {
             coordinates[coordinate[uint256(i)]] = value[uint256(i)];
             squareToCoordinate[value[uint256(i)]] = coordinate[uint256(i)];
@@ -164,7 +167,8 @@ contract MoveHelper {
             int256 pos = ((int256(i) + 1) * 8) - 1;
             int256 last = pos - 7;
             for (pos; pos >= last; pos--) {
-                uint8 piece = moveVerification.pieceAtPosition(gameState, uint8(uint256(pos)));
+                uint8 piece =
+                    moveVerification.pieceAtPosition(gameState, uint8(uint256(pos)));
 
                 board[j] = getLetter(piece);
 

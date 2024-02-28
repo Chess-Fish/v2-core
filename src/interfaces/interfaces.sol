@@ -13,9 +13,14 @@ interface IChessGame {
         uint256 tokenAmount,
         uint256 numberOfGames,
         uint256 timeLimit
-    ) external returns (address gameAddress);
+    )
+        external
+        returns (address gameAddress);
 
     function startGamesInTournament(address gameAddress) external;
 
-    function getGameStatus(address gameAddress) external view returns (address, address, uint256, uint256);
+    function getGameStatus(address gameAddress)
+        external
+        view
+        returns (address, address, uint256, uint256);
 }

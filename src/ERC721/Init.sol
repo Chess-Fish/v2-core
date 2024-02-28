@@ -16,7 +16,7 @@
 
 pragma solidity ^0.8.23;
 
-import {ChessGame} from "./../ChessGame.sol";
+import { ChessGame } from "./../ChessGame.sol";
 
 interface IChessFishNFT {
     function uint2str(uint256 _i) external view returns (string memory);
