@@ -492,7 +492,7 @@ contract Tournament {
                 isPlayerAuthenticatedInTournament(tournamentID, msg.sender),
                 "not authorized"
             );
-            require(!isPlayerInTournament(tournamentID, msg.sender), "already Joined");
+            require(!isPlayerInTournament(tournamentID, msg.sender), "already joined");
             require(
                 tournaments[tournamentID].isInProgress == false, "tournament in progress"
             );
@@ -505,7 +505,7 @@ contract Tournament {
             require(
                 tournaments[tournamentID].isInProgress == false, "tournament in progress"
             );
-            require(!isPlayerInTournament(tournamentID, msg.sender), "already Joined");
+            require(!isPlayerInTournament(tournamentID, msg.sender), "already joined");
         }
 
         address gameToken = tournaments[tournamentID].gameToken;

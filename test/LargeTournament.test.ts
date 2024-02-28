@@ -197,10 +197,13 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			);
 
 			await tournament.connect(otherAccount).joinTournament(tournamentNonce - 1);
+			
+			let revertTx = await tournament.connect(players[0]).joinTournament(tournamentNonce - 1);
+			await expect(revertTx).to.be.revertedWith("already Joined");
 
 			let gameAddresses = await tournament.getTournamentGameAddresses(tournamentNonce - 1);
 			expect(gameAddresses.length).to.equal(66); // 12 players
-			
+
 			await tournament.connect(otherAccount).exitTournament(tournamentNonce - 1);
 			gameAddresses = await tournament.getTournamentGameAddresses(tournamentNonce - 1);
 			expect(gameAddresses.length).to.equal(55); // 11 players
@@ -262,22 +265,20 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			const player10bal1 = await token.balanceOf(players[10].address);
 
 			let data = await tournament.tournaments(tournamentNonce - 1);
-			let prizePool = data.prizePool.toString();
+			let prizePool = ethers.BigNumber.from(data.prizePool.toString());
 
-			console.log("prize pool", prizePool)
-			console.log("game amount", gameAmount.toString())
+			const pool = gameAmount.mul(11).add(prizePool);
+			const scale = ethers.BigNumber.from(1000);
 
-			const pool = gameAmount * 11 + prizePool;
-			const expectedPayoutPlayer0 = pool * 0.365;
-			const expectedPayoutPlayer1 = pool * 0.23;
-			const expectedPayoutPlayer2 = pool * 0.135;
-			const expectedPayoutPlayer3 = pool * 0.1;
-			const expectedPayoutPlayer4 = pool * 0.05;
-			const expectedPayoutPlayer5 = pool * 0.025;
-			const expectedPayoutPlayer6 = pool * 0.025;
-			const expectedPayoutPlayer7 = pool * 0.0;
+			const expectedPayoutPlayer0 = pool.mul(365).div(scale);
+			const expectedPayoutPlayer1 = pool.mul(230).div(scale);
+			const expectedPayoutPlayer2 = pool.mul(135).div(scale);
+			const expectedPayoutPlayer3 = pool.mul(100).div(scale);
+			const expectedPayoutPlayer4 = pool.mul(50).div(scale);
+			const expectedPayoutPlayer5 = pool.mul(25).div(scale);
+			const expectedPayoutPlayer6 = pool.mul(25).div(scale);
+			const expectedPayoutPlayer7 = ethers.BigNumber.from(0); 
 
-			// winners
 			expect(player0bal1.sub(player0bal0).toString()).to.equal(expectedPayoutPlayer0.toString());
 			expect(player1bal1.sub(player1bal0).toString()).to.equal(expectedPayoutPlayer1.toString());
 			expect(player2bal1.sub(player2bal0).toString()).to.equal(expectedPayoutPlayer2.toString());
@@ -286,7 +287,7 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			expect(player5bal1.sub(player5bal0).toString()).to.equal(expectedPayoutPlayer5.toString());
 			expect(player6bal1.sub(player6bal0).toString()).to.equal(expectedPayoutPlayer6.toString());
 
-			// payout zero
+			// Payout zero
 			expect(player7bal1.sub(player7bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
 			expect(player8bal1.sub(player8bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
 			expect(player9bal1.sub(player9bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
