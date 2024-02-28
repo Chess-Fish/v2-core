@@ -198,8 +198,8 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 
 			await tournament.connect(otherAccount).joinTournament(tournamentNonce - 1);
 			
-			let revertTx = await tournament.connect(players[0]).joinTournament(tournamentNonce - 1);
-			await expect(revertTx).to.be.revertedWith("already Joined");
+			let revertTx = tournament.connect(players[0]).joinTournament(tournamentNonce - 1);
+			await expect(revertTx).to.be.revertedWith("already joined");
 
 			let gameAddresses = await tournament.getTournamentGameAddresses(tournamentNonce - 1);
 			expect(gameAddresses.length).to.equal(66); // 12 players
