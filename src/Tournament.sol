@@ -512,7 +512,6 @@ contract Tournament {
             cfshNFT.awardWinner(winner, gameAddresses[i]);
         }
 
-
         if (payoutToken != address(0)) {
             uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
             uint256[] memory payoutProfile;

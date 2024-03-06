@@ -22,6 +22,8 @@ import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 import "./MoveVerification.sol";
 import "./ChessGame.sol";
 
+import "hardhat/console.sol";
+
 /**
  * @title ChessFish GaslessGame Contract
  * @author ChessFish
@@ -122,6 +124,9 @@ contract GaslessGame is Initializable, EIP712 {
         view
         returns (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves)
     {
+        console.log("gasless game address");
+        console.log(gameAddress);
+
         SignedDelegation memory signedDelegation = decodeSignedDelegation(rawSignedDelegation);
         verifyDelegation(signedDelegation);
 
@@ -151,6 +156,8 @@ contract GaslessGame is Initializable, EIP712 {
                 moves = combinedMoves;
             }
         }
+        console.log("gasless game address 1");
+        console.log(gameAddress);
 
         (outcome, gameState,,) = moveVerification.checkGameFromStart(moves);
         return (gameAddress, outcome, gameState, moves);
@@ -236,6 +243,9 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
+        console.log("Verifier");
+        console.log(signer);
+        console.log(ECDSA.recover(digest, moveData.signature));
         require(ECDSA.recover(digest, moveData.signature) == signer, "299 invalid signature");
     }
 

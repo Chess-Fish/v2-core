@@ -16,10 +16,11 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-// import "./interfaces/interfaces.sol";
 import "./MoveHelper.sol";
 import "./GaslessGame.sol";
 import "./ERC721/ChessFishNFT.sol";
+
+import "hardhat/console.sol";
 
 /**
  * @title ChessFish GameData Contract
@@ -298,10 +299,7 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Generates unique hash for a game game
     /// @dev using keccak256 to generate a hash which is converted to an address
     /// @return gameAddress
-    function getgameAddress(GameData memory game) private view returns (address) {
-        require(game.player0 != game.player1, "players must be different");
-        require(game.numberOfGames % 2 == 1, "number of games must be odd");
-
+    function getGameAddress(GameData memory game) private view returns (address) {
         uint256 blockNumber = block.number;
         uint256 chainId = getChainId();
         bytes32 blockHash = blockhash(blockNumber);
@@ -325,6 +323,33 @@ contract ChessGame is Initializable, MoveHelper {
         return gameAddress;
     }
 
+    /// @notice Generates unique hash for a game game
+    /// @dev using keccak256 to generate a hash which is converted to an address
+    /// @return gameAddress
+    function getGaslessGameAddress(GameData memory game) private view returns (address) {
+        uint256 chainId = getChainId();
+
+        bytes32 salt = keccak256(
+            abi.encodePacked(
+                game.player0,
+                game.player1,
+                game.gameToken,
+                game.tokenAmount,
+                game.timeLimit,
+                game.numberOfGames,
+                chainId
+            )
+        );
+
+        address gameAddress = address(uint160(bytes20(salt)));
+
+        while (gameData[gameAddress].player0 != address(0)) {
+            gameAddress = address(uint160(gameAddress) + 1);
+        }
+
+        return gameAddress;
+    }
+
     /* 
     //// GASLESS GAME FUNCTIONS ////
     */
@@ -338,10 +363,32 @@ contract ChessGame is Initializable, MoveHelper {
         (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
             gaslessGame.verifyGameViewDelegatedSingle(rawSignedDelegation, rawMoveData);
 
+        if (gameAddress == address(0)) {
+            // generate game address
+            GaslessGame.SignedDelegation memory delegation0 =
+                abi.decode(rawSignedDelegation, (GaslessGame.SignedDelegation));
+
+            GameData memory gameParams = GameData(
+                delegation0.delegation.delegatorAddress, // player0
+                address(0), // player1
+                address(0), // gameToken
+                0, // tokenAmount
+                1, // numberOfGames
+                true, // hasPlayerAccepted
+                0, // timeLimit
+                block.timestamp, // timeLastMove
+                0, // timePlayer0
+                0, // timePlayer1
+                false, // isTournament
+                true // isComplete
+            );
+
+            gameAddress = getGaslessGameAddress(gameParams);
+            gameData[gameAddress] = gameParams;
+            hasBeenPaid[gameAddress] = true;
+        }
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
-
-        // add a require here?
 
         if (outcome != 0) {
             updateGameState(gameAddress, false, outcome);
@@ -388,7 +435,8 @@ contract ChessGame is Initializable, MoveHelper {
                 false, // isTournament
                 true // isComplete
             );
-            gameAddress = getgameAddress(gameParams);
+            gameAddress = getGaslessGameAddress(gameParams);
+            gameData[gameAddress] = gameParams;
             hasBeenPaid[gameAddress] = true;
         }
         uint256 gameID = gameIDs[gameAddress].length;
@@ -447,14 +495,13 @@ contract ChessGame is Initializable, MoveHelper {
             numberOfGames,
             true, // hasPlayerAccepted
             timeLimit,
-            0, // timeLastMove => setting to zero since tournament hasn't
-                // started
+            0, // timeLastMove
             0, // timePlayer0
             0, // timePlayer1
             true, // isTournament
             false // isComplete
         );
-        gameAddress = getgameAddress(game);
+        gameAddress = getGameAddress(game);
 
         gameData[gameAddress] = game;
 
@@ -507,7 +554,7 @@ contract ChessGame is Initializable, MoveHelper {
             require(gameAmount == 0, "not zero");
         }
 
-        gameAddress = getgameAddress(game);
+        gameAddress = getGameAddress(game);
 
         require(gameData[gameAddress].player0 == address(0), "already initialized");
 
@@ -726,8 +773,10 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 gameID = gameIDs[gameAddress].length;
         uint16[] memory moves = gameMoves[gameAddress][gameID].moves;
 
+        require(gameAddress != address(0), "gameAddress cannot be 0");
+
         if (gameAddress != address(0)) {
-            require(gameData[gameAddress].hasPlayerAccepted, "player has not accepted");
+            require(gameData[gameAddress].hasPlayerAccepted == true, "player did not accept");
         }
 
         // fails on invalid move

@@ -952,6 +952,7 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">36×</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -1640,7 +1641,6 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">// SPDX-License-Identifier: MIT
 &nbsp;
 /* 
@@ -1659,9 +1659,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 &nbsp;
-import "./interfaces/interfaces.sol";
+// import "./interfaces/interfaces.sol";
 import "./MoveHelper.sol";
 import "./GaslessGame.sol";
+import "./ERC721/ChessFishNFT.sol";
 &nbsp;
 /**
  * @title ChessFish GameData Contract
@@ -1745,7 +1746,7 @@ contract ChessGame is Initializable, MoveHelper {
     address public DividendSplitter;
 &nbsp;
     /// @dev ChessFish Winner NFT contract
-    address public ChessFishNFT;
+    ChessFishNFT public cfshNFT;
 &nbsp;
     /// @dev Gasless Game Helper Contract
     GaslessGame public gaslessGame;
@@ -1766,7 +1767,7 @@ contract ChessGame is Initializable, MoveHelper {
 &nbsp;
         TournamentHandler = _tournamentHandler;
         DividendSplitter = _dividendSplitter;
-        ChessFishNFT = _chessFishNFT;
+        cfshNFT = ChessFishNFT(_chessFishNFT);
     }
 &nbsp;
     /* 
@@ -2089,8 +2090,7 @@ contract ChessGame is Initializable, MoveHelper {
             numberOfGames,
             true, // hasPlayerAccepted
             timeLimit,
-            0, // timeLastMove =&gt; setting to zero since tournament hasn't
-                // started
+            0, // timeLastMove
             0, // timePlayer0
             0, // timePlayer1
             true, // isTournament
@@ -2143,16 +2143,16 @@ contract ChessGame is Initializable, MoveHelper {
             false // isComplete
         );
 &nbsp;
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (gameToken != address(0)) {
-            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), gameAmount);
+        if (gameToken != address(0)) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>    IERC20(gameToken).safeTransferFrom(msg.sender, address(this), gameAmount);
         } else {
-<span class="cstat-no" title="statement not covered" >            require(gameAmount == 0, "not zero")</span>;
-        }
+            require(gameAmount == 0, "not zero");
+        }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
         gameAddress = getgameAddress(game);
 &nbsp;
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(gameData[gameAddress].player0 == address(0), "already initialized");
-&nbsp;
+        require(gameData[gameAddress].player0 == address(0), "already initialized");
+<span class="missing-if-branch" title="else path not taken" >E</span>
         gameData[gameAddress] = game;
 &nbsp;
         GameStatus memory status = GameStatus(false, 0, 0);
@@ -2173,12 +2173,12 @@ contract ChessGame is Initializable, MoveHelper {
     function acceptGame(address gameAddress) external {
         address player1 = gameData[gameAddress].player1;
 &nbsp;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (player1 == address(0)) {
-            gameData[gameAddress].player1 = msg.sender;
-<span class="cstat-no" title="statement not covered" >            userGames[msg.sender].push(gameAddress)</span>;
-        } else {
-            <span class="missing-if-branch" title="else path not taken" >E</span>require(gameData[gameAddress].player1 == msg.sender, "msg.sender != player1");
-        }
+        if (player1 == address(0)) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    gameData[gameAddress].player1 = msg.sender;
+            userGames[msg.sender].push(gameAddress);
+        } el<span class="cstat-no" title="statement not covered" >se {</span>
+            require(gameData[gameAddress].player1 == msg.sender, "msg.sender != player1");
+        }<span class="missing-if-branch" title="else path not taken" >E</span>
 &nbsp;
         address gameToken = gameData[gameAddress].gameToken;
         uint256 game = gameData[gameAddress].tokenAmount;
@@ -2186,8 +2186,8 @@ contract ChessGame is Initializable, MoveHelper {
         gameData[gameAddress].hasPlayerAccepted = true;
         gameData[gameAddress].timeLastMove = block.timestamp;
 &nbsp;
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (gameToken != address(0)) {
-            IERC20(gameToken).safeTransferFrom(msg.sender, address(this), game);
+        if (gameToken != address(0)) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>    IERC20(gameToken).safeTransferFrom(msg.sender, address(this), game);
         }
 &nbsp;
         emit acceptGameEvent(gameAddress, msg.sender);
@@ -2195,27 +2195,27 @@ contract ChessGame is Initializable, MoveHelper {
 &nbsp;
     /// @notice Plays move on the board
     /// @return bool true if endGame, adds extra game if stalemate
-<span class="fstat-no" title="function not covered" >    function playMove(address gameAddress, uint16 move) external returns (bool) {</span>
-<span class="cstat-no" title="statement not covered" >        require(getPlayerMove(gameAddress) == msg.sender, "Not your turn")</span>;
-<span class="cstat-no" title="statement not covered" >        require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames, "Game ended 614")</span>;
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].timeLastMove != 0, "Tournament not started yet")</span>;
-&nbsp;
+    function playMove(address gameAddress, uint16 move) external returns (bool) {
+<span class="fstat-no" title="function not covered" >        require(getPlayerMove(gameAddress) == msg.sender, "Not your turn");</span>
+<span class="cstat-no" title="statement not covered" >        require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddres</span>s].numberOfGames, "Game ended 614");
+<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].timeLastMove != 0, "Tournament not started yet");</span>
+<span class="cstat-no" title="statement not covered" ></span>
         /// @dev checking if time ran out
-<span class="cstat-no" title="statement not covered" >        updateTime(gameAddress, msg.sender)</span>;
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        bool isEndgameTime = updateGameStateTime(gameAddress);</span>
+        updateTime(gameAddress, msg.sender);
+<span class="cstat-no" title="statement not covered" ></span>
+        bool isEndgameTime = updateGameStateTime(gameAddress);
 <span class="cstat-no" title="statement not covered" >        if (isEndgameTime) {</span>
 <span class="cstat-no" title="statement not covered" >            return true;</span>
-        }
+        }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        uint256 gameID = gameIDs[gameAddress].length;</span>
-<span class="cstat-no" title="statement not covered" >        uint256 size = gameMoves[gameAddress][gameID].moves.length;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        uint16[] memory moves = new uint16[](size + 1);</span>
-&nbsp;
+        uint256 gameID = gameIDs[gameAddress].length;
+<span class="cstat-no" title="statement not covered" >        uint256 size = gameMoves[gameAddress][gameID]</span>.moves.length;
+<span class="cstat-no" title="statement not covered" ></span>
+        uint16[] memory moves = new uint16[](size + 1);
+<span class="cstat-no" title="statement not covered" ></span>
         /// @dev copy array
-<span class="cstat-no" title="statement not covered" >        for (uint256 i = 0; i &lt; size;) {</span>
-            moves[i] = gameMoves[gameAddress][gameID].moves[i];
+        for (uint256 i = 0; i &lt; size;) {
+<span class="cstat-no" title="statement not covered" >            moves[i] = gameMoves[gameAddress][gameID].moves[i];</span>
             unchecked {
                 i++;
             }
@@ -2228,23 +2228,23 @@ contract ChessGame is Initializable, MoveHelper {
         gameMoves[gameAddress][gameID].moves = moves;
 &nbsp;
         /// @dev fails on invalid move
-<span class="cstat-no" title="statement not covered" >        bool isEndgame = updateGameState(gameAddress, true, 0);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        emit playMoveEvent(gameAddress, move);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        return isEndgame;</span>
-    }
+        bool isEndgame = updateGameState(gameAddress, true, 0);
+<span class="cstat-no" title="statement not covered" ></span>
+        emit playMoveEvent(gameAddress, move);
+<span class="cstat-no" title="statement not covered" ></span>
+        return isEndgame;
+    }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
     /// @notice Handles payout of game
     /// @dev smallest game amount is 18 wei before fees =&gt; 0
     function payoutGame(address gameAddress) external returns (bool) {
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(
-            gameData[gameAddress].player0 == msg.sender || <span class="branch-1 cbranch-no" title="branch not covered" >gameData[gameAddress].player1 == msg.sender</span>, "not listed"
-        );
-        <span class="missing-if-branch" title="else path not taken" >E</span>require(gameData[gameAddress].isComplete == true, "game not finished");
+        require(
+        <span class="missing-if-branch" title="else path not taken" >E</span>    gameData[gameAddress].player0 == msg.sender || gameData[gameAddress].player1 == msg.sender, "not listed"
+        );<span class="branch-1 cbranch-no" title="branch not covered" ></span>
+        require(gameData[gameAddress].isComplete == true, "game not finished");
         <span class="missing-if-branch" title="else path not taken" >E</span>require(gameData[gameAddress].isTournament == false, "tournament payment handled by tournament contract");
         <span class="missing-if-branch" title="else path not taken" >E</span>require(hasBeenPaid[gameAddress] == false, "already paid");
-&nbsp;
+<span class="missing-if-branch" title="else path not taken" >E</span>
         hasBeenPaid[gameAddress] = true;
 &nbsp;
         address winner;
@@ -2252,13 +2252,13 @@ contract ChessGame is Initializable, MoveHelper {
         /// @dev if there was a stalemate and now both players have the same
         /// score
         /// @dev add another game to play, and return payout successful as false
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (gameStatus[gameAddress].winsPlayer0 == gameStatus[gameAddress].winsPlayer1) {
-            gameData[gameAddress].numberOfGames++;
-<span class="cstat-no" title="statement not covered" >            return false;</span>
-        }
+        if (gameStatus[gameAddress].winsPlayer0 == gameStatus[gameAddress].winsPlayer1) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    gameData[gameAddress].numberOfGames++;
+            return false;
+        }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (gameStatus[gameAddress].winsPlayer0 &gt; gameStatus[gameAddress].winsPlayer1) {
-            winner = gameData[gameAddress].player0;
+        if (gameStatus[gameAddress].winsPlayer0 &gt; gameStatus[gameAddress].winsPlayer1) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    winner = gameData[gameAddress].player0;
         } else {
             winner = gameData[gameAddress].player1;
         }
@@ -2267,12 +2267,12 @@ contract ChessGame is Initializable, MoveHelper {
         uint256 gameAmount = gameData[gameAddress].tokenAmount * 2;
         uint256 prize = gamePrizes[gameAddress];
 &nbsp;
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (gameToken != address(0)) {
-            gameData[gameAddress].tokenAmount = 0;
+        if (gameToken != address(0)) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>    gameData[gameAddress].tokenAmount = 0;
             gamePrizes[gameAddress] = 0;
 &nbsp;
             /// @dev Mint NFT for Winner
-            IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
+            cfshNFT.awardWinner(winner, gameAddress);
 &nbsp;
             /// @dev 5% shareholder fee
             uint256 shareHolderFee = ((gameAmount + prize) * protocolFee) / 10_000;
@@ -2290,76 +2290,76 @@ contract ChessGame is Initializable, MoveHelper {
     /// @notice Cancel game
     /// @dev cancel game only if other player has not yet accepted
     /// @dev &amp;&amp; only if msg.sender is one of the players
-<span class="fstat-no" title="function not covered" >    function cancelGame(address gameAddress) external {</span>
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].hasPlayerAccepted == false, "in progress")</span>;
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].player0 == msg.sender, "not listed")</span>;
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].isTournament == false, "cannot cancel tournament game")</span>;
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        address token = gameData[gameAddress].gameToken;</span>
-<span class="cstat-no" title="statement not covered" >        uint256 gameAmount = gameData[gameAddress].tokenAmount;</span>
-&nbsp;
+    function cancelGame(address gameAddress) external {
+<span class="fstat-no" title="function not covered" >        require(gameData[gameAddress].hasPlayerAccepted == false, "in progress");</span>
+<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].player0 == msg.sender, "not listed");</span>
+<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].isTournament == false, "cannot cance</span>l tournament game");
+<span class="cstat-no" title="statement not covered" ></span>
+        address token = gameData[gameAddress].gameToken;
+<span class="cstat-no" title="statement not covered" >        uint256 gameAmount = gameData[gameAddress].token</span>Amount;
+<span class="cstat-no" title="statement not covered" ></span>
         gameData[gameAddress].tokenAmount = 0;
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        IERC20(token).safeTransfer(msg.sender, gameAmount)</span>;
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        emit cancelGameEvent(gameAddress, msg.sender);</span>
-    }
+        IERC20(token).safeTransfer(msg.sender, gameAmount);
+<span class="cstat-no" title="statement not covered" ></span>
+        emit cancelGameEvent(gameAddress, msg.sender);
+    }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
     /// @notice Updates the state of the game if player time is &lt; 0
     /// @dev check when called with timeout w tournament
     /// @dev set to public so that anyone can update time if player disappears
     /// @return wasUpdated returns true if status was updated
-<span class="fstat-no" title="function not covered" >    function updateGameStateTime(address gameAddress) public returns (bool) {</span>
-<span class="cstat-no" title="statement not covered" >        require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames, "Game ended 757")</span>;
-<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].timeLastMove != 0, "tournament match not started yet")</span>;
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        (int256 timePlayer0, int256 timePlayer1) = checkTimeRemaining(gameAddress);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        uint256 addedWins = gameData[gameAddress].numberOfGames - getNumberOfGamesPlayed(gameAddress) + 1;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        if (timePlayer0 &lt; 0) {</span>
-            gameStatus[gameAddress].winsPlayer1 += addedWins;
+    function updateGameStateTime(address gameAddress) public returns (bool) {
+<span class="fstat-no" title="function not covered" >        require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames, "Game ended 757");</span>
+<span class="cstat-no" title="statement not covered" >        require(gameData[gameAddress].timeLastMove != 0, "tournament match not started yet");</span>
+<span class="cstat-no" title="statement not covered" ></span>
+        (int256 timePlayer0, int256 timePlayer1) = checkTimeRemaining(gameAddress);
+<span class="cstat-no" title="statement not covered" ></span>
+        uint256 addedWins = gameData[gameAddress].numberOfGames - getNumberOfGamesPlayed(gameAddress) + 1;
+<span class="cstat-no" title="statement not covered" ></span>
+        if (timePlayer0 &lt; 0) {
+<span class="cstat-no" title="statement not covered" >            gameStatus[gameAddress].winsPlayer1 += addedWins;</span>
             gameData[gameAddress].isComplete = true;
-<span class="cstat-no" title="statement not covered" >            return true;</span>
-        }
-<span class="cstat-no" title="statement not covered" >        if (timePlayer1 &lt; 0) {</span>
-            gameStatus[gameAddress].winsPlayer0 += addedWins;
+            return true;
+        }<span class="cstat-no" title="statement not covered" ></span>
+        if (timePlayer1 &lt; 0) {
+<span class="cstat-no" title="statement not covered" >            gameStatus[gameAddress].winsPlayer0 += addedWins;</span>
             gameData[gameAddress].isComplete = true;
-<span class="cstat-no" title="statement not covered" >            return true;</span>
-        }
-<span class="cstat-no" title="statement not covered" >        return false;</span>
-    }
+            return true;
+        }<span class="cstat-no" title="statement not covered" ></span>
+        return false;
+    }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
     /// @notice Update game state if insufficient material
     /// @dev set to public so that anyone can update
     /// @return wasUpdated returns true if status was updated
-<span class="fstat-no" title="function not covered" >    function updateGameStateInsufficientMaterial(address gameAddress, uint256 gameState) public returns (bool) {</span>
-        /*         
+    function updateGameStateInsufficientMaterial(address gameAddress, uint256 gameState) public returns (bool) {
+<span class="fstat-no" title="function not covered" >        /*         </span>
         require(
         getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames,
             "Game ended 790"
         ); */
 &nbsp;
-<span class="cstat-no" title="statement not covered" >        bool isInsufficientMaterial = moveVerification.isStalemateViaInsufficientMaterial(gameState);</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        if (isInsufficientMaterial) {</span>
-            gameStatus[gameAddress].winsPlayer0 += 1;
+        bool isInsufficientMaterial = moveVerification.isStalemateViaInsufficientMaterial(gameState);
+<span class="cstat-no" title="statement not covered" ></span>
+        if (isInsufficientMaterial) {
+<span class="cstat-no" title="statement not covered" >            gameStatus[gameAddress].winsPlayer0 += 1;</span>
             gameStatus[gameAddress].winsPlayer1 += 1;
             gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
-<span class="cstat-no" title="statement not covered" >            gameIDs[gameAddress].push(gameIDs[gameAddress].length)</span>;
-            gameData[gameAddress].numberOfGames += 1;
-<span class="cstat-no" title="statement not covered" >            return true;</span>
-        } else {
-<span class="cstat-no" title="statement not covered" >            return false;</span>
-        }
+            gameIDs[gameAddress].push(gameIDs[gameAddress].length);
+<span class="cstat-no" title="statement not covered" >            gameData[gameAddress].numberOfGames += 1;</span>
+            return true;
+        } el<span class="cstat-no" title="statement not covered" >se {</span>
+            return false;
+        }<span class="cstat-no" title="statement not covered" ></span>
     }
 &nbsp;
     /// @notice Deposits prize to game address
     /// @dev used to deposit prizes to game
-<span class="fstat-no" title="function not covered" >    function depositToGame(address gameAddress, uint256 amount) external {</span>
-<span class="cstat-no" title="statement not covered" >        require(!gameData[gameAddress].isComplete, "game completed")</span>;
-<span class="cstat-no" title="statement not covered" >        IERC20(gameData[gameAddress].gameToken).safeTransferFrom(msg.sender, address(this), amount)</span>;
-        gamePrizes[gameAddress] += amount;
+    function depositToGame(address gameAddress, uint256 amount) external {
+<span class="fstat-no" title="function not covered" >        require(!gameData[gameAddress].isComplete, "game completed");</span>
+<span class="cstat-no" title="statement not covered" >        IERC20(gameData[gameAddress].gameToken).safeTransferFrom(msg</span>.sender, address(this), amount);
+<span class="cstat-no" title="statement not covered" >        gamePrizes[gameAddress] += amount;</span>
     }
 &nbsp;
     /// @notice Checks the moves of the game and updates state if neccessary
@@ -2373,24 +2373,24 @@ contract ChessGame is Initializable, MoveHelper {
         }
 &nbsp;
         // fails on invalid move
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (checkMoves) {
-<span class="cstat-no" title="statement not covered" >            require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames, "Game ended 837")</span>;
-            (outcome,,,) = moveVerification.checkGameFromStart(moves);
+        if (checkMoves) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    require(getNumberOfGamesPlayed(gameAddress) &lt;= gameData[gameAddress].numberOfGames, "Game ended 837");
+<span class="cstat-no" title="statement not covered" >            (outcome,,,) = moveVerification.checkGameFromStart(moves);</span>
         }
 &nbsp;
         // Inconclusive Outcome
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (outcome == 0) {
-<span class="cstat-no" title="statement not covered" >            return false;</span>
-        }
+        if (outcome == 0) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    return false;
+        }<span class="cstat-no" title="statement not covered" ></span>
         // Stalemate
-        <span class="missing-if-branch" title="if path not taken" >I</span>if (outcome == 1) {
-            gameStatus[gameAddress].winsPlayer0 += 1;
+        if (outcome == 1) {
+        <span class="missing-if-branch" title="if path not taken" >I</span>    gameStatus[gameAddress].winsPlayer0 += 1;
             gameStatus[gameAddress].winsPlayer1 += 1;
             gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
-<span class="cstat-no" title="statement not covered" >            gameIDs[gameAddress].push(gameIDs[gameAddress].length)</span>;
-            gameData[gameAddress].numberOfGames += 1;
-<span class="cstat-no" title="statement not covered" >            return true;</span>
-        }
+            gameIDs[gameAddress].push(gameIDs[gameAddress].length);
+<span class="cstat-no" title="statement not covered" >            gameData[gameAddress].numberOfGames += 1;</span>
+            return true;
+        }<span class="cstat-no" title="statement not covered" ></span>
         // Checkmate White
         if (outcome == 2) {
             if (isPlayerWhite(gameAddress, gameData[gameAddress].player0)) {
@@ -2406,31 +2406,31 @@ contract ChessGame is Initializable, MoveHelper {
             return true;
         }
         // Checkmate Black
-        <span class="missing-if-branch" title="else path not taken" >E</span>if (outcome == 3) {
-            <span class="missing-if-branch" title="if path not taken" >I</span>if (isPlayerWhite(gameAddress, gameData[gameAddress].player0)) {
-                gameStatus[gameAddress].winsPlayer1 += 1;
+        if (outcome == 3) {
+        <span class="missing-if-branch" title="else path not taken" >E</span>    if (isPlayerWhite(gameAddress, gameData[gameAddress].player0)) {
+            <span class="missing-if-branch" title="if path not taken" >I</span>    gameStatus[gameAddress].winsPlayer1 += 1;
             } else {
                 gameStatus[gameAddress].winsPlayer0 += 1;
             }
             gameStatus[gameAddress].isPlayer0White = !gameStatus[gameAddress].isPlayer0White;
             gameIDs[gameAddress].push(gameIDs[gameAddress].length);
-            <span class="missing-if-branch" title="else path not taken" >E</span>if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
-                gameData[gameAddress].isComplete = true;
+            if (gameIDs[gameAddress].length == gameData[gameAddress].numberOfGames) {
+            <span class="missing-if-branch" title="else path not taken" >E</span>    gameData[gameAddress].isComplete = true;
             }
             return true;
         }
-<span class="cstat-no" title="statement not covered" >        return false;</span>
-    }
+        return false;
+    }<span class="cstat-no" title="statement not covered" ></span>
 &nbsp;
     /// @notice Updates game time
-<span class="fstat-no" title="function not covered" >    function updateTime(address gameAddress, address player) private {</span>
-<span class="cstat-no" title="statement not covered" >        bool isPlayer0 = gameData[gameAddress].player0 == player;</span>
+    function updateTime(address gameAddress, address player) private {
+<span class="fstat-no" title="function not covered" >        bool isPlayer0 = gameData[gameAddress].player0 == player;</span>
 <span class="cstat-no" title="statement not covered" >        uint256 startTime = gameData[gameAddress].timeLastMove;</span>
 <span class="cstat-no" title="statement not covered" >        uint256 currentTime = block.timestamp;</span>
-<span class="cstat-no" title="statement not covered" >        uint256 dTime = currentTime - startTime;</span>
-&nbsp;
-<span class="cstat-no" title="statement not covered" >        if (isPlayer0) {</span>
-            gameData[gameAddress].timePlayer0 += dTime;
+<span class="cstat-no" title="statement not covered" >        uint256 dTime = currentTime - startTim</span>e;
+<span class="cstat-no" title="statement not covered" ></span>
+        if (isPlayer0) {
+<span class="cstat-no" title="statement not covered" >            gameData[gameAddress].timePlayer0 += dTime;</span>
             gameData[gameAddress].timeLastMove = currentTime; // Update the
                 // start time for the next turn
         } else {
@@ -2446,7 +2446,7 @@ contract ChessGame is Initializable, MoveHelper {
 </div><!-- /wrapper -->
 <div class='footer quiet pad2 space-top1 center small'>
   Code coverage
-  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Fri Mar 01 2024 10:33:21 GMT+0300 (Moscow Standard Time)
+  generated by <a href="http://istanbul-js.org/" target="_blank">istanbul</a> at Wed Mar 06 2024 15:46:22 GMT+0300 (Moscow Standard Time)
 </div>
 </div>
 <script src="../prettify.js"></script>

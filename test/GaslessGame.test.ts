@@ -109,7 +109,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 	}
 
 	describe("Gasless Game Verification Unit Tests", function () {
-		it("Should play game", async function () {
+		it("Should play game 1", async function () {
 			const {
 				signer0,
 				signer1,
@@ -139,10 +139,6 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 			const signedDelegationData0 = await gaslessGame.encodeSignedDelegation(message0, signature0);
 
-			// Testing individual delegation
-			// Internal
-			// await gaslessGame.verifyDelegation([message0 ,signature0]);
-
 			// ON THE FRONT END user 1
 			// 1) Generate random public private key pair
 			const entropy1 = generateRandomHash();
@@ -164,11 +160,11 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 			const moves = ["e2e4", "f7f6", "d2d4", "g7g5", "d1h5"]; // reversed fool's mate
 
-			for (let game = 0; game < 1; game++) {
-				let messageArray: any[] = [];
-				let signatureArray: any[] = [];
-				const hex_move_array: number[] = [];
+			let messageArray: any[] = [];
+			let signatureArray: any[] = [];
+			const hex_move_array: number[] = [];
 
+			for (let game = 0; game < 1; game++) {
 				for (let i = 0; i < moves.length; i++) {
 					const player = i % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
 
@@ -195,15 +191,20 @@ describe("ChessFish Chess Game Unit Tests", function () {
 						hex_move_array
 					);
 
+					console.log(hex_move_array);
+
 					signatureArray.push(signature);
 					messageArray.push(gaslessMoveData);
+
+					console.log("len", messageArray.length);
 				}
 				const delegations = [signedDelegationData0, signedDelegationData1];
 
 				const lastTwoMoves = messageArray.slice(-2);
 
-				await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
-				await chessGame.verifyGameUpdateStateDelegated(delegations, lastTwoMoves);
+				console.log(signer0.address, delegatedSigner0.address, signer1.address, delegatedSigner1.address);
+				// await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
+				await chessGame.verifyGameUpdateStateDelegated(delegations.reverse(), lastTwoMoves);
 			}
 		});
 
@@ -306,6 +307,6 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			const lastMove = messageArray[messageArray.length - 1];
 			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData0, lastMove);
 			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData0, lastMove);
-		});
+		}); 
 	});
 });
