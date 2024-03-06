@@ -16,9 +16,10 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/proxy/utils/Initializable.sol";
 
-import "./interfaces/interfaces.sol";
+// import "./interfaces/interfaces.sol";
 import "./MoveHelper.sol";
 import "./GaslessGame.sol";
+import "./ERC721/ChessFishNFT.sol";
 
 /**
  * @title ChessFish GameData Contract
@@ -102,7 +103,7 @@ contract ChessGame is Initializable, MoveHelper {
     address public DividendSplitter;
 
     /// @dev ChessFish Winner NFT contract
-    address public ChessFishNFT;
+    ChessFishNFT public cfshNFT;
 
     /// @dev Gasless Game Helper Contract
     GaslessGame public gaslessGame;
@@ -123,7 +124,7 @@ contract ChessGame is Initializable, MoveHelper {
 
         TournamentHandler = _tournamentHandler;
         DividendSplitter = _dividendSplitter;
-        ChessFishNFT = _chessFishNFT;
+        cfshNFT = ChessFishNFT(_chessFishNFT);
     }
 
     /* 
@@ -629,7 +630,7 @@ contract ChessGame is Initializable, MoveHelper {
             gamePrizes[gameAddress] = 0;
 
             /// @dev Mint NFT for Winner
-            IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddress);
+            cfshNFT.awardWinner(winner, gameAddress);
 
             /// @dev 5% shareholder fee
             uint256 shareHolderFee = ((gameAmount + prize) * protocolFee) / 10_000;

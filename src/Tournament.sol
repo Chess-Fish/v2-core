@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 import "./ChessGame.sol";
+import "./ERC721/ChessFishNFT.sol";
 
 /**
  * @title ChessFish Tournament Contract
@@ -78,7 +79,7 @@ contract Tournament {
     address deployer;
     ChessGame public chessGame;
     address public PaymentSplitter;
-    address public ChessFishNFT;
+    ChessFishNFT public cfshNFT;
 
     constructor() {
         deployer = msg.sender;
@@ -97,14 +98,14 @@ contract Tournament {
         _;
     }
 
-    function initialize(address _chessGame, address _paymentSplitter, address _nft)
+    function initialize(address _chessGame, address _paymentSplitter, address _chessFishNFT)
         public
         onlyDeployer
         notInitialized
     {
         chessGame = ChessGame(_chessGame);
         PaymentSplitter = _paymentSplitter;
-        ChessFishNFT = _nft;
+        cfshNFT = ChessFishNFT(_chessFishNFT);
     }
     /* 
     //// VIEW FUNCTIONS ////
@@ -508,8 +509,9 @@ contract Tournament {
         for (uint256 i = 0; i < gameAddresses.length; i++) {
             (address player0, address player1, uint256 wins0, uint256 wins1) = chessGame.getGameStatus(gameAddresses[i]);
             address winner = wins0 > wins1 ? player0 : player1;
-            IChessFishNFT(ChessFishNFT).awardWinner(winner, gameAddresses[i]);
+            cfshNFT.awardWinner(winner, gameAddresses[i]);
         }
+
 
         if (payoutToken != address(0)) {
             uint256 numberOfPlayers = tournaments[tournamentID].joinedPlayers.length;
