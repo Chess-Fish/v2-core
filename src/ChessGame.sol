@@ -363,30 +363,8 @@ contract ChessGame is Initializable, MoveHelper {
         (address gameAddress, uint8 outcome, uint256 gameState, uint16[] memory moves) =
             gaslessGame.verifyGameViewDelegatedSingle(rawSignedDelegation, rawMoveData);
 
-        if (gameAddress == address(0)) {
-            // generate game address
-            GaslessGame.SignedDelegation memory delegation0 =
-                abi.decode(rawSignedDelegation, (GaslessGame.SignedDelegation));
+        require(gameAddress != address(0), "GA=0");
 
-            GameData memory gameParams = GameData(
-                delegation0.delegation.delegatorAddress, // player0
-                address(0), // player1
-                address(0), // gameToken
-                0, // tokenAmount
-                1, // numberOfGames
-                true, // hasPlayerAccepted
-                0, // timeLimit
-                block.timestamp, // timeLastMove
-                0, // timePlayer0
-                0, // timePlayer1
-                false, // isTournament
-                true // isComplete
-            );
-
-            gameAddress = getGaslessGameAddress(gameParams);
-            gameData[gameAddress] = gameParams;
-            hasBeenPaid[gameAddress] = true;
-        }
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
 

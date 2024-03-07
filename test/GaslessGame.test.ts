@@ -208,7 +208,7 @@ describe("ChessFish Chess Game Unit Tests", function () {
 			}
 		});
 
-		it("Should play game", async function () {
+		it("Should test verifyGameUpdateStateDelegatedSingle", async function () {
 			const {
 				signer0,
 				signer1,
@@ -304,9 +304,24 @@ describe("ChessFish Chess Game Unit Tests", function () {
 				await gaslessGame.verifyGameViewDelegated(delegations, secondTolastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, secondTolastTwoMoves);
 			}
+			// get game address
+			const gameAddress = await chessGame.allGames();
+
+			// 3 Sign Typed Data V4
+			const message = {
+				delegatorAddress: delegationData0[0],
+				delegatedAddress: delegationData0[1],
+				gameAddress: gameAddress[0],
+			};
+
+			// Sign the data
+			const signature = await signer0._signTypedData(domain, delegationTypes, message0);
+
+			const signedDelegationData = await gaslessGame.encodeSignedDelegation(message, signature);
+
 			const lastMove = messageArray[messageArray.length - 1];
-			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData0, lastMove);
-			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData0, lastMove);
+			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData, lastMove);
+			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData, lastMove);
 		}); 
 	});
 });
