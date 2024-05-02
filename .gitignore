@@ -21,3 +21,5 @@ hardhat_cache
 artifacts
 
 coverage
+
+.DS-Store
