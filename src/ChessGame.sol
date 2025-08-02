@@ -416,6 +416,7 @@ contract ChessGame is Initializable, MoveHelper {
             gameAddress = getGaslessGameAddress(gameParams);
             gameData[gameAddress] = gameParams;
             hasBeenPaid[gameAddress] = true;
+            allGames.push(gameAddress);
         }
         uint256 gameID = gameIDs[gameAddress].length;
         gameMoves[gameAddress][gameID].moves = moves;
@@ -613,7 +614,7 @@ contract ChessGame is Initializable, MoveHelper {
         /// @dev fails on invalid move
         bool isEndgame = updateGameState(gameAddress, true, 0);
 
-        emit playMoveEvent(gameAddress, move);
+        // emit playMoveEvent(gameAddress, move);
 
         return isEndgame;
     }

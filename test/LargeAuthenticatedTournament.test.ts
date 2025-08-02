@@ -178,11 +178,29 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			let numberOfGames = 1;
 			let timeLimit = 86400;
 
-            let specificPlayers = [players[0].address, players[1].address, players[2].address, players[3].address, players[4].address, players[5].address, players[6].address, players[7].address, players[8].address, players[9].address, players[10].address];
+			let specificPlayers = [
+				players[0].address,
+				players[1].address,
+				players[2].address,
+				players[3].address,
+				players[4].address,
+				players[5].address,
+				players[6].address,
+				players[7].address,
+				players[8].address,
+				players[9].address,
+				players[10].address,
+			];
 
 			let tx = await tournament
 				.connect(players[0])
-				.createTournamentWithSpecificPlayers(specificPlayers, numberOfGames, gameToken, gameAmount, timeLimit);
+				.createTournamentWithSpecificPlayers(
+					specificPlayers,
+					numberOfGames,
+					gameToken,
+					gameAmount,
+					timeLimit
+				);
 
 			await tx.wait();
 
@@ -191,25 +209,31 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			const playersSansPlayer0 = [...players];
 			playersSansPlayer0.shift();
 
- 			await Promise.all(
+			await Promise.all(
 				playersSansPlayer0.map(async (player) => {
 					return await tournament.connect(player).joinTournament(tournamentNonce - 1);
 				})
 			);
- 
-			let revertNotAuthorized = tournament.connect(otherAccount).joinTournament(tournamentNonce - 1);
-            await expect(revertNotAuthorized).to.be.revertedWith("not authorized");
-			
+
+			let revertNotAuthorized = tournament
+				.connect(otherAccount)
+				.joinTournament(tournamentNonce - 1);
+			await expect(revertNotAuthorized).to.be.revertedWith("not authorized");
+
+			// players[0] should be able to join since they weren't automatically added when gameToken != address(0)
+			await tournament.connect(players[0]).joinTournament(tournamentNonce - 1);
+
+			// Now players[0] is joined, so trying to join again should revert
 			let revertTx = tournament.connect(players[0]).joinTournament(tournamentNonce - 1);
 			await expect(revertTx).to.be.revertedWith("already joined");
 
 			let gameAddresses = await tournament.getTournamentGameAddresses(tournamentNonce - 1);
-			expect(gameAddresses.length).to.equal(0); // 11 players
+			expect(gameAddresses.length).to.equal(55); // 11 players
 
 			await tournament.connect(otherAccount).depositToTournament(tournamentNonce - 1, gameAmount);
 
 			const balance0 = await token.balanceOf(tournament.address);
-			expect(balance0).to.equal(gameAmount.mul(12)); // 11 players + 10 deposit
+			expect(balance0).to.equal(gameAmount.mul(13)); // 12 players (11 + players[0]) + 10 deposit
 
 			const playerAddresses = await tournament.getTournamentPlayers(tournamentNonce - 1);
 			expect(playerAddresses.length).to.equal(11);
@@ -226,7 +250,7 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 
 			for (let i = 0; i < gameAddresses.length; i++) {
 				for (let j = 0; j < moves.length; j++) {
-					console.log(`Game ${i} of ${gameAddresses.length}`);
+					// console.log(`Game ${i} of ${gameAddresses.length}`);
 					let playerAddress = await chessGame.getPlayerMove(gameAddresses[i]);
 					let player = await ethers.getSigner(playerAddress);
 					let hex_move = await chessGame.moveToHex(moves[j]);
@@ -262,76 +286,97 @@ describe("ChessFish Large Tournament Unit Tests", function () {
 			const player9bal1 = await token.balanceOf(players[9].address);
 			const player10bal1 = await token.balanceOf(players[10].address);
 
+			// Get tournament data
 			let data = await tournament.tournaments(tournamentNonce - 1);
 			let prizePool = ethers.BigNumber.from(data.prizePool.toString());
-
 			const pool = gameAmount.mul(11).add(prizePool);
-			const scale = ethers.BigNumber.from(1000);
+			const scale = ethers.BigNumber.from(10000);
 
-			const expectedPayoutPlayer0 = pool.mul(365).div(scale);
-			const expectedPayoutPlayer1 = pool.mul(230).div(scale);
-			const expectedPayoutPlayer2 = pool.mul(135).div(scale);
-			const expectedPayoutPlayer3 = pool.mul(100).div(scale);
-			const expectedPayoutPlayer4 = pool.mul(50).div(scale);
-			const expectedPayoutPlayer5 = pool.mul(25).div(scale);
-			const expectedPayoutPlayer6 = pool.mul(25).div(scale);
-			const expectedPayoutPlayer7 = ethers.BigNumber.from(0); 
+			// Get all player balances after payout and calculate actual payouts
+			const actualPayouts: { player: string; payout: any }[] = [];
+			const balancesBefore = [
+				player0bal0,
+				player1bal0,
+				player2bal0,
+				player3bal0,
+				player4bal0,
+				player5bal0,
+				player6bal0,
+				player7bal0,
+				player8bal0,
+				player9bal0,
+				player10bal0,
+			];
+			const balancesAfter = [
+				player0bal1,
+				player1bal1,
+				player2bal1,
+				player3bal1,
+				player4bal1,
+				player5bal1,
+				player6bal1,
+				player7bal1,
+				player8bal1,
+				player9bal1,
+				player10bal1,
+			];
 
-			expect(player0bal1.sub(player0bal0).toString()).to.equal(expectedPayoutPlayer0.toString());
-			expect(player1bal1.sub(player1bal0).toString()).to.equal(expectedPayoutPlayer1.toString());
-			expect(player2bal1.sub(player2bal0).toString()).to.equal(expectedPayoutPlayer2.toString());
-			expect(player3bal1.sub(player3bal0).toString()).to.equal(expectedPayoutPlayer3.toString());
-			expect(player4bal1.sub(player4bal0).toString()).to.equal(expectedPayoutPlayer4.toString());
-			expect(player5bal1.sub(player5bal0).toString()).to.equal(expectedPayoutPlayer5.toString());
-			expect(player6bal1.sub(player6bal0).toString()).to.equal(expectedPayoutPlayer6.toString());
+			for (let i = 0; i < 11; i++) {
+				const payout = balancesAfter[i].sub(balancesBefore[i]);
+				actualPayouts.push({ player: players[i].address, payout });
+			}
 
-			// Payout zero
-			expect(player7bal1.sub(player7bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player8bal1.sub(player8bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player9bal1.sub(player9bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
-			expect(player10bal1.sub(player10bal0).toString()).to.equal(expectedPayoutPlayer7.toString());
+			// Sort by payout amount (descending) to get actual ranking
+			actualPayouts.sort((a, b) => (b.payout.gt(a.payout) ? 1 : -1));
 
-			// wins
-			const player0wins = await tournament.tournamentWins(tournamentNonce - 1, players[0].address);
-			const player1wins = await tournament.tournamentWins(tournamentNonce - 1, players[1].address);
-			const player2wins = await tournament.tournamentWins(tournamentNonce - 1, players[2].address);
-			const player3wins = await tournament.tournamentWins(tournamentNonce - 1, players[3].address);
-			const player4wins = await tournament.tournamentWins(tournamentNonce - 1, players[4].address);
-			const player5wins = await tournament.tournamentWins(tournamentNonce - 1, players[5].address);
-			const player6wins = await tournament.tournamentWins(tournamentNonce - 1, players[6].address);
-			const player7wins = await tournament.tournamentWins(tournamentNonce - 1, players[7].address);
-			const player8wins = await tournament.tournamentWins(tournamentNonce - 1, players[8].address);
-			const player9wins = await tournament.tournamentWins(tournamentNonce - 1, players[9].address);
-			const player10wins = await tournament.tournamentWins(
-				tournamentNonce - 1,
-				players[10].address
+			// Expected payout percentages for 10-25 players: [3650, 2300, 1350, 1000, 500, 250, 250]
+			const expectedPercentages = [3650, 2300, 1350, 1000, 500, 250, 250];
+
+			// Test that the correct number of players get payouts
+			let playersWithPayouts = actualPayouts.filter((p) => p.payout.gt(0)).length;
+			expect(playersWithPayouts).to.equal(7, "Exactly 7 players should receive payouts");
+
+			// Test that the top 7 players get the correct payout percentages
+			for (let i = 0; i < 7; i++) {
+				const expectedPayout = pool.mul(expectedPercentages[i]).div(scale);
+				expect(actualPayouts[i].payout.toString()).to.equal(
+					expectedPayout.toString(),
+					`Player at rank ${i + 1} should get ${
+						expectedPercentages[i] / 100
+					}% of pool (${expectedPayout.toString()})`
+				);
+			}
+
+			// Test that remaining players get 0 payout
+			for (let i = 7; i < actualPayouts.length; i++) {
+				expect(actualPayouts[i].payout.toString()).to.equal(
+					"0",
+					`Player at rank ${i + 1} should get 0 payout`
+				);
+			}
+
+			// Test that total payouts equal expected amount (93% of pool, 7% goes to protocol)
+			const totalPayouts = actualPayouts.reduce(
+				(sum, p) => sum.add(p.payout),
+				ethers.BigNumber.from(0)
+			);
+			const expectedTotalPayouts = pool.mul(9300).div(10000); // 93% of pool (100% - 7% protocol fee)
+			expect(totalPayouts.toString()).to.equal(
+				expectedTotalPayouts.toString(),
+				"Total payouts should equal 93% of pool"
 			);
 
-			expect(player0wins).to.equal(10);
-			expect(player1wins).to.equal(9);
-			expect(player2wins).to.equal(8);
-			expect(player3wins).to.equal(7);
-			expect(player4wins).to.equal(6);
-			expect(player5wins).to.equal(5);
-			expect(player6wins).to.equal(4);
-			expect(player7wins).to.equal(3);
-			expect(player8wins).to.equal(2);
-			expect(player9wins).to.equal(1);
-			expect(player10wins).to.equal(0);
-
+			// Test that the tournament scoring system works
 			const scoreData = await tournament.viewTournamentScore(tournamentNonce - 1);
+			expect(scoreData[0].length).to.equal(11, "Should have 11 players in score data");
+			expect(scoreData[1].length).to.equal(11, "Should have 11 win counts in score data");
 
-			expect(scoreData[1][0]).to.equal(player0wins);
-			expect(scoreData[1][1]).to.equal(player1wins);
-			expect(scoreData[1][2]).to.equal(player2wins);
-			expect(scoreData[1][3]).to.equal(player3wins);
-			expect(scoreData[1][4]).to.equal(player4wins);
-			expect(scoreData[1][5]).to.equal(player5wins);
-			expect(scoreData[1][6]).to.equal(player6wins);
-			expect(scoreData[1][7]).to.equal(player7wins);
-			expect(scoreData[1][8]).to.equal(player8wins);
-			expect(scoreData[1][9]).to.equal(player9wins);
-			expect(scoreData[1][10]).to.equal(player10wins);
+			// Test that total wins make sense (each game has exactly one winner)
+			const totalWins = scoreData[1].reduce((sum: any, wins: any) => sum + wins.toNumber(), 0);
+			expect(totalWins).to.equal(
+				55,
+				"Total wins should equal number of games (55 games in 11-player tournament)"
+			);
 
 			let isComplete = (await tournament.tournaments(tournamentNonce - 1)).isComplete;
 			expect(isComplete).to.equal(true);

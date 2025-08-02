@@ -136,7 +136,9 @@ contract GaslessGame is Initializable, EIP712 {
 
         verifyMoveSigner(moveData, signedDelegation.delegation.delegatedAddress);
 
-        checkIfDelegatorIsPlayer(signedDelegation.delegation.delegatorAddress, moveData.move.gameAddress);
+        gameAddress = moveData.move.gameAddress;
+        
+        checkIfDelegatorIsPlayer(signedDelegation.delegation.delegatorAddress, gameAddress);
 
         require(moveData.move.expiration >= block.timestamp, "move0 expired");
 
@@ -243,9 +245,9 @@ contract GaslessGame is Initializable, EIP712 {
                 )
             )
         );
-        console.log("Verifier");
-        console.log(signer);
-        console.log(ECDSA.recover(digest, moveData.signature));
+        // console.log("Verifier");
+        // console.log(signer);
+        // console.log(ECDSA.recover(digest, moveData.signature));
         require(ECDSA.recover(digest, moveData.signature) == signer, "299 invalid signature");
     }
 

@@ -284,7 +284,7 @@ describe("ChessFish Large Gasless Tournament Unit Tests", function () {
 									? delegatedSigner0
 									: delegatedSigner1; // Alternate for subsequent moves using address for comparison
 						}
-						console.log(`Playing game ${i} of ${gameAddresses.length}`);
+						// console.log(`Playing game ${i} of ${gameAddresses.length}`);
 
 						const hex_move = await chessGame.moveToHex(moves[k]);
 						hex_move_array.push(hex_move);

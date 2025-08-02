@@ -202,7 +202,12 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 				const lastTwoMoves = messageArray.slice(-2);
 
-				console.log(signer0.address, delegatedSigner0.address, signer1.address, delegatedSigner1.address);
+				console.log(
+					signer0.address,
+					delegatedSigner0.address,
+					signer1.address,
+					delegatedSigner1.address
+				);
 				// await gaslessGame.verifyGameViewDelegated(delegations.reverse(), lastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations.reverse(), lastTwoMoves);
 			}
@@ -303,25 +308,54 @@ describe("ChessFish Chess Game Unit Tests", function () {
 
 				await gaslessGame.verifyGameViewDelegated(delegations, secondTolastTwoMoves);
 				await chessGame.verifyGameUpdateStateDelegated(delegations, secondTolastTwoMoves);
+
+				// get game address after the game has been created
+				const gameAddress = await chessGame.allGames(0);
+
+				// 3 Sign Typed Data V4 - create new delegation with the actual game address
+				const message = {
+					delegatorAddress: delegationData0[0],
+					delegatedAddress: delegationData0[1],
+					gameAddress: gameAddress,
+				};
+
+				// Sign the data
+				const signature = await signer0._signTypedData(domain, delegationTypes, message);
+
+				const signedDelegationData = await gaslessGame.encodeSignedDelegation(message, signature);
+
+				// Create new move data with the actual game address for just the last move
+				const lastMoveHex = await chessGame.moveToHex(moves[moves.length - 1]);
+				const singleMoveArray = [lastMoveHex];
+				const movesHash = ethers.utils.keccak256(abi.encode(["uint16[]"], [singleMoveArray]));
+
+				const newMoveData = {
+					gameAddress: gameAddress,
+					gameNumber: 0,
+					expiration: Math.floor(Date.now() / 1000) + 86400 * 10,
+					movesHash: movesHash,
+				};
+
+				// Sign the new move data with the delegated signer (player who makes the last move)
+				const lastMovePlayer = (moves.length - 1) % 2 === 0 ? delegatedSigner0 : delegatedSigner1;
+				const newMoveSignature = await lastMovePlayer._signTypedData(
+					domain,
+					gaslessMoveTypes,
+					newMoveData
+				);
+
+				const newGaslessMoveData = await gaslessGame.encodeMoveMessage(
+					newMoveData,
+					newMoveSignature,
+					singleMoveArray
+				);
+
+				await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData, newGaslessMoveData);
+				await chessGame.verifyGameUpdateStateDelegatedSingle(
+					signedDelegationData,
+					newGaslessMoveData
+				);
 			}
-			// get game address
-			const gameAddress = await chessGame.allGames();
-
-			// 3 Sign Typed Data V4
-			const message = {
-				delegatorAddress: delegationData0[0],
-				delegatedAddress: delegationData0[1],
-				gameAddress: gameAddress[0],
-			};
-
-			// Sign the data
-			const signature = await signer0._signTypedData(domain, delegationTypes, message0);
-
-			const signedDelegationData = await gaslessGame.encodeSignedDelegation(message, signature);
-
-			const lastMove = messageArray[messageArray.length - 1];
-			await gaslessGame.verifyGameViewDelegatedSingle(signedDelegationData, lastMove);
-			await chessGame.verifyGameUpdateStateDelegatedSingle(signedDelegationData, lastMove);
-		}); 
+		});
 	});
 });

@@ -414,7 +414,7 @@ contract Tournament {
         /// @dev add functionality so that user can't accidentally join twice
         /// @dev add functionality to start tournament function to check if someone hasn't
         /// joined...
-        require(isPlayerInTournament(tournamentID, msg.sender), "already joined");
+        require(!isPlayerInTournament(tournamentID, msg.sender), "already joined");
         if (tournaments[tournamentID].isByInvite) {
             require(isPlayerAuthenticatedInTournament(tournamentID, msg.sender), "not authorized");
             // require(!isPlayerInTournament(tournamentID, msg.sender), "already joined");
@@ -548,7 +548,7 @@ contract Tournament {
                 + tournaments[tournamentID].prizePool;
             uint256 poolRemaining = poolSize;
 
-            require(poolSize >= IERC20(payoutToken).balanceOf(address(this)), "NL");
+            require(poolSize <= IERC20(payoutToken).balanceOf(address(this)), "NL");
 
             for (uint16 i = 0; i < payoutProfile.length;) {
                 uint256 payout = (poolSize * payoutProfile[i]) / 10_000;
