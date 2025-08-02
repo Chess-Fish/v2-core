@@ -18,8 +18,20 @@ node_modules
 typechain-types
 
 hardhat_cache
+cache_hardhat
 artifacts
 
 coverage
+coverage.json
+
+# Generated reports
+gas-report.txt
+dbg.project.json
+
+# Temporary files
+*~
+
+# Forge dependencies (should be managed by package manager)
+lib/
 
 .DS-Store
